@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/andrearcaina/den/pkg/utils"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -14,5 +14,12 @@ func main() {
 
 	r := chi.NewRouter()
 
-	r.Get("/te)
+	// custom test for now
+	r.Get("/portfolio/test", func(w http.ResponseWriter, r *http.Request) {
+		utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Hello World"})
+	})
+
+	if err := http.ListenAndServe(":8081", r); err != nil {
+		logger.Fatal("Failed to start server", zap.Error(err))
+	}
 }
