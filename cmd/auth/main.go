@@ -1,24 +1,40 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
+	handler "github.com/andrearcaina/den/internal/handler/http/auth"
+	"github.com/andrearcaina/den/internal/middleware"
+	service "github.com/andrearcaina/den/internal/service/auth"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
 func main() {
-	logger, _ := zap.NewDevelopment()
-	defer logger.Sync()
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic("Failed to create logger: " + err.Error())
+	}
+	defer func(logger *zap.Logger) {
+		err := logger.Sync()
+		if err != nil {
+			panic("Failed to sync logger: " + err.Error())
+		} else {
+			logger.Info("Logger synced successfully")
+		}
+	}(logger)
 
+	// create a mutex
 	r := chi.NewRouter()
 
-	r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello world"))
-	})
+	// custom logger middleware
+	r.Use(middleware.Logger(logger))
 
-	logger.Info(fmt.Sprintf("Starting auth on port 8080"))
+	// mount the auth handler with the auth service
+	authService := service.NewAuthService()
+	authHandler := handler.NewAuthHandler(authService)
+	r.Mount("/auth", authHandler.ServeHTTP())
+
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		logger.Fatal("Failed to start server", zap.Error(err))
 	}
