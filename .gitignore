@@ -33,3 +33,6 @@ go.work.sum
 
 # tmp folder
 tmp/
+
+# .idea folder
+.idea/
