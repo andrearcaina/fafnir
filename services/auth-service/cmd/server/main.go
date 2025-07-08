@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/andrearcaina/den/services/auth-service/internal/handlers"
 	"github.com/andrearcaina/den/services/auth-service/internal/service"
+	"log"
 
 	"net/http"
 
@@ -12,17 +13,21 @@ import (
 
 func main() {
 	// create a mutex
-	r := chi.NewRouter()
+	router := chi.NewRouter()
 
 	// custom logger middleware
-	r.Use(middleware.Logger)
+	router.Use(middleware.Logger)
 
 	// mount the auth handler with the auth service
 	authService := service.NewAuthService()
 	authHandler := handlers.NewAuthHandler(authService)
-	r.Mount("/auth", authHandler.ServeHTTP())
+	router.Mount("/auth", authHandler.ServeHTTP())
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		logger.Fatal("Failed to start server", zap.Error(err))
+	server := &http.Server{
+		Addr:    ":8081",
+		Handler: router,
 	}
+
+	log.Printf("Starting auth service on port %v\n", server.Addr)
+	log.Fatal(server.ListenAndServe())
 }
