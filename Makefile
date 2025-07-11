@@ -1,4 +1,4 @@
-.PHONY: run-auth-service run-user-service run status stop migrate-up migrate-down migrate-status migrate-create
+.PHONY: run-auth-service run-user-service run-web-app run status stop migrate-up migrate-down migrate-status migrate-create
 
 format := "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 
@@ -7,6 +7,9 @@ run-auth-service:
 
 run-user-service:
 	docker compose -p den --env-file infra/env/.env -f infra/docker-compose.yml up -d user-service
+
+run-web-app:
+	docker compose -p den --env-file infra/env/.env -f infra/docker-compose.yml up -d web-app
 
 run:
 	docker compose -p den --env-file infra/env/.env -f infra/docker-compose.yml up -d

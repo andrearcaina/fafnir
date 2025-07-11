@@ -13,7 +13,7 @@ services:
 
   auth-service:
     build:
-      context: ..  # Assuming docker-compose.yml is in infra/
+      context: ..
       dockerfile: services/auth-service/Dockerfile
     ports:
       - "8081:8081"
@@ -24,6 +24,13 @@ services:
       dockerfile: services/user-service/Dockerfile
     ports:
       - "8082:8082"
+
+  web-app:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
 
 volumes:
   pgdata:
