@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/andrearcaina/den/services/user-service/internal/config"
 	"github.com/andrearcaina/den/shared/pkg/utils"
 	"log"
 	"net/http"
@@ -13,6 +14,7 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
+	conf := config.NewConfig()
 
 	// custom test for now
 	router.Get("/user/test", func(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +22,7 @@ func main() {
 	})
 
 	server := &http.Server{
-		Addr:    ":8082",
+		Addr:    conf.PORT,
 		Handler: router,
 	}
 

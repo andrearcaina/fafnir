@@ -21,17 +21,43 @@ func (h *Handler) ServeHTTP() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/login", func(w http.ResponseWriter, request *http.Request) {
-		user := request.FormValue("username")
-		pass := request.FormValue("password")
+		var req struct {
+			User string `json:"user"`
+			Pass string `json:"pass"`
+		}
+
+		if err := utils.ParseJSON(request, &req); err != nil {
+			response := map[string]string{"error": "Invalid request body"}
+			if err := utils.WriteJSON(w, http.StatusBadRequest, response); err != nil {
+				http.Error(w, "Failed to write response", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
+
+		if req.User == "" || req.Pass == "" {
+			response := map[string]string{"error": "Username and password are required"}
+			if err := utils.WriteJSON(w, http.StatusBadRequest, response); err != nil {
+				http.Error(w, "Failed to write response", http.StatusInternalServerError)
+				return
+			}
+			return
+		}
 
 		// just to test (this should be replaced with proper validation and proper error handling)
 		// if the user does not send a password, it should return a status code of 400 Bad Request, but this doesn't handle that (yet)
-		if h.authService.Login(user, pass) {
+		if h.authService.Login(req.User, req.Pass) {
 			response := map[string]string{"message": "Login successful"}
-			utils.WriteJSON(w, http.StatusOK, response)
+			if err := utils.WriteJSON(w, http.StatusOK, response); err != nil {
+				http.Error(w, "Failed to write response", http.StatusInternalServerError)
+				return
+			}
 		} else {
 			response := map[string]string{"error": "Invalid credentials"}
-			utils.WriteJSON(w, http.StatusUnauthorized, response)
+			if err := utils.WriteJSON(w, http.StatusUnauthorized, response); err != nil {
+				http.Error(w, "Failed to write response", http.StatusInternalServerError)
+				return
+			}
 		}
 	})
 

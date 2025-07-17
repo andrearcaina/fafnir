@@ -8,9 +8,6 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY services/user-service ./services/user-service
-COPY shared ./shared
-
 WORKDIR /app/services/user-service
 
 CMD ["air"]

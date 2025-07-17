@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/andrearcaina/den/services/auth-service/internal/config"
 	"github.com/andrearcaina/den/services/auth-service/internal/handlers"
 	"github.com/andrearcaina/den/services/auth-service/internal/service"
 	"log"
@@ -23,8 +24,11 @@ func main() {
 	authHandler := handlers.NewAuthHandler(authService)
 	router.Mount("/auth", authHandler.ServeHTTP())
 
+	// create a config instance for the server
+	conf := config.NewConfig()
+
 	server := &http.Server{
-		Addr:    ":8081",
+		Addr:    conf.PORT,
 		Handler: router,
 	}
 
