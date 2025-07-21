@@ -14,6 +14,19 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: services/api-gateway/Dockerfile
+    volumes:
+      - ../services/api-gateway:/app/services/api-gateway
+      - ../shared:/app/shared
+    depends_on:
+      - auth-service
+      - user-service
+    ports:
+      - "8080:8080"
+
   auth-service:
     build:
       context: ..
@@ -21,8 +34,6 @@ services:
     volumes:
         - ../services/auth-service:/app/services/auth-service
         - ../shared:/app/shared
-    ports:
-      - "8081:8081"
 
   user-service:
     build:
@@ -31,15 +42,13 @@ services:
     volumes:
       - ../services/user-service:/app/services/user-service
       - ../shared:/app/shared
-    ports:
-      - "8082:8082"
 
   web-app:
     build:
       context: ../web
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "5000:5000"
     volumes:
       - ../web:/app
 
