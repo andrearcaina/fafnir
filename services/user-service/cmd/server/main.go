@@ -14,18 +14,21 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
-	conf := config.NewConfig()
+	cfg := config.NewConfig()
 
 	// custom test for now
 	router.Get("/user/test", func(w http.ResponseWriter, r *http.Request) {
-		utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Hello World"})
+		err := utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Hello World"})
+		if err != nil {
+			return
+		}
 	})
 
 	server := &http.Server{
-		Addr:    conf.PORT,
+		Addr:    cfg.PORT,
 		Handler: router,
 	}
 
-	log.Printf("Starting user service on port %v\n", server.Addr)
+	log.Printf("Starting api service on port %v\n", server.Addr)
 	log.Fatal(server.ListenAndServe())
 }

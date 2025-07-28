@@ -1,9 +1,8 @@
 package main
 
 import (
+	"github.com/andrearcaina/den/services/auth-service/internal/api"
 	"github.com/andrearcaina/den/services/auth-service/internal/config"
-	"github.com/andrearcaina/den/services/auth-service/internal/handlers"
-	"github.com/andrearcaina/den/services/auth-service/internal/service"
 	"log"
 
 	"net/http"
@@ -13,25 +12,27 @@ import (
 )
 
 func main() {
-	// create a mutex
+	// create a router instance using chi
 	router := chi.NewRouter()
 
-	// custom logger middleware
+	// custom logger middleware (by go chi)
 	router.Use(middleware.Logger)
 
-	// mount the auth handler with the auth service
-	authService := service.NewAuthService()
-	authHandler := handlers.NewAuthHandler(authService)
+	// create an instance of the auth service and handler
+	authService := api.NewAuthService()
+	authHandler := api.NewAuthHandler(authService)
+
+	// mount the auth handler to the router
 	router.Mount("/auth", authHandler.ServeHTTP())
 
 	// create a config instance for the server
-	conf := config.NewConfig()
+	cfg := config.NewConfig()
 
 	server := &http.Server{
-		Addr:    conf.PORT,
+		Addr:    cfg.PORT,
 		Handler: router,
 	}
 
-	log.Printf("Starting auth service on port %v\n", server.Addr)
+	log.Printf("Starting api service on port %v\n", server.Addr)
 	log.Fatal(server.ListenAndServe())
 }

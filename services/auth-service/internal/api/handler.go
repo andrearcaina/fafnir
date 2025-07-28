@@ -1,17 +1,16 @@
-package handlers
+package api
 
 import (
-	"github.com/andrearcaina/den/services/auth-service/internal/service"
 	"github.com/andrearcaina/den/shared/pkg/utils"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
 type Handler struct {
-	authService *service.AuthService
+	authService *Service
 }
 
-func NewAuthHandler(authService *service.AuthService) *Handler {
+func NewAuthHandler(authService *Service) *Handler {
 	return &Handler{
 		authService: authService,
 	}
@@ -45,7 +44,7 @@ func (h *Handler) ServeHTTP() chi.Router {
 		}
 
 		// just to test (this should be replaced with proper validation and proper error handling)
-		// if the user does not send a password, it should return a status code of 400 Bad Request, but this doesn't handle that (yet)
+		// if the api does not send a password, it should return a status code of 400 Bad Request, but this doesn't handle that (yet)
 		if h.authService.Login(req.User, req.Pass) {
 			response := map[string]string{"message": "Login successful"}
 			if err := utils.WriteJSON(w, http.StatusOK, response); err != nil {
