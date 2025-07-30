@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/andrearcaina/den/shared/pkg/utils"
 	"github.com/go-chi/chi/v5"
+	"log"
 	"net/http"
 )
 
@@ -16,49 +17,45 @@ func NewAuthHandler(authService *Service) *Handler {
 	}
 }
 
-func (h *Handler) ServeHTTP() chi.Router {
+func (h *Handler) ServeAuthRoutes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/login", func(w http.ResponseWriter, request *http.Request) {
-		var req struct {
-			User string `json:"user"`
-			Pass string `json:"pass"`
-		}
-
-		if err := utils.ParseJSON(request, &req); err != nil {
-			response := map[string]string{"error": "Invalid request body"}
-			if err := utils.WriteJSON(w, http.StatusBadRequest, response); err != nil {
-				http.Error(w, "Failed to write response", http.StatusInternalServerError)
-				return
-			}
-			return
-		}
-
-		if req.User == "" || req.Pass == "" {
-			response := map[string]string{"error": "Username and password are required"}
-			if err := utils.WriteJSON(w, http.StatusBadRequest, response); err != nil {
-				http.Error(w, "Failed to write response", http.StatusInternalServerError)
-				return
-			}
-			return
-		}
-
-		// just to test (this should be replaced with proper validation and proper error handling)
-		// if the api does not send a password, it should return a status code of 400 Bad Request, but this doesn't handle that (yet)
-		if h.authService.Login(req.User, req.Pass) {
-			response := map[string]string{"message": "Login successful"}
-			if err := utils.WriteJSON(w, http.StatusOK, response); err != nil {
-				http.Error(w, "Failed to write response", http.StatusInternalServerError)
-				return
-			}
-		} else {
-			response := map[string]string{"error": "Invalid credentials"}
-			if err := utils.WriteJSON(w, http.StatusUnauthorized, response); err != nil {
-				http.Error(w, "Failed to write response", http.StatusInternalServerError)
-				return
-			}
-		}
-	})
+	r.Post("/login", h.login)
 
 	return r
+}
+
+func (h *Handler) login(w http.ResponseWriter, request *http.Request) {
+	var loginRequest LoginRequest
+
+	if err := utils.ParseJSON(request, &loginRequest); err != nil {
+		response := LoginResponse{
+			Message: "Invalid request body",
+		}
+		utils.WriteJSON(w, http.StatusBadRequest, response)
+		return
+	}
+
+	if loginRequest.Username == "" || loginRequest.Password == "" {
+		response := LoginResponse{
+			Message: "Username and password required",
+		}
+		utils.WriteJSON(w, http.StatusBadRequest, response)
+		return
+	}
+
+	if h.authService.Login(loginRequest.Username, loginRequest.Password) {
+		response := LoginResponse{
+			Message: "Login successful",
+		}
+		utils.WriteJSON(w, http.StatusOK, response)
+	} else {
+		response := LoginResponse{
+			Message: "Invalid credentials",
+		}
+
+		log.Println(response)
+
+		utils.WriteJSON(w, http.StatusUnauthorized, response)
+	}
 }

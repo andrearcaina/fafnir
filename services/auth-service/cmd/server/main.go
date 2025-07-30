@@ -23,7 +23,7 @@ func main() {
 	authHandler := api.NewAuthHandler(authService)
 
 	// mount the auth handler to the router
-	router.Mount("/auth", authHandler.ServeHTTP())
+	router.Mount("/auth", authHandler.ServeAuthRoutes())
 
 	// create a config instance for the server
 	cfg := config.NewConfig()
@@ -33,6 +33,6 @@ func main() {
 		Handler: router,
 	}
 
-	log.Printf("Starting api service on port %v\n", server.Addr)
+	log.Printf("Starting auth service on port %v\n", server.Addr)
 	log.Fatal(server.ListenAndServe())
 }

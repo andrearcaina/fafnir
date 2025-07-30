@@ -1,73 +1,60 @@
 package clients
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
+	"resty.dev/v3"
 )
 
 type LoginRequest struct {
-	User string `json:"user"`
-	Pass string `json:"pass"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type LoginResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
-	Error   string `json:"error"`
 }
 
 type AuthClient struct {
-	BaseURL    string
-	HTTPClient *http.Client
+	BaseURL string
+	Client  *resty.Client
 }
 
 func NewAuthClient(baseURL string) *AuthClient {
+	client := resty.New().
+		SetBaseURL(baseURL).
+		SetHeader("Content-Type", "application/json")
+
 	return &AuthClient{
-		BaseURL:    baseURL,
-		HTTPClient: &http.Client{},
+		BaseURL: baseURL,
+		Client:  client,
 	}
 }
 
 func (c *AuthClient) Login(ctx context.Context, user, pass string) (*LoginResponse, error) {
-	reqBody := LoginRequest{
-		User: user,
-		Pass: pass,
-	}
+	resp, err := c.Client.R().
+		SetContext(ctx).
+		SetBody(LoginRequest{
+			Username: user,
+			Password: pass,
+		}).
+		SetResult(&LoginResponse{}).
+		SetError(&LoginResponse{}).
+		Post("/auth/login")
 
-	jsonBody, err := json.Marshal(reqBody)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal login request: %w", err)
+		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 
-	url := fmt.Sprintf("%s/auth/login", strings.TrimRight(c.BaseURL, "/"))
-	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create http request: %w", err)
-	}
-	httpReq.Header.Set("Content-Type", "application/json")
+	var loginResponse LoginResponse
+	loginResponse.Code = resp.StatusCode()
 
-	resp, err := c.HTTPClient.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make http request to auth service: %w", err)
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(resp.Body)
-
-	var loginResp LoginResponse
-	if err := json.NewDecoder(resp.Body).Decode(&loginResp); err != nil {
-		return nil, fmt.Errorf("failed to decode auth service response: %w", err)
+	if resp.IsError() {
+		loginResponse.Message = resp.Error().(*LoginResponse).Message
+	} else if resp.IsSuccess() {
+		loginResponse.Message = resp.Result().(*LoginResponse).Message
 	}
 
-	loginResp.Code = resp.StatusCode
-
-	return &loginResp, nil
+	return &loginResponse, nil
 }

@@ -29,6 +29,6 @@ func main() {
 		Handler: router,
 	}
 
-	log.Printf("Starting api service on port %v\n", server.Addr)
+	log.Printf("Starting user service on port %v\n", server.Addr)
 	log.Fatal(server.ListenAndServe())
 }

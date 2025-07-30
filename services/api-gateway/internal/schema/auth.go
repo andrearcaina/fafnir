@@ -21,7 +21,7 @@ var LoginResponseType = graphql.NewObject(graphql.ObjectConfig{
 var LoginInputType = graphql.NewInputObject(graphql.InputObjectConfig{
 	Name: "LoginInput",
 	Fields: graphql.InputObjectConfigFieldMap{
-		"user": &graphql.InputObjectFieldConfig{
+		"username": &graphql.InputObjectFieldConfig{
 			Type: graphql.NewNonNull(graphql.String),
 		},
 		"password": &graphql.InputObjectFieldConfig{
