@@ -1,6 +1,6 @@
--- +goose Up
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+# Initial Schema Design
 
+```sql
 -- stores user information
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -90,15 +90,4 @@ CREATE TABLE watchlist (
    added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
    PRIMARY KEY (user_id, symbol)
 );
-
--- +goose Down
-DROP TABLE IF EXISTS users_roles;
-DROP TABLE IF EXISTS roles_permissions;
-DROP TABLE IF EXISTS portfolio;
-DROP TABLE IF EXISTS watchlist;
-DROP TABLE IF EXISTS accounts;
-DROP TABLE IF EXISTS stock_quote;
-DROP TABLE IF EXISTS stock_metadata;
-DROP TABLE IF EXISTS roles;
-DROP TABLE IF EXISTS permissions;
-DROP TABLE IF EXISTS users;
+```

@@ -18,8 +18,8 @@ services:
       - "3000:3000"
     restart: unless-stopped
     environment:
-      GF_SECURITY_ADMIN_USER: ${ADMIN_USER}
-      GF_SECURITY_ADMIN_PASSWORD: ${ADMIN_PASS}
+      GF_SECURITY_ADMIN_USER: ${GF_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_ADMIN_PASS}
     volumes:
       - ./monitoring/grafana:/etc/grafana/provisioning/datasources
 

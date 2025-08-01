@@ -8,6 +8,8 @@
 - Next.js frontend for user interface
 
 ## Structure
+- `docs/`: Documentation (architecture, development, database)
+- `scripts/`: Scripts for development and deployment (used by Makefile)
 - `services/`: Go microservices (API Gateway, Auth, User)
 - `shared/`: Shared Go code and protobufs
 - `infra/`: Infrastructure (Docker, DB, k8s, monitoring)
@@ -29,16 +31,21 @@
 fafnir/
 ├── docs/
 ├── frontend/
-├── infra/
-│    ├── db/               
+├── infra/              
 │    ├── env/              
 │    ├── k8s/              
 │    ├── monitoring/       
+│    ├── postgres/
+├── scripts/
+│     ├── docker.sh
+      ├── help.sh
+      ├── migration.sh 
 ├── services/
 │    ├── api-gateway/      
 │    ├── auth-service/
 │    ├── user-service/     
 ├── shared/
+├── .gitignore
 ├── Makefile          
 ├── README.md             
 ```

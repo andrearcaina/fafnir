@@ -30,11 +30,12 @@ These commands help you manage the development environment using Docker:
 
 You can also use the following commands to migrate the database:
 
-| Command               | Description                                         |
-|-----------------------|-----------------------------------------------------|
-| `make migrate-up`     | Run DB migrations                                   |
-| `make migrate-down`   | Remove all DB migrations                            |
-| `make migrate-status` | Check status of DB migrations                       |
+| Command                                                   | Description                   |
+|-----------------------------------------------------------|-------------------------------|
+| `make migrate-up`                                         | Run DB migrations             |
+| `make migrate-down`                                       | Remove all DB migrations      |
+| `make migrate-status`                                     | Check status of DB migrations |
+| `make migrate-create db=<db_name> name=<migration_name> ` | Create a migration sql file   |
 
 
 You can also run certain microservices individually:
@@ -58,3 +59,4 @@ You can also run certain microservices individually:
 - [Architecture Overview](architecture.md)
 - [Database Guide](database.md)
 - [GraphQL Guide](graphql.md)
+- [Schema Design](schema.md)
