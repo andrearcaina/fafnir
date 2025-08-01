@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/andrearcaina/den/services/user-service/internal/config"
-	"github.com/andrearcaina/den/shared/pkg/utils"
+	"fafnir/user-service/internal/api"
+	"fafnir/user-service/internal/config"
 	"log"
 	"net/http"
 
@@ -14,15 +14,13 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
-	cfg := config.NewConfig()
 
-	// custom test for now
-	router.Get("/user/test", func(w http.ResponseWriter, r *http.Request) {
-		err := utils.WriteJSON(w, http.StatusOK, map[string]string{"message": "Hello World"})
-		if err != nil {
-			return
-		}
-	})
+	userService := api.NewUserService()
+	userHandler := api.NewUserHandler(userService)
+
+	router.Mount("/user", userHandler.ServeUserRoutes())
+
+	cfg := config.NewConfig()
 
 	server := &http.Server{
 		Addr:    cfg.PORT,

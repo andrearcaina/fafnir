@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/andrearcaina/den/services/auth-service/internal/api"
-	"github.com/andrearcaina/den/services/auth-service/internal/config"
+	"fafnir/auth-service/internal/api"
+	"fafnir/auth-service/internal/config"
 	"log"
 
 	"net/http"

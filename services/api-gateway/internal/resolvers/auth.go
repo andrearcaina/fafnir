@@ -5,7 +5,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"log"
 
-	"github.com/andrearcaina/den/services/api-gateway/internal/clients"
+	"fafnir/api-gateway/internal/clients"
 )
 
 type AuthPayload struct {

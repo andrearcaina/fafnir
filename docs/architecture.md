@@ -11,7 +11,7 @@
 - `services/`: Go microservices (API Gateway, Auth, User)
 - `shared/`: Shared Go code and protobufs
 - `infra/`: Infrastructure (Docker, DB, k8s, monitoring)
-- `web/`: Frontend web app
+- `frontend/`: Frontend web app
 
 ## Service Responsibilities
 - **api-gateway**: Entry point, GraphQL API, routes requests
@@ -28,6 +28,7 @@
 ```plaintext
 fafnir/
 ├── docs/
+├── frontend/
 ├── infra/
 │    ├── db/               
 │    ├── env/              
@@ -38,9 +39,6 @@ fafnir/
 │    ├── auth-service/
 │    ├── user-service/     
 ├── shared/
-├── web/
-├── Makefile              
-├── go.mod                
-├── go.sum                
+├── Makefile          
 ├── README.md             
 ```

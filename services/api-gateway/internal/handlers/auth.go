@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"fafnir/api-gateway/internal/clients"
+	"fafnir/api-gateway/internal/resolvers"
+	"fafnir/api-gateway/internal/schema"
 	"fmt"
-	"github.com/andrearcaina/den/services/api-gateway/internal/clients"
-	"github.com/andrearcaina/den/services/api-gateway/internal/resolvers"
-	"github.com/andrearcaina/den/services/api-gateway/internal/schema"
 	"github.com/graphql-go/graphql"
 )
 

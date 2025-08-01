@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/andrearcaina/den/services/api-gateway/internal/clients"
-	"github.com/andrearcaina/den/services/api-gateway/internal/config"
-	"github.com/andrearcaina/den/services/api-gateway/internal/handlers"
+	"fafnir/api-gateway/internal/clients"
+	"fafnir/api-gateway/internal/config"
+	"fafnir/api-gateway/internal/handlers"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log"

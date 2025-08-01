@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/andrearcaina/den/services/api-gateway/internal/clients"
+	"fafnir/api-gateway/internal/clients"
 	"github.com/graphql-go/handler"
 	"net/http"
 )

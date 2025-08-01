@@ -30,8 +30,9 @@ infra/env/.env.*
 # .idea/
 # .vscode/
 
-# tmp folder
+# tmp and bin folder
 tmp/
+bin/
 
 # .idea folder
 .idea/

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/andrearcaina/den/shared/pkg/utils"
+	"fafnir/shared/pkg/utils"
 	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
