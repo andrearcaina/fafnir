@@ -1,9 +1,13 @@
 .PHONY: default help run-auth-service run-user-service run-api-gateway run-web-app build run status stop rm-volumes prune clean reset migrate-up migrate-down migrate-status migrate-create
 
+# default makefile target command
+
 default: help
 
 help:
 	./scripts/help.sh
+
+# docker commands for running services
 
 run-auth-service:
 	./scripts/docker.sh run-auth-service
@@ -39,6 +43,8 @@ clean: stop prune rm-volumes
 
 reset: clean build run
 
+# migration commands for database
+
 migrate-up:
 	./scripts/migrate.sh up
 
@@ -51,3 +57,7 @@ migrate-status:
 # make migrate-create postgres=auth_db name=seed_db
 migrate-create:
 	./scripts/migrate.sh create $(db) $(name)
+
+# gqlgen commands for generating GraphQL schema and resolvers
+generate:
+	./scripts/gqlgen.sh generate

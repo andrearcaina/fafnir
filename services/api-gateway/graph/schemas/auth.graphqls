@@ -1,0 +1,14 @@
+type LoginResponse {
+    code: Int
+    message: String
+    error: String
+}
+
+input LoginInput {
+    username: String!
+    password: String!
+}
+
+type Mutation {
+    login(input: LoginInput!): LoginResponse!
+}

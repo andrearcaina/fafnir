@@ -1,40 +1,31 @@
 package main
 
 import (
-	"fafnir/api-gateway/internal/clients"
-	"fafnir/api-gateway/internal/config"
-	"fafnir/api-gateway/internal/handlers"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"context"
+	"fafnir/api-gateway/internal/api"
 	"log"
-	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
-	authClient := clients.NewAuthClient("http://fafnir-auth-service-1:8081/")
+	server := api.NewServer()
 
-	handlerConfig := &handlers.HandlerConfig{
-		AuthServiceClient: authClient,
-		// add more clients for services later on
-	}
+	// this starts the server in a goroutine so it can run concurrently (so that we can listen for OS signals)
+	// if we didn't do this, the server would block the main thread, and we wouldn't be able to listen for OS signals
+	go func() {
+		log.Fatal(server.Run())
+	}()
 
-	graphQLHandler, err := handlers.NewGraphQLHandler(handlerConfig)
+	// this sets up a channel to listen for OS signals when a user wants to stop the service (like Ctrl+C)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 
-	if err != nil {
-		log.Fatalf("Failed to create GraphQL handler: %v", err)
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Handle("/graphql", graphQLHandler)
-
-	conf := config.NewConfig()
-
-	server := &http.Server{
-		Addr:    conf.PORT,
-		Handler: r,
-	}
-
-	log.Printf("Starting API Gateway on port %v\n", server.Addr)
-	log.Fatal(server.ListenAndServe())
+	log.Fatal(server.GracefulShutdown(ctx))
 }

@@ -1,32 +1,31 @@
 package main
 
 import (
+	"context"
 	"fafnir/user-service/internal/api"
-	"fafnir/user-service/internal/config"
 	"log"
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
-	router := chi.NewRouter()
+	server := api.NewServer()
 
-	router.Use(middleware.Logger)
+	// this starts the server in a goroutine so it can run concurrently (so that we can listen for OS signals)
+	// if we didn't do this, the server would block the main thread, and we wouldn't be able to listen for OS signals
+	go func() {
+		log.Fatal(server.Run())
+	}()
 
-	userService := api.NewUserService()
-	userHandler := api.NewUserHandler(userService)
+	// this sets up a channel to listen for OS signals when a user wants to stop the service (like Ctrl+C)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 
-	router.Mount("/user", userHandler.ServeUserRoutes())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	cfg := config.NewConfig()
-
-	server := &http.Server{
-		Addr:    cfg.PORT,
-		Handler: router,
-	}
-
-	log.Printf("Starting user service on port %v\n", server.Addr)
-	log.Fatal(server.ListenAndServe())
+	log.Fatal(server.GracefulShutdown(ctx))
 }

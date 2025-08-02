@@ -2,16 +2,20 @@
 
 ## Prerequisites
 - Go
-- Make (If you're on Windows, use WSL)
+- Make (If you're on Windows, use WSL2)
 - Node.js & npm
 - Docker & Docker Compose
 
 ## Setup
 1. Clone the repo.
-2. Copy `.env.example` to `.env` and update values.
-3. Install dependencies:
-    - Backend: `go mod tidy`
-    - Frontend: `npm install` in `web/`
+2. Copy `.env.dev.example` to `.env.dev` and update values
+
+## Running Locally
+- Start docker containers: `make run`
+- Run migrations: `make migrate-up`
+- Access Next.js App: [http://localhost:5000](http://localhost:5000)
+- Access Grafana App: [http://localhost:3000](http://localhost:3000)
+- Access GraphQL API: [http://localhost:8080](http://localhost:8080)
 
 ## Make Commands
 
@@ -37,6 +41,11 @@ You can also use the following commands to migrate the database:
 | `make migrate-status`                                     | Check status of DB migrations |
 | `make migrate-create db=<db_name> name=<migration_name> ` | Create a migration sql file   |
 
+You can run the following commands to generate the GraphQL resolvers based on the schema:
+
+| Command         | Description                                                            |
+|-----------------|------------------------------------------------------------------------|
+| `make generate` | Generate GraphQL boilerplate dependent on the .graphqls schema created |
 
 You can also run certain microservices individually:
 
@@ -47,13 +56,15 @@ You can also run certain microservices individually:
 | `make run-api-gateway`  | Start the GraphQL API Gateway |
 | `make run-web-app`      | Start the web app             |
 
+For more information on the commands, check out the scripts folder.
 
-## Running Locally
-- Start docker containers: `make run`
-- Run migrations: `make migrate-up`
-- Access Next.js App: [http://localhost:5000](http://localhost:5000)
-- Access Grafana App: [http://localhost:3000](http://localhost:3000)
-- Access GraphQL API: [http://localhost:8080](http://localhost:8080)
+| Bash Script            | Description                        |
+|------------------------|------------------------------------|
+| `./scripts/docker.sh`  | All the docker command logic       |
+| `./scripts/gqlgen.sh`  | All the gqlgen command logic       |
+| `./scripts/help.sh`    | The help command logic             |
+| `./scripts/migrate.sh` | The goose migrations command logic |
+
 
 ## Useful Links
 - [Architecture Overview](architecture.md)

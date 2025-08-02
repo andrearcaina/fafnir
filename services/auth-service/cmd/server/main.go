@@ -1,38 +1,31 @@
 package main
 
 import (
+	"context"
 	"fafnir/auth-service/internal/api"
-	"fafnir/auth-service/internal/config"
 	"log"
-
-	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
-	// create a router instance using chi
-	router := chi.NewRouter()
+	server := api.NewServer()
 
-	// custom logger middleware (by go chi)
-	router.Use(middleware.Logger)
+	// this starts the server in a goroutine so it can run concurrently (so that we can listen for OS signals)
+	// if we didn't do this, the server would block the main thread, and we wouldn't be able to listen for OS signals
+	go func() {
+		log.Fatal(server.Run())
+	}()
 
-	// create an instance of the auth service and handler
-	authService := api.NewAuthService()
-	authHandler := api.NewAuthHandler(authService)
+	// this sets up a channel to listen for OS signals when a user wants to stop the service (like Ctrl+C)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 
-	// mount the auth handler to the router
-	router.Mount("/auth", authHandler.ServeAuthRoutes())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	// create a config instance for the server
-	cfg := config.NewConfig()
-
-	server := &http.Server{
-		Addr:    cfg.PORT,
-		Handler: router,
-	}
-
-	log.Printf("Starting auth service on port %v\n", server.Addr)
-	log.Fatal(server.ListenAndServe())
+	log.Fatal(server.GracefulShutdown(ctx))
 }
