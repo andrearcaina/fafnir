@@ -47,7 +47,7 @@ mutation {
 You can even use variables to make your mutation more dynamic:
 
 ```graphql
-mutation Login($input: LoginInput!) {
+mutation Login($input: LoginRequest!) {
   login(input: $input) {
     code
     message
@@ -85,20 +85,21 @@ Then, using variables, you can send the request with this in the body:
     "login": {
       "code": 200,
       "message": "Login successful",
-      "error": ""
+      "error": null
     }
   }
 }
 ```
 
 ### Error Response
+Will fix later on and remove error entirely probably (will see how it goes)
 ```json
 {
   "data": {
     "login": {
       "code": 401,
-      "message": "",
-      "error": "Invalid credentials"
+      "message": "Invalid credentials",
+      "error": null
     }
   }
 }

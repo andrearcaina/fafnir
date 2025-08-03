@@ -30,3 +30,7 @@ echo -e "${GREEN}migrate-up${NC}           - Apply database migrations up"
 echo -e "${GREEN}migrate-down${NC}         - Rollback database migrations down"
 echo -e "${GREEN}migrate-status${NC}       - Show migration status"
 echo -e "${GREEN}migrate-create db=<db_name> name=<migration_name>${NC} - Create a new migration with the specified db and migration name"
+echo ""
+echo "Codegen:"
+echo -e "${GREEN}generate codegen=<codegen_type> [service]${NC} - Generate code for the specific codegen type (gqlgen, sqlc).
+If codegen_type=sqlc, then service=<service_type> is required."

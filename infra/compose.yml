@@ -34,7 +34,13 @@ services:
         - ../services/auth-service:/app/services/auth-service
         - ../shared:/app/shared
     environment:
-      - GOOSEDB_STRING={{AUTH_DB_STRING}}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - AUTH_DB=${AUTH_DB}
+      - DB_HOST_DOCKER=${DB_HOST_DOCKER}
+      - DB_PORT=${DB_PORT}
+    depends_on:
+      - db
 
   user-service:
     build:
@@ -44,7 +50,11 @@ services:
       - ../services/user-service:/app/services/user-service
       - ../shared:/app/shared
     environment:
-      - GOOSEDB_STRING={{USER_DB_STRING}}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - USER_DB=${USER_DB}
+      - DB_HOST_DOCKER=${DB_HOST_DOCKER}
+      - DB_PORT=${DB_PORT}
 
   web-app:
     build:

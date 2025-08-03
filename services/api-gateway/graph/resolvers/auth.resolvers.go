@@ -13,19 +13,26 @@ import (
 )
 
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.LoginResponse, error) {
-	loginResp, err := r.AuthClient.Login(ctx, input.Username, input.Password)
+func (r *mutationResolver) Login(ctx context.Context, input model.LoginRequest) (*model.LoginResponse, error) {
+	loginResp, err := r.AuthClient.Login(ctx, input)
 	if err != nil {
 		log.Printf("Error calling auth service for login: %v", err)
 		return nil, fmt.Errorf("authentication failed: %w", err)
 	}
 
-	code := int32(loginResp.Code)
+	return loginResp, nil
+}
 
-	return &model.LoginResponse{
-		Code:    &code,
-		Message: &loginResp.Message,
-	}, nil
+// Register is the resolver for the register field.
+func (r *mutationResolver) Register(ctx context.Context, input model.RegisterRequest) (*model.RegisterResponse, error) {
+	// for now this only calls the auth service, but it should also call the user service to create a user profile too
+	registerResp, err := r.AuthClient.Register(ctx, input)
+	if err != nil {
+		log.Printf("Error calling auth service for registration: %v", err)
+		return nil, fmt.Errorf("registration failed: %w", err)
+	}
+
+	return registerResp, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

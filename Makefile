@@ -58,6 +58,9 @@ migrate-status:
 migrate-create:
 	./scripts/migrate.sh create $(db) $(name)
 
-# gqlgen commands for generating GraphQL schema and resolvers
+# codegen commands for generating GraphQL and SQLc go code from .graphqls and .sql files
+
+# make generate codegen=<graphql|sqlc>
+# if codegen is sqlc, then service is required (service=auth)
 generate:
-	./scripts/gqlgen.sh generate
+	./scripts/codegen.sh generate $(codegen) $(service)

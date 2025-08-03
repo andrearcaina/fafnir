@@ -2,8 +2,8 @@
 
 package model
 
-type LoginInput struct {
-	Username string `json:"username"`
+type LoginRequest struct {
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -17,4 +17,15 @@ type Mutation struct {
 }
 
 type Query struct {
+}
+
+type RegisterRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type RegisterResponse struct {
+	Code    *int32  `json:"code,omitempty"`
+	Message *string `json:"message,omitempty"`
+	Error   *string `json:"error,omitempty"`
 }

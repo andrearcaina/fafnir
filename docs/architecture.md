@@ -16,11 +16,11 @@
 - `frontend/`: Frontend web app (planning to use ShadCN/UI with Next.js)
 
 ## Microservice Responsibilities
-| Service        | Description                                                                            | Tech Stack Used     | Reason of Choice                                                                                                                              |
-|----------------|----------------------------------------------------------------------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `api-gateway`  | GraphQL API Entry point (routes client requests)                                       | Go, gqlgen, go-chi  | I wanted to try out GraphQL, and thought Go would be the best choice for it, especially since the other services I have implemented are in Go |
-| `auth-service` | The authorization and authentication server. Sends JWT HttpOnly cookies and uses OAuth | Go, go-chi          | Same reason as above, but just a simple RESTful API                                                                                           |
-| `user-service` | The profile service where users can check their account information and details        | Go, gRPC, protobufs | I wanted to use gRPC to learn about more about server intercommunication and why protobufs are the "best" at it                               |
+| Service        | Description                                                                            | Tech Stack Used           | Reason of Choice                                                                                                                              |
+|----------------|----------------------------------------------------------------------------------------|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `api-gateway`  | GraphQL API Entry point (routes client requests)                                       | Go, gqlgen, go-chi        | I wanted to try out GraphQL, and thought Go would be the best choice for it, especially since the other services I have implemented are in Go |
+| `auth-service` | The authorization and authentication server. Sends JWT HttpOnly cookies and uses OAuth | Go, sqlc, go-chi          | Same reason as above, but just a simple RESTful API                                                                                           |
+| `user-service` | The profile service where users can check their account information and details        | Go, sqlc, gRPC, protobufs | I wanted to use gRPC to learn about more about server intercommunication and why protobufs are the "best" at it                               |
 
 TODO:
 - Implement more services like `notification-service`, `payment-service`, ...
