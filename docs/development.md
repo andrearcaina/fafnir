@@ -13,26 +13,30 @@
 ## Running Locally
 - Start docker containers: `make run`
 - Run migrations: `make migrate-up`
+- Generate admin and member: `make seed db=all`
 - Access Next.js App: [http://localhost:5000](http://localhost:5000)
 - Access Grafana App: [http://localhost:3000](http://localhost:3000)
 - Access GraphQL API: [http://localhost:8080](http://localhost:8080) 
   - All microservices are available under this endpoint, except for the Auth Service (which is used for user authentication)
 - Access Auth Service: [http://localhost:8081](http://localhost:8081)
+- Stop development and volumes: `make clean`
 
 ## Make Commands
 
 These commands help you manage the development environment using Docker:
 
-| Command               | Description                                         |
-|-----------------------|-----------------------------------------------------|
-| `make build`          | Build all docker containers                         |
-| `make run`            | Start all docker containers                         |
-| `make status`         | Check status of currently running docker containers |
-| `make stop`           | Stop every docker containers                        |
-| `make rm-volumes`     | Remove all volumes of PostgreSQL DB                 |
-| `make prune`          | Prune all images and cached builds                  |
-| `make clean`          | Runs commands `stop`, `prune` `rm-volumes`          |
-| `make reset`          | Runs commands `clean`, `build` `run`                |
+| Command           | Description                                         |
+|-------------------|-----------------------------------------------------|
+| `make build`      | Build all docker containers                         |
+| `make start`      | Start all existing docker containers                |
+| `make pause`      | Stops running all existing docker containers        |
+| `make run`        | Creates and run docker containers                   |
+| `make stop`       | Stops and deletes containers and volumes            |
+| `make status`     | Check status of currently running docker containers |
+| `make rm-volumes` | Remove all volumes of PostgreSQL DB                 |
+| `make prune`      | Prune all images and cached builds                  |
+| `make clean`      | Runs commands `stop`, `prune`, `rm-volumes`         |
+| `make reset`      | Runs commands `clean`, `build`, `start`             |
 
 You can also use the following commands to migrate the database:
 
@@ -45,9 +49,15 @@ You can also use the following commands to migrate the database:
 
 You can run the following commands to generate the GraphQL resolvers based on the schema:
 
-| Command         | Description                                                            |
-|-----------------|------------------------------------------------------------------------|
-| `make generate` | Generate GraphQL boilerplate dependent on the .graphqls schema created |
+| Command         | Description                                                                   |
+|-----------------|-------------------------------------------------------------------------------|
+| `make generate` | Generate GraphQL or sqlc boilerplate dependent on the .graphqls or .sql files |
+
+You can run the following commands to seed the database with initial data after migrations:
+
+| Command     | Description                     |
+|-------------|---------------------------------|
+| `make seed` | Seed database with initial data |
 
 You can also run certain microservices individually:
 
@@ -66,6 +76,7 @@ For more information on the commands, check out the scripts folder.
 | `./scripts/gqlgen.sh`  | All the gqlgen command logic       |
 | `./scripts/help.sh`    | The help command logic             |
 | `./scripts/migrate.sh` | The goose migrations command logic |
+| `./scripts/seed.sh`    | Seed command logic                 |
 
 
 ## Useful Links

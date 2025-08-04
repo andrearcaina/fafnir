@@ -26,11 +26,17 @@ case "$1" in
   run)
     docker compose $project $env_file $compose_files up -d
     ;;
-  status)
-    docker compose $project $env_file $compose_files ps --format="$format"
-    ;;
   stop)
     docker compose $project $env_file $compose_files down -v --remove-orphans
+    ;;
+  start)
+    docker compose $project $env_file $compose_files start
+    ;;
+  pause)
+    docker compose $project $env_file $compose_files stop
+    ;;
+  status)
+    docker compose $project $env_file $compose_files ps --format="$format"
     ;;
   rm-volumes)
     docker volume rm fafnir_pgdata fafnir_prom_data || true

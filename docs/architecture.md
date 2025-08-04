@@ -52,6 +52,7 @@ fafnir/
 │     ├── docker.sh
 │     ├── help.sh
 │     ├── migration.sh 
+│     ├── seed.sh 
 ├── services/
 │    ├── api-gateway/      
 │    ├── auth-service/

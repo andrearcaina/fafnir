@@ -9,30 +9,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Permission struct {
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
-}
-
-type Role struct {
-	Name        string      `json:"name"`
-	Description pgtype.Text `json:"description"`
-}
-
-type RolesPermission struct {
-	RoleName       string `json:"role_name"`
-	PermissionName string `json:"permission_name"`
-}
-
 type User struct {
 	ID           uuid.UUID          `json:"id"`
 	Email        string             `json:"email"`
 	PasswordHash string             `json:"password_hash"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-}
-
-type UsersRole struct {
-	UserID   uuid.UUID `json:"user_id"`
-	RoleName string    `json:"role_name"`
 }

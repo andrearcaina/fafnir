@@ -12,6 +12,9 @@ sqlc_codegen() {
     auth)
       cd "services/auth-service" && sqlc generate
       ;;
+    security)
+      cd "services/security-service" && sqlc generate
+      ;;
     user)
       cd "services/user-service" && sqlc generate
       ;;

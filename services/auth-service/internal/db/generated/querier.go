@@ -13,6 +13,8 @@ import (
 type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
+	// the query below is used for seeding
+	InsertUserWithID(ctx context.Context, arg InsertUserWithIDParams) (InsertUserWithIDRow, error)
 	RegisterUser(ctx context.Context, arg RegisterUserParams) (RegisterUserRow, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
 }

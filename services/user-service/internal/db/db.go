@@ -2,8 +2,8 @@ package db
 
 import (
 	"context"
-	"fafnir/security-service/internal/config"
-	"fafnir/security-service/internal/db/generated"
+	"fafnir/user-service/internal/config"
+	"fafnir/user-service/internal/db/generated"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

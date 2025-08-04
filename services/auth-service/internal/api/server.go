@@ -25,7 +25,7 @@ func NewServer() *Server {
 
 	cfg := config.NewConfig()
 
-	// connect to auth db
+	// connect to auth connections
 	dbConn, err := db.NewDBConnection(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v\n", err)

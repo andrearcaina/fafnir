@@ -32,6 +32,7 @@ func (s *Service) RegisterUser(ctx context.Context, request RegisterRequest) (Re
 	_, err := s.db.GetQueries().GetUserByEmail(ctx, request.Email)
 	if err == nil {
 		return RegisterResponse{
+			UserId:  uuid.Nil,
 			Message: "Email already exists",
 		}, http.StatusConflict, err
 	}

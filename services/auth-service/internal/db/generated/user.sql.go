@@ -49,6 +49,31 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow
 	return i, err
 }
 
+const insertUserWithID = `-- name: InsertUserWithID :one
+INSERT INTO users (id, email, password_hash, created_at, updated_at)
+VALUES ($1, $2, $3, NOW(), NOW())
+RETURNING id, email
+`
+
+type InsertUserWithIDParams struct {
+	ID           uuid.UUID `json:"id"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+}
+
+type InsertUserWithIDRow struct {
+	ID    uuid.UUID `json:"id"`
+	Email string    `json:"email"`
+}
+
+// the query below is used for seeding
+func (q *Queries) InsertUserWithID(ctx context.Context, arg InsertUserWithIDParams) (InsertUserWithIDRow, error) {
+	row := q.db.QueryRow(ctx, insertUserWithID, arg.ID, arg.Email, arg.PasswordHash)
+	var i InsertUserWithIDRow
+	err := row.Scan(&i.ID, &i.Email)
+	return i, err
+}
+
 const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (id, email, password_hash, created_at, updated_at)
 VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())

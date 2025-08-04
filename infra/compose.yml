@@ -45,6 +45,20 @@ services:
     ports:
     - "8081:8081"
 
+  security-service:
+    build:
+      context: ..
+      dockerfile: services/security-service/Dockerfile
+    volumes:
+      - ../services/security-service:/app/services/security-service
+      - ../shared:/app/shared
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SECURITY_DB=${SECURITY_DB}
+      - DB_HOST_DOCKER=${DB_HOST_DOCKER}
+      - DB_PORT=${DB_PORT}
+
   user-service:
     build:
       context: ..

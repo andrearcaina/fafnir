@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fafnir/security-service/internal/config"
+	"fafnir/security-service/internal/db"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log"
@@ -24,7 +25,15 @@ func NewServer() *Server {
 
 	cfg := config.NewConfig()
 
-	securityService := NewSecurityService()
+	// just to make sure the database connection is established (will assign a var later once we have a service)
+	_, err := db.NewDBConnection(cfg)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// this will be handled differently using gRPC in the future
+	// for now, we will use a simple HTTP handler for REST API calls
+	securityService := NewSecurityService( /* pass in connections conn later */ )
 	securityHandler := NewSecurityHandler(securityService)
 
 	// mount the auth handler to the router
@@ -40,12 +49,12 @@ func NewServer() *Server {
 }
 
 func (s *Server) Run() error {
-	log.Printf("Starting auth service on port %s\n", s.HTTP.Addr)
+	log.Printf("Starting security service on port %s\n", s.HTTP.Addr)
 	return s.HTTP.ListenAndServe()
 }
 
 func (s *Server) GracefulShutdown(ctx context.Context) error {
-	log.Println("Shutting down auth service gracefully...")
+	log.Println("Shutting down security service gracefully...")
 
 	err := s.HTTP.Shutdown(ctx)
 	if err != nil {
@@ -53,6 +62,6 @@ func (s *Server) GracefulShutdown(ctx context.Context) error {
 		return err
 	}
 
-	log.Println("Auth service shutdown complete.")
+	log.Println("Security service shutdown complete.")
 	return nil
 }

@@ -5,13 +5,14 @@ INSERT INTO roles_permissions (role_name, permission_name) VALUES
     ('member', 'manage_watchlist'),
     ('member', 'manage_profile'),
     ('member', 'manage_own_accounts'),
-    ('admin', 'view_stocks'),
-    ('admin', 'manage_portfolio'),
-    ('admin', 'manage_watchlist'),
+    ('admin', 'view_admin_dashboard'),
+    ('admin', 'impersonate_user'),
+    ('admin', 'manage_signup_codes'),
     ('admin', 'manage_profile'),
-    ('admin', 'manage_own_accounts'),
+    ('admin', 'view_audit_logs'),
     ('admin', 'view_users'),
     ('admin', 'deactivate_users'),
+    ('admin', 'reactivate_users'),
     ('admin', 'manage_roles');
 
 -- +goose Down
