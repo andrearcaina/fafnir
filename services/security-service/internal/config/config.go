@@ -7,7 +7,6 @@ import (
 
 type Config struct {
 	PORT string
-	JWT  string
 	DB   PostgresConfig
 }
 
@@ -22,8 +21,7 @@ type PostgresConfig struct {
 
 func NewConfig() *Config {
 	return &Config{
-		PORT: ":8081",
-		JWT:  os.Getenv("JWT_SECRET_KEY"),
+		PORT: ":8082",
 		DB:   newPostgresConfig(),
 	}
 }
@@ -33,7 +31,7 @@ func newPostgresConfig() PostgresConfig {
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("POSTGRES_USER")
 	password := os.Getenv("POSTGRES_PASSWORD")
-	dbName := os.Getenv("AUTH_DB")
+	dbName := os.Getenv("SECURITY_DB")
 
 	return PostgresConfig{
 		Host:     host,

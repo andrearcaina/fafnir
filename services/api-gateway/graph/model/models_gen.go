@@ -2,30 +2,5 @@
 
 package model
 
-type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	Code    *int32  `json:"code,omitempty"`
-	Message *string `json:"message,omitempty"`
-	Error   *string `json:"error,omitempty"`
-}
-
-type Mutation struct {
-}
-
 type Query struct {
-}
-
-type RegisterRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type RegisterResponse struct {
-	Code    *int32  `json:"code,omitempty"`
-	Message *string `json:"message,omitempty"`
-	Error   *string `json:"error,omitempty"`
 }

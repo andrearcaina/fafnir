@@ -30,6 +30,25 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	return i, err
 }
 
+const getUserById = `-- name: GetUserById :one
+SELECT id, email, password_hash
+FROM users
+WHERE id = $1
+`
+
+type GetUserByIdRow struct {
+	ID           uuid.UUID `json:"id"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+}
+
+func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
+	row := q.db.QueryRow(ctx, getUserById, id)
+	var i GetUserByIdRow
+	err := row.Scan(&i.ID, &i.Email, &i.PasswordHash)
+	return i, err
+}
+
 const registerUser = `-- name: RegisterUser :one
 INSERT INTO users (id, email, password_hash, created_at, updated_at)
 VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())

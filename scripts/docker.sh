@@ -8,8 +8,8 @@ project="-p fafnir"
 format='table {{.Name}}\t{{.Status}}\t{{.Ports}}'
 
 case "$1" in
-  auth-service)
-    docker compose $project $env_file $compose_files up -d auth-service
+  iam-service)
+    docker compose $project $env_file $compose_files up -d iam-service
     ;;
   user-service)
     docker compose $project $env_file $compose_files up -d user-service

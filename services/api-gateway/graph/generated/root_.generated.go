@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fafnir/api-gateway/graph/model"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -33,7 +32,6 @@ type Config struct {
 }
 
 type ResolverRoot interface {
-	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -41,25 +39,8 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	LoginResponse struct {
-		Code    func(childComplexity int) int
-		Error   func(childComplexity int) int
-		Message func(childComplexity int) int
-	}
-
-	Mutation struct {
-		Login    func(childComplexity int, input model.LoginRequest) int
-		Register func(childComplexity int, input model.RegisterRequest) int
-	}
-
 	Query struct {
 		Health func(childComplexity int) int
-	}
-
-	RegisterResponse struct {
-		Code    func(childComplexity int) int
-		Error   func(childComplexity int) int
-		Message func(childComplexity int) int
 	}
 }
 
@@ -82,78 +63,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "LoginResponse.code":
-		if e.complexity.LoginResponse.Code == nil {
-			break
-		}
-
-		return e.complexity.LoginResponse.Code(childComplexity), true
-
-	case "LoginResponse.error":
-		if e.complexity.LoginResponse.Error == nil {
-			break
-		}
-
-		return e.complexity.LoginResponse.Error(childComplexity), true
-
-	case "LoginResponse.message":
-		if e.complexity.LoginResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.LoginResponse.Message(childComplexity), true
-
-	case "Mutation.login":
-		if e.complexity.Mutation.Login == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_login_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Login(childComplexity, args["input"].(model.LoginRequest)), true
-
-	case "Mutation.register":
-		if e.complexity.Mutation.Register == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_register_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Register(childComplexity, args["input"].(model.RegisterRequest)), true
-
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
 			break
 		}
 
 		return e.complexity.Query.Health(childComplexity), true
-
-	case "RegisterResponse.code":
-		if e.complexity.RegisterResponse.Code == nil {
-			break
-		}
-
-		return e.complexity.RegisterResponse.Code(childComplexity), true
-
-	case "RegisterResponse.error":
-		if e.complexity.RegisterResponse.Error == nil {
-			break
-		}
-
-		return e.complexity.RegisterResponse.Error(childComplexity), true
-
-	case "RegisterResponse.message":
-		if e.complexity.RegisterResponse.Message == nil {
-			break
-		}
-
-		return e.complexity.RegisterResponse.Message(childComplexity), true
 
 	}
 	return 0, false
@@ -162,10 +77,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputLoginRequest,
-		ec.unmarshalInputRegisterRequest,
-	)
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -198,21 +110,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 
 			return &response
-		}
-	case ast.Mutation:
-		return func(ctx context.Context) *graphql.Response {
-			if !first {
-				return nil
-			}
-			first = false
-			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
-			var buf bytes.Buffer
-			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data: buf.Bytes(),
-			}
 		}
 
 	default:
@@ -262,33 +159,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schemas/auth.graphqls", Input: `type LoginResponse {
-    code: Int
-    message: String
-    error: String
+	{Name: "../schemas/base.graphqls", Input: `schema {
+    query: Query
 }
 
-type RegisterResponse {
-    code: Int,
-    message: String,
-    error: String
-}
-
-input RegisterRequest {
-    email: String!
-    password: String!
-}
-
-input LoginRequest {
-    email: String!
-    password: String!
-}
-
-type Mutation {
-    login(input: LoginRequest!): LoginResponse!
-    register(input: RegisterRequest!): RegisterResponse!
-}`, BuiltIn: false},
-	{Name: "../schemas/health.graphqls", Input: `type Query {
+type Query
+`, BuiltIn: false},
+	{Name: "../schemas/health.graphqls", Input: `extend type Query {
     health: String!
 }`, BuiltIn: false},
 }

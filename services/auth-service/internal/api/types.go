@@ -12,11 +12,21 @@ type RegisterRequest struct {
 	Password string `json:"password"`
 }
 
+type UserInfoRequest struct {
+	UserId uuid.UUID `json:"userId"`
+}
+
 type LoginResponse struct {
-	Message string `json:"message"`
+	Message  string `json:"message"`
+	JwtToken string `json:"jwtToken"`
 }
 
 type RegisterResponse struct {
-	UserID  uuid.UUID `json:"user_id"`
+	UserId  uuid.UUID `json:"userId"`
 	Message string    `json:"message"`
+}
+
+type UserInfoResponse struct {
+	UserId uuid.UUID `json:"userId"`
+	Email  string    `json:"email"`
 }

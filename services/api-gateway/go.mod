@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.78
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/vektah/gqlparser/v2 v2.5.30
-	resty.dev/v3 v3.0.0-beta.3
 )
 
 require (
@@ -21,7 +20,6 @@ require (
 	github.com/urfave/cli/v2 v2.27.7 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/mod v0.26.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/tools v0.35.0 // indirect

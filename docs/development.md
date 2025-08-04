@@ -15,7 +15,9 @@
 - Run migrations: `make migrate-up`
 - Access Next.js App: [http://localhost:5000](http://localhost:5000)
 - Access Grafana App: [http://localhost:3000](http://localhost:3000)
-- Access GraphQL API: [http://localhost:8080](http://localhost:8080)
+- Access GraphQL API: [http://localhost:8080](http://localhost:8080) 
+  - All microservices are available under this endpoint, except for the Auth Service (which is used for user authentication)
+- Access Auth Service: [http://localhost:8081](http://localhost:8081)
 
 ## Make Commands
 

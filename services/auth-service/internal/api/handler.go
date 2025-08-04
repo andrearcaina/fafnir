@@ -3,7 +3,6 @@ package api
 import (
 	"fafnir/shared/pkg/utils"
 	"github.com/go-chi/chi/v5"
-	"log"
 	"net/http"
 )
 
@@ -23,59 +22,86 @@ func (h *Handler) ServeAuthRoutes() chi.Router {
 	r.Post("/register", h.register)
 	r.Post("/login", h.login)
 
+	r.With(CheckAuthMiddleware(h.authService.jwtKey)).Delete("/logout", h.logout)
+	r.With(CheckAuthMiddleware(h.authService.jwtKey)).Get("/me", h.getUserInfo)
 	return r
 }
 
 func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 	var registerRequest RegisterRequest
 
-	if err := utils.ParseJSON(r, &registerRequest); err != nil {
-		response := RegisterResponse{
-			Message: "Invalid request body",
-		}
-		utils.WriteJSON(w, http.StatusBadRequest, response)
+	if err := utils.DecodeJSON(r, &registerRequest); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, RegisterResponse{
+			Message: "Invalid request format",
+		}, err)
 		return
 	}
 
 	resp, code, err := h.authService.RegisterUser(r.Context(), registerRequest)
 	if err != nil {
-		log.Printf("Failed to register user: %v", err)
+		utils.WriteError(w, int(code), resp, err)
+		return
 	}
 
-	utils.WriteJSON(w, code, resp)
+	utils.WriteJSON(w, int(code), resp)
 }
 
 func (h *Handler) login(w http.ResponseWriter, request *http.Request) {
 	var loginRequest LoginRequest
 
-	if err := utils.ParseJSON(request, &loginRequest); err != nil {
-		response := LoginResponse{
-			Message: "Invalid request body",
-		}
-		utils.WriteJSON(w, http.StatusBadRequest, response)
+	err := utils.DecodeJSON(request, &loginRequest)
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, RegisterResponse{
+			Message: "Invalid request format",
+		}, err)
 		return
 	}
 
-	if loginRequest.Email == "" || loginRequest.Password == "" {
-		response := LoginResponse{
-			Message: "Email and password required",
-		}
-		utils.WriteJSON(w, http.StatusBadRequest, response)
+	resp, code, err := h.authService.Login(request.Context(), loginRequest)
+	if err != nil {
+		utils.WriteError(w, int(code), resp, err)
 		return
 	}
 
-	if h.authService.Login(loginRequest.Email, loginRequest.Password) {
-		response := LoginResponse{
-			Message: "Login successful",
-		}
-		utils.WriteJSON(w, http.StatusOK, response)
-	} else {
-		response := LoginResponse{
-			Message: "Invalid credentials",
-		}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    resp.JwtToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   24 * 3600,
+	})
 
-		log.Println(response)
+	utils.WriteJSON(w, int(code), resp)
+}
 
-		utils.WriteJSON(w, http.StatusUnauthorized, response)
+func (h *Handler) logout(w http.ResponseWriter, _ *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	})
+
+	utils.WriteJSON(w, http.StatusNoContent, nil)
+}
+
+func (h *Handler) getUserInfo(w http.ResponseWriter, r *http.Request) {
+	userId, err := GetUserIdFromContext(r.Context())
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, UserInfoResponse{}, err)
+		return
 	}
+
+	resp, code, err := h.authService.GetUserInfo(r.Context(), userId)
+	if err != nil {
+		utils.WriteError(w, int(code), resp, err)
+		return
+	}
+
+	utils.WriteJSON(w, int(code), resp)
 }

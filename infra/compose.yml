@@ -39,8 +39,11 @@ services:
       - AUTH_DB=${AUTH_DB}
       - DB_HOST_DOCKER=${DB_HOST_DOCKER}
       - DB_PORT=${DB_PORT}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
       - db
+    ports:
+    - "8081:8081"
 
   user-service:
     build:

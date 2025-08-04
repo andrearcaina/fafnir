@@ -27,7 +27,7 @@ func NewServer() *Server {
 	srv := handler.New(generated.NewExecutableSchema(
 		generated.Config{
 			Resolvers: &resolvers.Resolver{
-				AuthClient: cfg.AuthClient,
+				// UserClient: cfg.CLIENTS.UserClient,
 			},
 		},
 	))
@@ -45,7 +45,10 @@ func NewServer() *Server {
 
 	router := chi.NewRouter()
 
-	router.Use(middleware.Logger)
+	router.Use(
+		middleware.Logger,
+		middleware.Recoverer,
+	)
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	router.Handle("/graphql", srv)

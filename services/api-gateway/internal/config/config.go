@@ -1,7 +1,5 @@
 package config
 
-import "fafnir/api-gateway/internal/clients"
-
 // will use env later
 
 type Config struct {
@@ -10,14 +8,14 @@ type Config struct {
 }
 
 type ClientsConfig struct {
-	AuthClient *clients.AuthClient
+	// UserClient *clients.UserClient
 }
 
 func NewConfig() *Config {
 	return &Config{
-		PORT: ":8080",
+		PORT:    ":8080",
 		CLIENTS: ClientsConfig{
-			AuthClient: clients.NewAuthClient("http://auth-service:8081"),
+			// UserClient: clients.NewUserClient("http://user-service:8082"),
 		},
 	}
 }

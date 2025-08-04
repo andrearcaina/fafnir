@@ -2,8 +2,7 @@ package api
 
 import (
 	"context"
-	"fafnir/auth-service/internal/config"
-	"fafnir/auth-service/internal/db"
+	"fafnir/security-service/internal/config"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log"
@@ -25,18 +24,11 @@ func NewServer() *Server {
 
 	cfg := config.NewConfig()
 
-	// connect to auth db
-	dbConn, err := db.NewDBConnection(cfg)
-	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v\n", err)
-	}
-
-	// create an auth service and handler instance
-	authService := NewAuthService(dbConn, cfg.JWT)
-	authHandler := NewAuthHandler(authService)
+	securityService := NewSecurityService()
+	securityHandler := NewSecurityHandler(securityService)
 
 	// mount the auth handler to the router
-	router.Mount("/auth", authHandler.ServeAuthRoutes())
+	router.Mount("/security", securityHandler.ServeSecurityRoutes())
 
 	// create a config instance for the server
 	return &Server{

@@ -1,6 +1,8 @@
 # GraphQL API Guide
 
-GraphQL is the primary way to interact with the API Gateway in this project.
+GraphQL is the primary way to interact with the microservices in this project. It provides a flexible and efficient way to query and manipulate data across the various services.
+
+If you want to learn how authentication is handled in this project, please refer to the [Authentication Guide](./authentication.md).
 
 Some key points about the GraphQL API:
 - **Single Endpoint**: All requests go to `/graphql`.
@@ -21,50 +23,7 @@ Health Check Query
 
 ## Example Mutations
 
-Login Mutation
-
-### Login Mutation
-```graphql
-mutation {
-  login(input: { user: "username", password: "password" }) {
-    code
-    message
-    error
-  }
-}
-```
-
-If you only want the code, you can modify your mutation request to:
-
-```graphql
-mutation {
-  login(input: { user: "username", password: "password" }) {
-    code
-  }
-}
-```
-
-You can even use variables to make your mutation more dynamic:
-
-```graphql
-mutation Login($input: LoginRequest!) {
-  login(input: $input) {
-    code
-    message
-    error
-  }
-}
-```
-
-Then, using variables, you can send the request with this in the body:
-```json
-{
-  "input": {
-    "user": "username",
-    "password": "password"
-  }
-}
-``` 
+None yet
 
 
 ## Example Responses
@@ -74,33 +33,6 @@ Then, using variables, you can send the request with this in the body:
 {
   "data": {
     "health": "API Gateway is running"
-  }
-}
-```
-
-### Successful Login Response
-```json
-{
-  "data": {
-    "login": {
-      "code": 200,
-      "message": "Login successful",
-      "error": null
-    }
-  }
-}
-```
-
-### Error Response
-Will fix later on and remove error entirely probably (will see how it goes)
-```json
-{
-  "data": {
-    "login": {
-      "code": 401,
-      "message": "Invalid credentials",
-      "error": null
-    }
   }
 }
 ```

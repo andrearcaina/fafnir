@@ -12,3 +12,8 @@ WHERE id = $2;
 SELECT id, email, password_hash
 FROM users
 WHERE email = $1;
+
+-- name: GetUserById :one
+SELECT id, email, password_hash
+FROM users
+WHERE id = $1;
