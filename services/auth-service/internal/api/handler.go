@@ -22,8 +22,11 @@ func (h *Handler) ServeAuthRoutes() chi.Router {
 	r.Post("/register", h.register)
 	r.Post("/login", h.login)
 
-	r.With(CheckAuthMiddleware(h.authService.jwtKey)).Delete("/logout", h.logout)
-	r.With(CheckAuthMiddleware(h.authService.jwtKey)).Get("/me", h.getUserInfo)
+	// create a middleware for certain endpoints
+	authMiddleware := CheckAuth(h.authService)
+
+	r.With(authMiddleware).Delete("/logout", h.logout)
+	r.With(authMiddleware).Get("/me", h.getUserInfo)
 	return r
 }
 
