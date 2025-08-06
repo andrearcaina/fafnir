@@ -29,7 +29,7 @@ func NewServer() *Server {
 	// connect to auth connections
 	dbConn, err := db.NewDBConnection(cfg)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v\n", err)
+		log.Fatal(err)
 	}
 
 	// create an auth service and handler instance

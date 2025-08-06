@@ -82,7 +82,7 @@ func main() {
 
 func run(config *Config) error {
 	if err := godotenv.Load(config.ConfigPath); err != nil {
-		return errors.New("error loading .env file")
+		return errors.New("errors loading .env file")
 	}
 
 	switch config.ServiceDB {

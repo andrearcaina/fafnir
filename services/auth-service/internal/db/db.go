@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db/generated"
 	"fmt"
@@ -16,11 +17,11 @@ type Database struct {
 func NewDBConnection(cfg *config.Config) (*Database, error) {
 	pool, err := pgxpool.New(context.Background(), cfg.DB.URL)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("failed to connect to database: %v", err))
 	}
 
 	if err := pool.Ping(context.Background()); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		return nil, errors.New(fmt.Sprintf("failed to ping database: %v", err))
 	}
 
 	queries := generated.New(pool)

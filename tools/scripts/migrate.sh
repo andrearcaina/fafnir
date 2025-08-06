@@ -1,75 +1,26 @@
 #!/bin/bash
-
 set -e
-
 source "infra/env/.env.dev"
 
-infra_db_string="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT/$GOOSE_DRIVER?sslmode=disable"
-auth_db_string="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT/$AUTH_DB?sslmode=disable"
-security_db_string="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT/$SECURITY_DB?sslmode=disable"
-user_db_string="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT/$USER_DB?sslmode=disable"
+DB_BASE="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT"
+SERVICES=(auth security user)
 
-migrate_up() {
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$auth_db_string" goose -dir services/auth-service/internal/db/migrations up && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$security_db_string" goose -dir services/security-service/internal/db/migrations up && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$user_db_string" goose -dir services/user-service/internal/db/migrations up
-}
-
-migrate_down() {
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$auth_db_string" goose -dir services/auth-service/internal/db/migrations down && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$security_db_string" goose -dir services/security-service/internal/db/migrations down && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$user_db_string" goose -dir services/user-service/internal/db/migrations down
-}
-
-migrate_status() {
-  echo "Migration status for all databases:"
-
-  echo "
-The 'auth service' migration" && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$auth_db_string" goose -dir services/auth-service/internal/db/migrations status && \
-  echo "
-The 'security service' migration" && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$security_db_string" goose -dir services/security-service/internal/db/migrations status && \
-  echo "
-The 'user service' migration" && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$user_db_string" goose -dir services/user-service/internal/db/migrations status
-}
-
-migrate_create() {
-  db="$1"
-  name="$2"
-  if [ -z "$db" ]; then
-    echo "Error: db argument is required. Use db=auth, db=user, db=security, or db=infra."
-    exit 1
-  fi
-  if [ -z "$name" ]; then
-    echo "Error: name argument is required. Use name=<migration_name>."
-    exit 1
-  fi
-  case "$db" in
-    auth)
-      goose -dir services/auth-service/internal/db/migrations create "$name" sql
-      ;;
-    security)
-      goose -dir services/security-service/internal/db/migrations create "$name" sql
-      ;;
-    user)
-      goose -dir services/user-service/internal/db/migrations create "$name" sql
-      ;;
-    infra)
-      goose -dir infra/postgres/migrations create "$name" sql
-      ;;
-    *)
-      echo "Error: Invalid db argument. Use db=auth, db=user, db=security, or db=infra."
-      exit 1
-      ;;
-  esac
+goose_cmd() {
+  local service=$1 action=$2
+  local db_var="${service^^}_DB"
+  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$DB_BASE/${!db_var}?sslmode=disable" \
+    goose -dir "services/$service-service/internal/db/migrations" $action
 }
 
 case "$1" in
-  up) migrate_up ;;
-  down) migrate_down ;;
-  status) migrate_status ;;
-  create) migrate_create "$2" "$3" ;;
+  up|down) for s in "${SERVICES[@]}"; do goose_cmd $s $1; done ;;
+  status) for s in "${SERVICES[@]}"; do echo -e "\n$s service:"; goose_cmd $s status; done ;;
+  create)
+    [[ $# -lt 3 ]] && { echo "Usage: $0 create <db> <name>"; exit 1; }
+    case "$2" in
+      auth|security|user) goose -dir "services/$2-service/internal/db/migrations" create "$3" sql ;;
+      infra) goose -dir "infra/postgres/migrations" create "$3" sql ;;
+      *) echo "Invalid db. Use: auth, security, user, infra"; exit 1 ;;
+    esac ;;
   *) echo "Usage: $0 {up|down|status|create <db> <name>}"; exit 1 ;;
 esac

@@ -32,5 +32,10 @@ OR (role_name = 'admin' AND permission_name IN (
     'manage_own_accounts',
     'view_users',
     'deactivate_users',
+    'reactivate_users',
+    'impersonate_user',
+    'manage_signup_codes',
+    'view_admin_dashboard',
+    'view_audit_logs',
     'manage_roles'
 ));

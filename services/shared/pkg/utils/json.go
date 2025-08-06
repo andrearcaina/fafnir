@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	apperrors "fafnir/shared/pkg/errors"
 	"log"
 	"net/http"
 )
@@ -12,15 +13,15 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+		HandleError(w, err)
 		return
 	}
 }
 
-// DecodeJSON reads JSON from the request body (r) into v. It returns an error if decoding fails.
+// DecodeJSON reads JSON from the request body and returns a proper AppError for validation failures
 func DecodeJSON(r *http.Request, v interface{}) error {
 	if r.Body == nil {
-		return errors.New("request body is empty")
+		return apperrors.ValidationError("Request body is required")
 	}
 
 	defer func() {
@@ -30,14 +31,25 @@ func DecodeJSON(r *http.Request, v interface{}) error {
 	}()
 
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
-		return errors.New("failed to decode request body")
+		return apperrors.ValidationError("Invalid JSON format in request body")
 	}
 
 	return nil
 }
 
-// WriteError writes an error response in JSON format and logs the error
-func WriteError(w http.ResponseWriter, status int, data interface{}, err error) {
-	log.Printf("Error: %v", err)
-	WriteJSON(w, status, data)
+// HandleError is the central errors handler for HTTP responses
+func HandleError(w http.ResponseWriter, err error) {
+	var appErr *apperrors.AppError
+	if errors.As(err, &appErr) {
+		if appErr.Cause != nil {
+			log.Printf("AppError [%s]: %s (caused by: %v)", appErr.Code, appErr.Message, appErr.Cause)
+		} else {
+			log.Printf("AppError [%s]: %s", appErr.Code, appErr.Message)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(appErr.HTTPStatus)
+		w.Write(appErr.ToJSON())
+		return
+	}
 }

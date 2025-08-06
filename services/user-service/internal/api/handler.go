@@ -30,7 +30,7 @@ func (h *UserHandler) getUserInfo(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(userId)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"errors": "Invalid user ID"})
 		return
 	}
 

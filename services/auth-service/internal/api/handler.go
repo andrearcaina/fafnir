@@ -34,35 +34,40 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 	var registerRequest RegisterRequest
 
 	if err := utils.DecodeJSON(r, &registerRequest); err != nil {
-		utils.WriteError(w, http.StatusBadRequest, RegisterResponse{
-			Message: "Invalid request format",
-		}, err)
+		utils.HandleError(w, err)
 		return
 	}
 
-	resp, code, err := h.authService.RegisterUser(r.Context(), registerRequest)
+	if err := ValidateAuthRequest(registerRequest); err != nil {
+		utils.HandleError(w, err)
+		return
+	}
+
+	resp, err := h.authService.RegisterUser(r.Context(), registerRequest)
 	if err != nil {
-		utils.WriteError(w, int(code), resp, err)
+		utils.HandleError(w, err)
 		return
 	}
 
-	utils.WriteJSON(w, int(code), resp)
+	utils.WriteJSON(w, http.StatusCreated, resp)
 }
 
-func (h *Handler) login(w http.ResponseWriter, request *http.Request) {
+func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginRequest
 
-	err := utils.DecodeJSON(request, &loginRequest)
-	if err != nil {
-		utils.WriteError(w, http.StatusBadRequest, RegisterResponse{
-			Message: "Invalid request format",
-		}, err)
+	if err := utils.DecodeJSON(r, &loginRequest); err != nil {
+		utils.HandleError(w, err)
 		return
 	}
 
-	resp, code, err := h.authService.Login(request.Context(), loginRequest)
+	if err := ValidateAuthRequest(loginRequest); err != nil {
+		utils.HandleError(w, err)
+		return
+	}
+
+	resp, err := h.authService.Login(r.Context(), loginRequest)
 	if err != nil {
-		utils.WriteError(w, int(code), resp, err)
+		utils.HandleError(w, err)
 		return
 	}
 
@@ -76,7 +81,9 @@ func (h *Handler) login(w http.ResponseWriter, request *http.Request) {
 		MaxAge:   24 * 3600,
 	})
 
-	utils.WriteJSON(w, int(code), resp)
+	utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
+		"message": resp.Message, // don't send the JWT token in the response body because it's already set in the cookie
+	})
 }
 
 func (h *Handler) logout(w http.ResponseWriter, _ *http.Request) {
@@ -96,15 +103,15 @@ func (h *Handler) logout(w http.ResponseWriter, _ *http.Request) {
 func (h *Handler) getUserInfo(w http.ResponseWriter, r *http.Request) {
 	userId, err := GetUserIdFromContext(r.Context())
 	if err != nil {
-		utils.WriteError(w, http.StatusUnauthorized, UserInfoResponse{}, err)
+		utils.HandleError(w, err)
 		return
 	}
 
-	resp, code, err := h.authService.GetUserInfo(r.Context(), userId)
+	resp, err := h.authService.GetUserInfo(r.Context(), userId)
 	if err != nil {
-		utils.WriteError(w, int(code), resp, err)
+		utils.HandleError(w, err)
 		return
 	}
 
-	utils.WriteJSON(w, int(code), resp)
+	utils.WriteJSON(w, http.StatusOK, resp)
 }

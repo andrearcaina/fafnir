@@ -1,43 +1,17 @@
 #!/bin/bash
 
-# make generate codegen=<graphql|sqlc>
-# if codegen is sqlc, then service is required (service=auth)
-
-gql_codegen() {
-  cd "services/api-gateway" && go generate ./...
-}
-
-sqlc_codegen() {
-  case "$service" in
-    auth)
-      cd "services/auth-service" && sqlc generate
-      ;;
-    security)
-      cd "services/security-service" && sqlc generate
-      ;;
-    user)
-      cd "services/user-service" && sqlc generate
-      ;;
-    *)
-      echo "Invalid service name. Use 'auth' or 'user'."
-      exit 1
-      ;;
-  esac
-}
+# make generate codegen=<graphql|sqlc> [service=<service_name>]
 
 case "$codegen" in
   graphql)
-    gql_codegen
+    cd "services/api-gateway" && go generate ./...
     ;;
   sqlc)
-    if [[ -z "$service" ]]; then
-      echo "Service name is required for SQLC code generation."
-      exit 1
-    fi
-    sqlc_codegen "$service"
+    [[ -z "$service" ]] && { echo "Service name required for SQLC. Use: auth, security, user"; exit 1; }
+    case "$service" in
+      auth|security|user) cd "services/$service-service" && sqlc generate ;;
+      *) echo "Invalid service. Use: auth, security, user"; exit 1 ;;
+    esac
     ;;
-  *)
-    echo "Usage: make generate codegen=<graphql|sqlc> [service=<service_name>]"
-    exit 1
-    ;;
+  *) echo "Usage: make generate codegen=<graphql|sqlc> [service=<service_name>]"; exit 1 ;;
 esac

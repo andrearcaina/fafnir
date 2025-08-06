@@ -1,14 +1,14 @@
 users:
   - user_id: "ff9fe8c1-d6bf-4a39-a89e-3c6dbec82819" # generated from online UUID generator
     email: "admin@test.com"
-    password: "pass"
+    password: "Password123"
     first_name: "Admin"
     last_name: "User"
     role_name: "admin"
 
   - user_id: "5d684a32-8ba4-4ec3-8ce3-68df382341a2"
     email: "user@test.com"
-    password: "pass"
+    password: "Password123"
     first_name: "Regular"
     last_name: "User"
     role_name: "member"

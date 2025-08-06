@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"errors"
-	"fmt"
+	apperrors "fafnir/shared/pkg/errors"
+	"fafnir/shared/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"net/http"
@@ -16,25 +16,33 @@ func CheckAuth(authService *Service) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("auth_token")
 			if err != nil {
-				http.Error(w, "Unauthorized: no cookie", http.StatusUnauthorized)
+				err := apperrors.UnauthorizedError().
+					WithDetails("Authentication token not found in cookies")
+				utils.HandleError(w, err)
 				return
 			}
 
 			token, err := authService.parseJWT(cookie.Value)
 			if err != nil {
-				http.Error(w, fmt.Sprintf("Unauthorized: %v", err), http.StatusUnauthorized)
+				err := apperrors.UnauthorizedError().
+					WithDetails("Invalid authentication token")
+				utils.HandleError(w, err)
 				return
 			}
 
 			claims, ok := token.Claims.(jwt.MapClaims)
 			if !ok {
-				http.Error(w, "Unauthorized: no claims", http.StatusUnauthorized)
+				err := apperrors.UnauthorizedError().
+					WithDetails("Invalid token claims")
+				utils.HandleError(w, err)
 				return
 			}
 
 			sub, ok := claims["sub"].(string)
 			if !ok {
-				http.Error(w, "Unauthorized: no subject", http.StatusUnauthorized)
+				err := apperrors.UnauthorizedError().
+					WithDetails("Token subject is missing or invalid")
+				utils.HandleError(w, err)
 				return
 			}
 
@@ -49,12 +57,14 @@ func GetUserIdFromContext(ctx context.Context) (uuid.UUID, error) {
 	val := ctx.Value(contextKey("auth/userIdContextKey"))
 	userIDStr, ok := val.(string)
 	if !ok {
-		return uuid.Nil, errors.New("user Id not found in context")
+		return uuid.Nil, apperrors.UnauthorizedError().
+			WithDetails("User ID not found in context")
 	}
 
 	parsed, err := uuid.Parse(userIDStr)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, apperrors.ValidationError("Invalid user ID format").
+			WithDetails("User ID must be a valid UUID")
 	}
 
 	return parsed, nil

@@ -8,4 +8,4 @@ CREATE TABLE user_profiles (
 );
 
 -- +goose Down
-DROP TABLE IF EXISTS profile;
+DROP TABLE user_profiles;
