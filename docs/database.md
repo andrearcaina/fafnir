@@ -1,7 +1,7 @@
 # Database & Migrations
 
 ## Overview
-- Uses Postgres (see `infra/db/Dockerfile`)
+- Uses Postgres (see `build/docker/postgres.Dockerfile`)
 - Migrations managed with [Goose](https://github.com/pressly/goose)
 - Install Goose if you haven't already:
 ```bash
@@ -9,32 +9,9 @@
 ```
 
 ## Running Migrations
-- Apply migrations: `make migrate-up`
-- Migration files: `infra/db/migrations/`
-
-## Creating a Migration
-1. Generate a new migration:
+- Each service has its own database and migration files located in `services/<service-name>/migrations/`
+- To run migrations for a specific service, use:
 ```bash
-> make migrate-create name=your_migration_name
-```
-
-2. Edit the generated file in `infra/db/migrations/`:
-   - Add SQL commands in the `Up` function.
-   - Add rollback commands in the `Down` function.
-
-```sql
--- Example migration file
--- +goose Up
-CREATE TABLE example_table (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
-    
--- +goose Down
-DROP TABLE example_table;
-```
-   
-3. Run the migration:
-```bash
-> make migrate-up
+> make migrate-create db=<service_name> name=<migration_name>
+> make migrate-up # do this after creation of migration files and updating sql 
 ```

@@ -10,14 +10,12 @@ security_db_string="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_L
 user_db_string="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT/$USER_DB?sslmode=disable"
 
 migrate_up() {
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$infra_db_string" goose -dir infra/postgres/migrations up && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$auth_db_string" goose -dir services/auth-service/internal/db/migrations up && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$security_db_string" goose -dir services/security-service/internal/db/migrations up && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$user_db_string" goose -dir services/user-service/internal/db/migrations up
 }
 
 migrate_down() {
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$infra_db_string" goose -dir infra/postgres/migrations down && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$auth_db_string" goose -dir services/auth-service/internal/db/migrations down && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$security_db_string" goose -dir services/security-service/internal/db/migrations down && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$user_db_string" goose -dir services/user-service/internal/db/migrations down
@@ -26,9 +24,6 @@ migrate_down() {
 migrate_status() {
   echo "Migration status for all databases:"
 
-  echo "
-The 'database instance' migration" && \
-  GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$infra_db_string" goose -dir infra/postgres/migrations status && \
   echo "
 The 'auth service' migration" && \
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$auth_db_string" goose -dir services/auth-service/internal/db/migrations status && \

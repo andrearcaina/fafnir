@@ -1,49 +1,55 @@
-.PHONY: default help run-auth-service run-user-service run-api-gateway run-web-app build start pause run stop status rm-volumes prune clean reset migrate-up migrate-down migrate-status migrate-create generate seed
+.PHONY: default help run-auth-service run-user-service run-security-service run-api-gateway run-web-app run build start pause stop status logs rm-volumes prune clean reset migrate-up migrate-down migrate-status migrate-create generate seed
 
 ### default makefile target command (runs help)
 
 default: help
 
 help:
-	./scripts/help.sh
+	@echo "Usage: make <target> [options]"
 
 ### docker commands for running services
 
 run-auth-service:
-	./scripts/docker.sh run-auth-service
+	./tools/scripts/docker.sh auth-service
 
 run-user-service:
-	./scripts/docker.sh run-user-service
+	./tools/scripts/docker.sh user-service
+
+run-security-service:
+	./tools/scripts/docker.sh security-service
 
 run-api-gateway:
-	./scripts/docker.sh run-api-gateway
+	./tools/scripts/docker.sh api-gateway
 
 run-web-app:
-	./scripts/docker.sh run-web-app
-
-build:
-	./scripts/docker.sh build
-
-start:
-	./scripts/docker.sh start
-
-pause:
-	./scripts/docker.sh pause
+	./tools/scripts/docker.sh web-app
 
 run:
-	./scripts/docker.sh run
+	./tools/scripts/docker.sh run $(monitoring)
+
+build:
+	./tools/scripts/docker.sh build
+
+start:
+	./tools/scripts/docker.sh start
+
+pause:
+	./tools/scripts/docker.sh pause
 
 stop:
-	./scripts/docker.sh stop
+	./tools/scripts/docker.sh stop
 
 status:
-	./scripts/docker.sh status
+	./tools/scripts/docker.sh status
 
-prune:
-	./scripts/docker.sh prune
+logs:
+	./tools/scripts/docker.sh logs
 
 rm-volumes:
-	./scripts/docker.sh rm-volumes
+	./tools/scripts/docker.sh rm-volumes
+
+prune:
+	./tools/scripts/docker.sh prune
 
 clean: stop prune rm-volumes
 
@@ -52,28 +58,28 @@ reset: clean build run
 ### migration commands for database
 
 migrate-up:
-	./scripts/migrate.sh up
+	./tools/scripts/migrate.sh up
 
 migrate-down:
-	./scripts/migrate.sh down
+	./tools/scripts/migrate.sh down
 
 migrate-status:
-	./scripts/migrate.sh status
+	./tools/scripts/migrate.sh status
 
 # make migrate-create connections=auth name=seed_some_data
 migrate-create:
-	./scripts/migrate.sh create $(db) $(name)
+	./tools/scripts/migrate.sh create $(db) $(name)
 
 #### codegen commands for generating GraphQL and SQLc go code from .graphqls and .sql files
 
 # make generate codegen=<graphql|sqlc>
 # if codegen is sqlc, then service is required (service=auth)
 generate:
-	./scripts/codegen.sh generate $(codegen) $(service)
+	./tools/scripts/codegen.sh generate $(codegen) $(service)
 
 ### seed commands for seeding certain databases
 
-# make seed connections=<db_name> (db_name=auth)
-# or seed all databases (connections=all)
+# make seed db=<db_name> (db_name=auth)
+# or seed all databases (db=all)
 seed:
-	./scripts/seed.sh $(db)
+	cd tools/seeder && go run main.go --db $(db)

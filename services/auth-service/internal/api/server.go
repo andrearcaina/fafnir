@@ -4,10 +4,11 @@ import (
 	"context"
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 type Server struct {

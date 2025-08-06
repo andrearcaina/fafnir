@@ -1,27 +1,108 @@
 # Project Architecture
 
 ## Overview
-- Utilizes Go (and possibly Java, C#, and Python) microservices to handle different responsibilities
-- Links services via gRPC and/or REST
-- Unified API Gateway using GraphQL
-- PostgreSQL for data storage and management (later on can add Redis for caching)
-- Next.js and TypeScript frontend for user interface and interaction
 
-## Structure
-- `docs/`: Documentation (architecture, development, database)
-- `scripts/`: Scripts for development and deployment (mainly used to run docker and migration commands)
-- `services/`: Go microservices source code (potentially might add more languages like Java, C#, Python)
-- `shared/`: Shared Go code and protobufs (might remove Go code, and keep only protobufs)
-- `infra/`: Infrastructure (docker, environment variables, postgres DB, k8s, monitoring)
-- `frontend/`: Frontend web app (planning to use ShadCN/UI with Next.js)
+Fafnir is a modern, scalable microservices platform built with Go, featuring centralized tooling, multi-stage Docker builds, and comprehensive observability. The architecture follows microservices best practices with proper service isolation and security.
 
-## Microservice Responsibilities
-| Service            | Description                                                                                | Tech Stack Used           | Reason of Choice                                                                                                                              |
-|--------------------|--------------------------------------------------------------------------------------------|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `api-gateway`      | GraphQL API Entry point (routes client requests)                                           | Go, gqlgen, go-chi        | I wanted to try out GraphQL, and thought Go would be the best choice for it, especially since the other services I have implemented are in Go |
-| `auth-service`     | The authorization and authentication server. Sends JWT HttpOnly cookies and uses OAuth 2.0 | Go, sqlc, go-chi          | Same reason as above, but just a simple RESTful API                                                                                           |
-| `security-service` | The security service is to check if what roles and permissions the user has                | Go, sqlc, gRPC, protobufs | I wanted to use gRPC to learn about more about server intercommunication and why protobufs are the "best" at it                               |
-| `user-service`     | The profile service where users can check their account information and details            | Go, sqlc, gRPC, protobufs | Same as security-service                                                                                                                      |
+### Key Architectural Principles
+- **API Gateway Pattern**: Single entry point for all external requests
+- **Service Isolation**: Internal services not exposed to public network
+- **Centralized Tooling**: Shared build tools, seeder, and scripts
+- **Multi-Language Ready**: Structured to support Go, Java, C#, and Python services
+- **Container-First**: Docker-native development and deployment
+- **Observability**: Built-in monitoring with Prometheus and Grafana
+
+## Technology Stack
+- **Backend**: Go microservices with gRPC/REST communication
+- **API Gateway**: GraphQL unified endpoint using gqlgen
+- **Database**: PostgreSQL with per-service databases
+- **Frontend**: Next.js with TypeScript and ShadCN/UI
+- **Containerization**: Docker with multi-stage builds
+- **Monitoring**: Prometheus, Grafana, Node Exporter, cAdvisor
+- **Development**: Hot reload, centralized scripts, Make-based workflow
+
+## Project Structure
+
+```
+fafnir/
+├── build/                   # Build configurations
+│   └── docker/              # Centralized Dockerfiles
+│   └── ci/                  # CI configurations
+├── deployments/             # Deployment configurations
+│   └── compose/             # Docker Compose files
+├── docs/                    # Documentation
+├── frontend/                # Next.js web application
+├── infra/                   # Infrastructure configurations
+│   ├── env/                 # Environment files
+│   ├── monitoring/          # Prometheus & Grafana configs
+│   └── postgres/            # Database initialization
+├── services/                # Microservices
+│   ├── api-gateway/         # GraphQL API Gateway
+│   ├── auth-service/        # Authentication service
+│   ├── security-service/    # Authorization service
+│   ├── user-service/        # User management service
+│   └── shared/              # Shared libraries and utilities
+└── tools/                   # Development tools
+    ├── scripts/             # Build and deployment scripts
+    └── seeder/              # Centralized database seeder
+```
+
+## Service Architecture
+
+### Core Services
+
+| Service              | Description                                                      | Tech Stack          | Ports           | Database    |
+|----------------------|------------------------------------------------------------------|---------------------|-----------------|-------------|
+| **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi  | 8080 (public)   | -           |
+| **auth-service**     | Authentication & JWT token management with OAuth 2.0 support     | Go, sqlc, go-chi    | 8081 (internal) | auth_db     |
+| **user-service**     | User profile management and CRUD operations                      | Go, sqlc, go-chi    | 8083 (internal) | user_db     |
+| **security-service** | Role-based access control and authorization                      | Go, sqlc, go-chi    | 8082 (internal) | security_db |
+| **frontend**         | Next.js web application with TypeScript and ShadCN/UI            | Next.js, TypeScript | 3001 (public)   | -           |
+
+### Infrastructure Services
+
+| Service           | Description                                    | Ports           | Purpose              |
+|-------------------|------------------------------------------------|-----------------|----------------------|
+| **postgres**      | PostgreSQL database with per-service databases | 5432 (internal) | Data persistence     |
+| **prometheus**    | Metrics collection and monitoring              | 9090 (dev only) | Observability        |
+| **grafana**       | Metrics visualization and dashboards           | 3000 (dev only) | Monitoring UI        |
+| **node-exporter** | System metrics collection                      | 9100 (internal) | Host monitoring      |
+| **cadvisor**      | Container metrics collection                   | 8080 (internal) | Container monitoring |
+
+## Network Architecture
+
+### Security Model
+- **Public Access**: Only API Gateway (8080), Auth Service (8081), and Frontend (3001) are exposed
+- **Internal Communication**: All microservices communicate via Docker internal network
+- **Database Access**: Services connect to individual databases via internal network
+- **Monitoring**: Prometheus scrapes metrics from internal service endpoints
+
+## Development Workflow
+
+### Centralized Tooling
+- **Seeder**: Single tool in `tools/seeder/` seeds all service databases
+- **Scripts**: Centralized in `tools/scripts/` for consistency
+- **Dockerfiles**: Multi-stage templates in `build/docker/` for all services
+- **Compose**: Modular files in `deployments/compose/` for different environments
+
+### Build Process
+1. **Development**: Hot reload with volume mounts
+2. **Testing**: Isolated test stage in multi-stage Dockerfiles
+3. **Production**: Optimized, minimal images with non-root users
+
+### Database Management
+- **Migrations**: Per-service migrations using Goose
+- **Seeding**: Centralized seeder supports all services via CLI flags
+- **Initialization**: Database creation handled by PostgreSQL init scripts
+
+## Future Extensibility
+
+The current structure is designed to easily accommodate:
+- **Multi-Language Services**: Ready for Java, C#, Python services
+- **Additional Databases**: Redis, MongoDB can be added easily
+- **Service Mesh**: Istio/Linkerd integration possible
+- **Cloud Deployment**: Kubernetes manifests can be added
+- **CI/CD Pipelines**: GitHub Actions workflows ready to implement
 
 TODO:
 - Implement more services like `notification-service`, `payment-service`, ...
@@ -36,30 +117,3 @@ Below is the ideal data flow for the application. A concept drawing will be adde
 6. API Gateway → aggregates data from multiple services if necessary
 7. API Gateway → sends data back to Frontend
 8. Frontend → displays data to the user
-
-## File Tree Structure
-```plaintext
-fafnir/
-├── docs/
-├── frontend/
-├── infra/              
-│    ├── env/              
-│    ├── k8s/              
-│    ├── monitoring/       
-│    ├── postgres/
-├── scripts/
-│     ├── codegen.sh
-│     ├── docker.sh
-│     ├── help.sh
-│     ├── migration.sh 
-│     ├── seed.sh 
-├── services/
-│    ├── api-gateway/      
-│    ├── auth-service/
-│    ├── security-service/     
-│    ├── user-service/     
-├── shared/
-├── .gitignore
-├── Makefile          
-├── README.md             
-```
