@@ -71,15 +71,8 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    resp.JwtToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   24 * 3600,
-	})
+	utils.SetCookie(w, "auth_token", resp.JwtToken, 24*3600, true, false, http.SameSiteLaxMode)
+	utils.SetCookie(w, "csrf_token", resp.CsrfToken, 24*3600, false, false, http.SameSiteLaxMode)
 
 	utils.WriteJSON(w, http.StatusOK, map[string]interface{}{
 		"message": resp.Message, // don't send the JWT token in the response body because it's already set in the cookie
@@ -87,15 +80,8 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) logout(w http.ResponseWriter, _ *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   -1,
-	})
+	utils.SetCookie(w, "auth_token", "", -1, true, false, http.SameSiteLaxMode)
+	utils.SetCookie(w, "csrf_token", "", -1, false, false, http.SameSiteLaxMode)
 
 	utils.WriteJSON(w, http.StatusNoContent, nil)
 }

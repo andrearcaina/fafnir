@@ -4,6 +4,7 @@ import (
 	"context"
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db"
+	"github.com/go-chi/cors"
 	"log"
 	"net/http"
 
@@ -18,8 +19,18 @@ type Server struct {
 func NewServer() *Server {
 	router := chi.NewRouter()
 
+	// set up CORS options
+	corsOptions := cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5000", "http://localhost:9090"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	})
+
 	// custom logger middleware (by go chi)
 	router.Use(
+		corsOptions,
 		middleware.Logger,
 		middleware.Recoverer,
 	)

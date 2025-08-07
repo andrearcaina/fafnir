@@ -14,7 +14,7 @@ type contextKey string
 func CheckAuth(authService *Service) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("auth_token")
+			jwtCookie, err := r.Cookie("auth_token")
 			if err != nil {
 				err := apperrors.UnauthorizedError().
 					WithDetails("Authentication token not found in cookies")
@@ -22,7 +22,22 @@ func CheckAuth(authService *Service) func(next http.Handler) http.Handler {
 				return
 			}
 
-			token, err := authService.parseJWT(cookie.Value)
+			csrfCookie, err := r.Cookie("csrf_token")
+			if err != nil {
+				err := apperrors.UnauthorizedError().
+					WithDetails("CSRF token not found in cookies")
+				utils.HandleError(w, err)
+				return
+			}
+
+			if csrfCookie.Value != utils.GetCSRFTokenFromRequest(r) {
+				err := apperrors.UnauthorizedError().
+					WithDetails("Invalid CSRF token")
+				utils.HandleError(w, err)
+				return
+			}
+
+			token, err := utils.ParseJWTToken(jwtCookie.Value, authService.jwtKey)
 			if err != nil {
 				err := apperrors.UnauthorizedError().
 					WithDetails("Invalid authentication token")
