@@ -37,8 +37,9 @@ type UserInfoRequest struct {
 }
 
 type LoginResponse struct {
-	Message  string `json:"message"`
-	JwtToken string `json:"jwtToken"`
+	Message   string `json:"message"`
+	JwtToken  string `json:"jwtToken"`
+	CsrfToken string `json:"csrfToken"`
 }
 
 type RegisterResponse struct {
