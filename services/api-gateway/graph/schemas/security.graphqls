@@ -1,0 +1,13 @@
+input HasPermissionRequest {
+    userId: String!
+    permission: String!
+}
+
+type HasPermissionResponse {
+    hasPermission: Boolean!
+    permissionCode: String! # grpc permission code (e.g., "PERMISSION_DENIED")
+}
+
+extend type Query {
+    checkPermission(request: HasPermissionRequest!): HasPermissionResponse!
+}

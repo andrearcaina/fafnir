@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CheckUserPermission(ctx context.Context, arg CheckUserPermissionParams) (bool, error)
 	// this is for seeding
 	InsertUserRoleWithID(ctx context.Context, arg InsertUserRoleWithIDParams) (UsersRole, error)
 }

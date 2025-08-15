@@ -1,31 +1,54 @@
 package api
 
 import (
-	"fafnir/shared/pkg/utils"
-	"github.com/go-chi/chi/v5"
-	"net/http"
+	"context"
+	"fafnir/security-service/internal/db"
+	"fafnir/security-service/internal/db/generated"
+	"fafnir/shared/pb/security"
+
+	"github.com/google/uuid"
 )
 
 type Handler struct {
-	securityService *Service
+	db *db.Database
+	pb.UnimplementedSecurityServiceServer
 }
 
-func NewSecurityHandler(securityService *Service) *Handler {
+func NewSecurityHandler(database *db.Database) *Handler {
 	return &Handler{
-		securityService: securityService,
+		db: database,
 	}
 }
 
-func (h *Handler) ServeSecurityRoutes() chi.Router {
-	r := chi.NewRouter()
+// CheckPermission implements the gRPC CheckPermission method
+func (h *Handler) CheckPermission(ctx context.Context, req *pb.CheckPermissionRequest) (*pb.CheckPermissionResponse, error) {
+	userId, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return &pb.CheckPermissionResponse{
+			HasPermission: false,
+			Code:          pb.ErrorCode_INVALID_ARGUMENT,
+		}, err
+	}
 
-	r.Get("/test", h.test)
+	params := generated.CheckUserPermissionParams{
+		UserID:         userId,
+		PermissionName: req.Permission,
+	}
 
-	return r
-}
+	hasPermission, err := h.db.GetQueries().CheckUserPermission(ctx, params)
+	if err != nil {
+		return nil, err
+	}
 
-func (h *Handler) test(w http.ResponseWriter, r *http.Request) {
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"message": "Security service is running",
-	})
+	if !hasPermission {
+		return &pb.CheckPermissionResponse{
+			HasPermission: false,
+			Code:          pb.ErrorCode_PERMISSION_DENIED,
+		}, nil
+	}
+
+	return &pb.CheckPermissionResponse{
+		HasPermission: true,
+		Code:          pb.ErrorCode_OK,
+	}, nil
 }

@@ -2,5 +2,15 @@
 
 package model
 
+type HasPermissionRequest struct {
+	UserID     string `json:"userId"`
+	Permission string `json:"permission"`
+}
+
+type HasPermissionResponse struct {
+	HasPermission  bool   `json:"hasPermission"`
+	PermissionCode string `json:"permissionCode"`
+}
+
 type Query struct {
 }

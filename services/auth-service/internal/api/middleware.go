@@ -4,9 +4,10 @@ import (
 	"context"
 	apperrors "fafnir/shared/pkg/errors"
 	"fafnir/shared/pkg/utils"
+	"net/http"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"net/http"
 )
 
 type contextKey string

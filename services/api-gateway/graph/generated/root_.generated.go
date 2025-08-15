@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fafnir/api-gateway/graph/model"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -39,8 +40,14 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	HasPermissionResponse struct {
+		HasPermission  func(childComplexity int) int
+		PermissionCode func(childComplexity int) int
+	}
+
 	Query struct {
-		Health func(childComplexity int) int
+		CheckPermission func(childComplexity int, request model.HasPermissionRequest) int
+		Health          func(childComplexity int) int
 	}
 }
 
@@ -63,6 +70,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "HasPermissionResponse.hasPermission":
+		if e.complexity.HasPermissionResponse.HasPermission == nil {
+			break
+		}
+
+		return e.complexity.HasPermissionResponse.HasPermission(childComplexity), true
+
+	case "HasPermissionResponse.permissionCode":
+		if e.complexity.HasPermissionResponse.PermissionCode == nil {
+			break
+		}
+
+		return e.complexity.HasPermissionResponse.PermissionCode(childComplexity), true
+
+	case "Query.checkPermission":
+		if e.complexity.Query.CheckPermission == nil {
+			break
+		}
+
+		args, err := ec.field_Query_checkPermission_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CheckPermission(childComplexity, args["request"].(model.HasPermissionRequest)), true
+
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
 			break
@@ -77,7 +110,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputHasPermissionRequest,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -167,6 +202,19 @@ type Query
 `, BuiltIn: false},
 	{Name: "../schemas/health.graphqls", Input: `extend type Query {
     health: String!
+}`, BuiltIn: false},
+	{Name: "../schemas/security.graphqls", Input: `input HasPermissionRequest {
+    userId: String!
+    permission: String!
+}
+
+type HasPermissionResponse {
+    hasPermission: Boolean!
+    permissionCode: String! # grpc permission code (e.g., "PERMISSION_DENIED")
+}
+
+extend type Query {
+    checkPermission(request: HasPermissionRequest!): HasPermissionResponse!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

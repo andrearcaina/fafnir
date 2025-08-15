@@ -34,8 +34,6 @@
 | **Frontend** | [http://localhost:3001](http://localhost:3001) | Next.js web application |
 | **API Gateway** | [http://localhost:8080](http://localhost:8080) | GraphQL endpoint |
 | **Auth Service** | [http://localhost:8081](http://localhost:8081) | Authentication API |
-| **User Service** | [http://localhost:8083](http://localhost:8083) | User management API |
-| **Security Service** | [http://localhost:8082](http://localhost:8082) | Authorization API |
 | **Grafana** | [http://localhost:3000](http://localhost:3000) | Monitoring dashboard |
 | **Prometheus** | [http://localhost:9090](http://localhost:9090) | Metrics collection |
 
@@ -60,15 +58,19 @@ make run-api-gateway
 # Run migrations
 make migrate-up
 
-# Seed databases
-make seed serviceDB=all        # All databases
-make seed serviceDB=auth       # Auth database only
-make seed serviceDB=user       # User database only
-make seed serviceDB=security   # Security database only
-
 # Check migration status
 make migrate-status
 ```
+
+### Seed Operations
+```bash
+# Populate databases
+make seed db=all        # All databases
+make seed db=auth       # Auth database only
+make seed db=user       # User database only
+make seed db=security   # Security database only
+```
+
 
 ### Code Generation
 ```bash
@@ -107,9 +109,9 @@ You can also use the following commands to migrate the database:
 
 You can run the following commands to generate the GraphQL resolvers based on the schema:
 
-| Command         | Description                                                                   |
-|-----------------|-------------------------------------------------------------------------------|
-| `make generate` | Generate GraphQL or sqlc boilerplate dependent on the .graphqls or .sql files |
+| Command         | Description                                                                                    |
+|-----------------|------------------------------------------------------------------------------------------------|
+| `make generate` | Generate GraphQL, sqlc, or proto boilerplate dependent on the .graphqls, .sql, or .proto files |
 
 You can run the following commands to seed the database with initial data after migrations:
 

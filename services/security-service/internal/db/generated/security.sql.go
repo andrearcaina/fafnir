@@ -11,6 +11,27 @@ import (
 	"github.com/google/uuid"
 )
 
+const checkUserPermission = `-- name: CheckUserPermission :one
+SELECT EXISTS (
+    SELECT 1
+    FROM users_roles ur
+    JOIN roles_permissions rp ON ur.role_name = rp.role_name
+    WHERE ur.user_id = $1 AND rp.permission_name = $2
+) AS has_permission
+`
+
+type CheckUserPermissionParams struct {
+	UserID         uuid.UUID `json:"user_id"`
+	PermissionName string    `json:"permission_name"`
+}
+
+func (q *Queries) CheckUserPermission(ctx context.Context, arg CheckUserPermissionParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkUserPermission, arg.UserID, arg.PermissionName)
+	var has_permission bool
+	err := row.Scan(&has_permission)
+	return has_permission, err
+}
+
 const insertUserRoleWithID = `-- name: InsertUserRoleWithID :one
 INSERT INTO users_roles (user_id, role_name)
 VALUES ($1, $2)

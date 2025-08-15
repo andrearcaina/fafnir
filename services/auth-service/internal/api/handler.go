@@ -2,8 +2,9 @@ package api
 
 import (
 	"fafnir/shared/pkg/utils"
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {

@@ -6,9 +6,12 @@ package generated
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
+	GetUserProfileById(ctx context.Context, id uuid.UUID) (GetUserProfileByIdRow, error)
 	// for seeding
 	InsertUserProfileById(ctx context.Context, arg InsertUserProfileByIdParams) (InsertUserProfileByIdRow, error)
 }

@@ -4,63 +4,61 @@ import (
 	"context"
 	"fafnir/security-service/internal/config"
 	"fafnir/security-service/internal/db"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"fafnir/shared/pb/security"
 	"log"
-	"net/http"
+	"net"
+
+	"google.golang.org/grpc"
 )
 
 type Server struct {
-	HTTP *http.Server
+	handler    *Handler
+	grpcServer *grpc.Server
+	config     *config.Config
 }
 
 func NewServer() *Server {
-	router := chi.NewRouter()
-
-	// custom logger middleware (by go chi)
-	router.Use(
-		middleware.Logger,
-		middleware.Recoverer,
-	)
-
 	cfg := config.NewConfig()
 
 	// just to make sure the database connection is established (will assign a var later once we have a service)
-	_, err := db.NewDBConnection(cfg)
+	dbConn, err := db.NewDBConnection(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// this will be handled differently using gRPC in the future
-	// for now, we will use a simple HTTP handler for REST API calls
-	securityService := NewSecurityService( /* pass in connections conn later */ )
-	securityHandler := NewSecurityHandler(securityService)
+	// create the security handler
+	securityHandler := NewSecurityHandler(dbConn)
 
-	// mount the auth handler to the router
-	router.Mount("/security", securityHandler.ServeSecurityRoutes())
+	// create gRPC server with logging interceptor (interceptors are basically a middleware for gRPC)
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(loggingInterceptor),
+	)
 
-	// create a config instance for the server
+	// register the security service with the gRPC server
+	pb.RegisterSecurityServiceServer(grpcServer, securityHandler)
+
 	return &Server{
-		HTTP: &http.Server{
-			Addr:    cfg.PORT,
-			Handler: router,
-		},
+		handler:    securityHandler,
+		grpcServer: grpcServer,
+		config:     cfg,
 	}
 }
 
 func (s *Server) Run() error {
-	log.Printf("Starting security service on port %s\n", s.HTTP.Addr)
-	return s.HTTP.ListenAndServe()
+	log.Printf("Starting gRPC security service on port %s\n", s.config.PORT)
+
+	listener, err := net.Listen("tcp", s.config.PORT)
+	if err != nil {
+		return err
+	}
+
+	return s.grpcServer.Serve(listener)
 }
 
 func (s *Server) GracefulShutdown(ctx context.Context) error {
 	log.Println("Shutting down security service gracefully...")
 
-	err := s.HTTP.Shutdown(ctx)
-	if err != nil {
-		log.Printf("Error during graceful shutdown: %v\n", err)
-		return err
-	}
+	s.grpcServer.GracefulStop()
 
 	log.Println("Security service shutdown complete.")
 	return nil

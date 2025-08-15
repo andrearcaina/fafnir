@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "fafnir/user-service/internal/pb;pb";
+
+message UserDataRequest {
+  string user_id = 1;
+}
+
+message UseDataResponse {
+  string user_id = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+service SecurityService {
+  rpc CheckPermission(UserDataRequest) returns (UseDataResponse);
+}

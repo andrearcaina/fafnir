@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package security;
+
+option go_package = "fafnir/security-service/internal/pb;pb";
+
+enum ErrorCode {
+  OK = 0;
+  INVALID_ARGUMENT = 1;
+  PERMISSION_DENIED = 2;
+}
+
+message CheckPermissionRequest {
+  string user_id = 1;
+  string permission = 2;
+}
+
+message CheckPermissionResponse {
+  bool has_permission = 1;
+  ErrorCode code = 2;
+}
+
+service SecurityService {
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+}

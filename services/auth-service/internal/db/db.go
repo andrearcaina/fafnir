@@ -6,6 +6,7 @@ import (
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db/generated"
 	"fmt"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -14,7 +15,7 @@ type Database struct {
 	queries *generated.Queries
 }
 
-func NewDBConnection(cfg *config.Config) (*Database, error) {
+func New(cfg *config.Config) (*Database, error) {
 	pool, err := pgxpool.New(context.Background(), cfg.DB.URL)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to connect to database: %v", err))

@@ -5,6 +5,9 @@ import (
 	"fafnir/api-gateway/graph/generated"
 	"fafnir/api-gateway/graph/resolvers"
 	"fafnir/api-gateway/internal/config"
+	"log"
+	"net/http"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -13,8 +16,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/vektah/gqlparser/v2/ast"
-	"log"
-	"net/http"
 )
 
 type Server struct {
@@ -27,6 +28,7 @@ func NewServer() *Server {
 	srv := handler.New(generated.NewExecutableSchema(
 		generated.Config{
 			Resolvers: &resolvers.Resolver{
+				SecurityClient: cfg.CLIENTS.SecurityClient,
 				// UserClient: cfg.CLIENTS.UserClient,
 			},
 		},

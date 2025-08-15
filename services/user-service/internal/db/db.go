@@ -6,6 +6,7 @@ import (
 	"fafnir/user-service/internal/config"
 	"fafnir/user-service/internal/db/generated"
 	"fmt"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

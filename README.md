@@ -1,6 +1,6 @@
 # fafnir
 
-This was built to demonstrate an understanding of microservices, GraphQL, gRPC, Docker, Kubernetes, Grafana, Prometheus, and GCP.
+This was built to demonstrate an understanding of microservices, GraphQL, RabbitMQ, GCP (Cloud Run or GKE), gRPC, Docker, Kubernetes, Grafana, and Prometheus.
 
 ## Documentation
 

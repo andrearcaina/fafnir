@@ -7,6 +7,7 @@ import (
 	apperrors "fafnir/shared/pkg/errors"
 	"fafnir/shared/pkg/utils"
 	"fmt"
+
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )

@@ -11,6 +11,25 @@ import (
 	"github.com/google/uuid"
 )
 
+const getUserProfileById = `-- name: GetUserProfileById :one
+SELECT id, first_name, last_name
+FROM user_profiles
+WHERE id = $1
+`
+
+type GetUserProfileByIdRow struct {
+	ID        uuid.UUID `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+}
+
+func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (GetUserProfileByIdRow, error) {
+	row := q.db.QueryRow(ctx, getUserProfileById, id)
+	var i GetUserProfileByIdRow
+	err := row.Scan(&i.ID, &i.FirstName, &i.LastName)
+	return i, err
+}
+
 const insertUserProfileById = `-- name: InsertUserProfileById :one
 INSERT INTO user_profiles (id, first_name, last_name, created_at, updated_at)
 VALUES ($1, $2, $3, NOW(), NOW())
