@@ -45,8 +45,16 @@ type ComplexityRoot struct {
 		PermissionCode func(childComplexity int) int
 	}
 
+	ProfileDataResponse struct {
+		FirstName      func(childComplexity int) int
+		LastName       func(childComplexity int) int
+		PermissionCode func(childComplexity int) int
+		UserID         func(childComplexity int) int
+	}
+
 	Query struct {
 		CheckPermission func(childComplexity int, request model.HasPermissionRequest) int
+		GetProfileData  func(childComplexity int, request model.ProfileDataRequest) int
 		Health          func(childComplexity int) int
 	}
 }
@@ -84,6 +92,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.HasPermissionResponse.PermissionCode(childComplexity), true
 
+	case "ProfileDataResponse.firstName":
+		if e.complexity.ProfileDataResponse.FirstName == nil {
+			break
+		}
+
+		return e.complexity.ProfileDataResponse.FirstName(childComplexity), true
+
+	case "ProfileDataResponse.lastName":
+		if e.complexity.ProfileDataResponse.LastName == nil {
+			break
+		}
+
+		return e.complexity.ProfileDataResponse.LastName(childComplexity), true
+
+	case "ProfileDataResponse.permissionCode":
+		if e.complexity.ProfileDataResponse.PermissionCode == nil {
+			break
+		}
+
+		return e.complexity.ProfileDataResponse.PermissionCode(childComplexity), true
+
+	case "ProfileDataResponse.userId":
+		if e.complexity.ProfileDataResponse.UserID == nil {
+			break
+		}
+
+		return e.complexity.ProfileDataResponse.UserID(childComplexity), true
+
 	case "Query.checkPermission":
 		if e.complexity.Query.CheckPermission == nil {
 			break
@@ -95,6 +131,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.CheckPermission(childComplexity, args["request"].(model.HasPermissionRequest)), true
+
+	case "Query.getProfileData":
+		if e.complexity.Query.GetProfileData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getProfileData_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetProfileData(childComplexity, args["request"].(model.ProfileDataRequest)), true
 
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
@@ -112,6 +160,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputHasPermissionRequest,
+		ec.unmarshalInputProfileDataRequest,
 	)
 	first := true
 
@@ -215,6 +264,20 @@ type HasPermissionResponse {
 
 extend type Query {
     checkPermission(request: HasPermissionRequest!): HasPermissionResponse!
+}`, BuiltIn: false},
+	{Name: "../schemas/user.graphqls", Input: `input ProfileDataRequest {
+    userId: String!
+}
+
+type ProfileDataResponse {
+    userId: String!
+    firstName: String!
+    lastName: String!
+    permissionCode: String! # grpc permission code
+}
+
+extend type Query {
+    getProfileData(request: ProfileDataRequest!): ProfileDataResponse!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

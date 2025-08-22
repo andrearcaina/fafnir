@@ -18,6 +18,13 @@ case "$codegen" in
   proto)
     [[ -z "$service" ]] && { echo "Service name required for Protobuf. Use: auth, security, user"; exit 1; }
     case "$service" in
+      base)
+        cd "services/shared"
+        protoc -I=../../proto \
+          --go_out=pb/base --go_opt=paths=source_relative \
+          --go-grpc_out=pb/base --go-grpc_opt=paths=source_relative \
+          ../../proto/base.proto
+      ;;
       auth|security|user)
         cd "services/shared"
         protoc -I=../../proto \

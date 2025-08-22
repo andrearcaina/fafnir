@@ -2,18 +2,21 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "fafnir/user-service/internal/pb;pb";
+option go_package = "fafnir/shared/pb/security;pb";
 
-message UserDataRequest {
+import "base.proto";
+
+message ProfileDataRequest {
   string user_id = 1;
 }
 
-message UseDataResponse {
+message ProfileDataResponse {
   string user_id = 1;
   string first_name = 2;
   string last_name = 3;
+  base.ErrorCode code = 4;
 }
 
-service SecurityService {
-  rpc CheckPermission(UserDataRequest) returns (UseDataResponse);
+service UserService {
+  rpc GetProfileData(ProfileDataRequest) returns (ProfileDataResponse);
 }

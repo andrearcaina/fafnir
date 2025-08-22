@@ -2,13 +2,9 @@ syntax = "proto3";
 
 package security;
 
-option go_package = "fafnir/security-service/internal/pb;pb";
+option go_package = "fafnir/shared/pb/security;pb";
 
-enum ErrorCode {
-  OK = 0;
-  INVALID_ARGUMENT = 1;
-  PERMISSION_DENIED = 2;
-}
+import "base.proto";
 
 message CheckPermissionRequest {
   string user_id = 1;
@@ -17,7 +13,7 @@ message CheckPermissionRequest {
 
 message CheckPermissionResponse {
   bool has_permission = 1;
-  ErrorCode code = 2;
+  base.ErrorCode code = 2;
 }
 
 service SecurityService {

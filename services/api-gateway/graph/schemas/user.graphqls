@@ -1,0 +1,14 @@
+input ProfileDataRequest {
+    userId: String!
+}
+
+type ProfileDataResponse {
+    userId: String!
+    firstName: String!
+    lastName: String!
+    permissionCode: String! # grpc permission code
+}
+
+extend type Query {
+    getProfileData(request: ProfileDataRequest!): ProfileDataResponse!
+}

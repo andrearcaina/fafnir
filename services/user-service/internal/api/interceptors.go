@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	pb "fafnir/shared/pb/security"
+	pb "fafnir/shared/pb/user"
 	"log"
 	"time"
 
@@ -26,18 +26,19 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 	}
 
 	// Log response
-	if info.FullMethod == "/security.SecurityService/CheckPermission" {
-		logCheckPermission(duration, resp.(*pb.CheckPermissionResponse))
+	if info.FullMethod == "/user.UserService/GetProfileData" {
+		logGetProfileData(duration, resp.(*pb.ProfileDataResponse))
 	}
 
 	return resp, nil
 }
 
-func logCheckPermission(duration time.Duration, resp *pb.CheckPermissionResponse) {
-	log.Printf(
-		"gRPC Response - Duration: %v, Response: has_permission=%v, code=%s",
+func logGetProfileData(duration time.Duration, resp *pb.ProfileDataResponse) {
+	log.Printf("gRPC Response - Method: /user.UserService/GetProfileData, Duration: %v, UserId: %s, FirstName: %s, LastName: %s, Code: %s",
 		duration,
-		resp.GetHasPermission(),
+		resp.GetUserId(),
+		resp.GetFirstName(),
+		resp.GetLastName(),
 		resp.GetCode().String(),
 	)
 }

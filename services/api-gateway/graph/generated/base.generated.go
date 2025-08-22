@@ -20,6 +20,7 @@ import (
 type QueryResolver interface {
 	Health(ctx context.Context) (string, error)
 	CheckPermission(ctx context.Context, request model.HasPermissionRequest) (*model.HasPermissionResponse, error)
+	GetProfileData(ctx context.Context, request model.ProfileDataRequest) (*model.ProfileDataResponse, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -41,6 +42,17 @@ func (ec *executionContext) field_Query_checkPermission_args(ctx context.Context
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNHasPermissionRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐHasPermissionRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getProfileData_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNProfileDataRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileDataRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +167,71 @@ func (ec *executionContext) fieldContext_Query_checkPermission(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_checkPermission_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getProfileData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getProfileData(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetProfileData(rctx, fc.Args["request"].(model.ProfileDataRequest))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProfileDataResponse)
+	fc.Result = res
+	return ec.marshalNProfileDataResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileDataResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getProfileData(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_ProfileDataResponse_userId(ctx, field)
+			case "firstName":
+				return ec.fieldContext_ProfileDataResponse_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_ProfileDataResponse_lastName(ctx, field)
+			case "permissionCode":
+				return ec.fieldContext_ProfileDataResponse_permissionCode(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfileDataResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getProfileData_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -355,6 +432,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_checkPermission(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getProfileData":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getProfileData(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

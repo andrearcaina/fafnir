@@ -1,41 +1,50 @@
 package api
 
 import (
-	"fafnir/shared/pkg/utils"
-	"net/http"
-	"strconv"
+	"context"
+	basepb "fafnir/shared/pb/base"
+	"fafnir/shared/pb/user"
+	"fafnir/user-service/internal/db"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type UserHandler struct {
-	UserService *Service
+	db *db.Database
+	pb.UnimplementedUserServiceServer
 }
 
-func NewUserHandler(userService *Service) *UserHandler {
+func NewUserHandler(database *db.Database) *UserHandler {
 	return &UserHandler{
-		UserService: userService,
+		db: database,
 	}
 }
 
-func (h *UserHandler) ServeUserRoutes() chi.Router {
-	r := chi.NewRouter()
-
-	r.Get("/info/{id}", h.getUserInfo)
-
-	return r
-}
-
-func (h *UserHandler) getUserInfo(w http.ResponseWriter, r *http.Request) {
-	userId := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(userId)
-
+func (h *UserHandler) GetProfileData(ctx context.Context, req *pb.ProfileDataRequest) (*pb.ProfileDataResponse, error) {
+	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, map[string]string{"errors": "Invalid user ID"})
-		return
+		return &pb.ProfileDataResponse{
+			UserId:    "",
+			FirstName: "",
+			LastName:  "",
+			Code:      basepb.ErrorCode_INVALID_ARGUMENT,
+		}, err
 	}
 
-	userInfo := h.UserService.GetUserInfo(id)
+	profileData, err := h.db.GetQueries().GetUserProfileById(ctx, userID)
+	if err != nil {
+		return &pb.ProfileDataResponse{
+			UserId:    userID.String(),
+			FirstName: "",
+			LastName:  "",
+			Code:      basepb.ErrorCode_NOT_FOUND,
+		}, err
+	}
 
-	utils.WriteJSON(w, http.StatusOK, userInfo)
+	return &pb.ProfileDataResponse{
+		UserId:    userID.String(),
+		FirstName: profileData.FirstName,
+		LastName:  profileData.LastName,
+		Code:      basepb.ErrorCode_OK,
+	}, nil
 }

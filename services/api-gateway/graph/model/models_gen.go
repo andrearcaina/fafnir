@@ -12,5 +12,16 @@ type HasPermissionResponse struct {
 	PermissionCode string `json:"permissionCode"`
 }
 
+type ProfileDataRequest struct {
+	UserID string `json:"userId"`
+}
+
+type ProfileDataResponse struct {
+	UserID         string `json:"userId"`
+	FirstName      string `json:"firstName"`
+	LastName       string `json:"lastName"`
+	PermissionCode string `json:"permissionCode"`
+}
+
 type Query struct {
 }

@@ -10,5 +10,5 @@ import "fafnir/api-gateway/internal/clients"
 
 type Resolver struct {
 	SecurityClient *clients.SecurityClient
-	// UserClient *clients.UserClient
+	UserClient     *clients.UserClient
 }

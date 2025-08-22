@@ -11,7 +11,7 @@ type Config struct {
 
 type ClientsConfig struct {
 	SecurityClient *clients.SecurityClient
-	// UserClient *clients.UserClient
+	UserClient     *clients.UserClient
 }
 
 func NewConfig() *Config {
@@ -19,7 +19,7 @@ func NewConfig() *Config {
 		PORT: ":8080",
 		CLIENTS: ClientsConfig{
 			SecurityClient: clients.NewSecurityClient("security-service:8082"),
-			// UserClient: clients.NewUserClient("user-service:8082"),
+			UserClient:     clients.NewUserClient("user-service:8083"),
 		},
 	}
 }

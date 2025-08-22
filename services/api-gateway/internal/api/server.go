@@ -29,7 +29,7 @@ func NewServer() *Server {
 		generated.Config{
 			Resolvers: &resolvers.Resolver{
 				SecurityClient: cfg.CLIENTS.SecurityClient,
-				// UserClient: cfg.CLIENTS.UserClient,
+				UserClient:     cfg.CLIENTS.UserClient,
 			},
 		},
 	))

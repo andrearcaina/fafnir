@@ -12,7 +12,7 @@ import (
 )
 
 type Server struct {
-	handler    *Handler
+	handler    *SecurityHandler
 	grpcServer *grpc.Server
 	config     *config.Config
 }

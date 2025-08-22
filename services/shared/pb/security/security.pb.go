@@ -7,6 +7,7 @@
 package pb
 
 import (
+	base "fafnir/shared/pb/base"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -20,55 +21,6 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
-
-type ErrorCode int32
-
-const (
-	ErrorCode_OK                ErrorCode = 0
-	ErrorCode_INVALID_ARGUMENT  ErrorCode = 1
-	ErrorCode_PERMISSION_DENIED ErrorCode = 2
-)
-
-// Enum value maps for ErrorCode.
-var (
-	ErrorCode_name = map[int32]string{
-		0: "OK",
-		1: "INVALID_ARGUMENT",
-		2: "PERMISSION_DENIED",
-	}
-	ErrorCode_value = map[string]int32{
-		"OK":                0,
-		"INVALID_ARGUMENT":  1,
-		"PERMISSION_DENIED": 2,
-	}
-)
-
-func (x ErrorCode) Enum() *ErrorCode {
-	p := new(ErrorCode)
-	*p = x
-	return p
-}
-
-func (x ErrorCode) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (ErrorCode) Descriptor() protoreflect.EnumDescriptor {
-	return file_security_proto_enumTypes[0].Descriptor()
-}
-
-func (ErrorCode) Type() protoreflect.EnumType {
-	return &file_security_proto_enumTypes[0]
-}
-
-func (x ErrorCode) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use ErrorCode.Descriptor instead.
-func (ErrorCode) EnumDescriptor() ([]byte, []int) {
-	return file_security_proto_rawDescGZIP(), []int{0}
-}
 
 type CheckPermissionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -125,7 +77,7 @@ func (x *CheckPermissionRequest) GetPermission() string {
 type CheckPermissionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	HasPermission bool                   `protobuf:"varint,1,opt,name=has_permission,json=hasPermission,proto3" json:"has_permission,omitempty"`
-	Code          ErrorCode              `protobuf:"varint,2,opt,name=code,proto3,enum=security.ErrorCode" json:"code,omitempty"`
+	Code          base.ErrorCode         `protobuf:"varint,2,opt,name=code,proto3,enum=base.ErrorCode" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -167,32 +119,29 @@ func (x *CheckPermissionResponse) GetHasPermission() bool {
 	return false
 }
 
-func (x *CheckPermissionResponse) GetCode() ErrorCode {
+func (x *CheckPermissionResponse) GetCode() base.ErrorCode {
 	if x != nil {
 		return x.Code
 	}
-	return ErrorCode_OK
+	return base.ErrorCode(0)
 }
 
 var File_security_proto protoreflect.FileDescriptor
 
 const file_security_proto_rawDesc = "" +
 	"\n" +
-	"\x0esecurity.proto\x12\bsecurity\"Q\n" +
+	"\x0esecurity.proto\x12\bsecurity\x1a\n" +
+	"base.proto\"Q\n" +
 	"\x16CheckPermissionRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1e\n" +
 	"\n" +
 	"permission\x18\x02 \x01(\tR\n" +
-	"permission\"i\n" +
+	"permission\"e\n" +
 	"\x17CheckPermissionResponse\x12%\n" +
-	"\x0ehas_permission\x18\x01 \x01(\bR\rhasPermission\x12'\n" +
-	"\x04code\x18\x02 \x01(\x0e2\x13.security.ErrorCodeR\x04code*@\n" +
-	"\tErrorCode\x12\x06\n" +
-	"\x02OK\x10\x00\x12\x14\n" +
-	"\x10INVALID_ARGUMENT\x10\x01\x12\x15\n" +
-	"\x11PERMISSION_DENIED\x10\x022i\n" +
+	"\x0ehas_permission\x18\x01 \x01(\bR\rhasPermission\x12#\n" +
+	"\x04code\x18\x02 \x01(\x0e2\x0f.base.ErrorCodeR\x04code2i\n" +
 	"\x0fSecurityService\x12V\n" +
-	"\x0fCheckPermission\x12 .security.CheckPermissionRequest\x1a!.security.CheckPermissionResponseB(Z&fafnir/security-service/internal/pb;pbb\x06proto3"
+	"\x0fCheckPermission\x12 .security.CheckPermissionRequest\x1a!.security.CheckPermissionResponseB\x1eZ\x1cfafnir/shared/pb/security;pbb\x06proto3"
 
 var (
 	file_security_proto_rawDescOnce sync.Once
@@ -206,17 +155,16 @@ func file_security_proto_rawDescGZIP() []byte {
 	return file_security_proto_rawDescData
 }
 
-var file_security_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_security_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_security_proto_goTypes = []any{
-	(ErrorCode)(0),                  // 0: security.ErrorCode
-	(*CheckPermissionRequest)(nil),  // 1: security.CheckPermissionRequest
-	(*CheckPermissionResponse)(nil), // 2: security.CheckPermissionResponse
+	(*CheckPermissionRequest)(nil),  // 0: security.CheckPermissionRequest
+	(*CheckPermissionResponse)(nil), // 1: security.CheckPermissionResponse
+	(base.ErrorCode)(0),             // 2: base.ErrorCode
 }
 var file_security_proto_depIdxs = []int32{
-	0, // 0: security.CheckPermissionResponse.code:type_name -> security.ErrorCode
-	1, // 1: security.SecurityService.CheckPermission:input_type -> security.CheckPermissionRequest
-	2, // 2: security.SecurityService.CheckPermission:output_type -> security.CheckPermissionResponse
+	2, // 0: security.CheckPermissionResponse.code:type_name -> base.ErrorCode
+	0, // 1: security.SecurityService.CheckPermission:input_type -> security.CheckPermissionRequest
+	1, // 2: security.SecurityService.CheckPermission:output_type -> security.CheckPermissionResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
@@ -234,14 +182,13 @@ func file_security_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_security_proto_rawDesc), len(file_security_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_security_proto_goTypes,
 		DependencyIndexes: file_security_proto_depIdxs,
-		EnumInfos:         file_security_proto_enumTypes,
 		MessageInfos:      file_security_proto_msgTypes,
 	}.Build()
 	File_security_proto = out.File

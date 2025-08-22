@@ -7,6 +7,7 @@
 package pb
 
 import (
+	base "fafnir/shared/pb/base"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -21,27 +22,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type UserDataRequest struct {
+type ProfileDataRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UserDataRequest) Reset() {
-	*x = UserDataRequest{}
+func (x *ProfileDataRequest) Reset() {
+	*x = ProfileDataRequest{}
 	mi := &file_user_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UserDataRequest) String() string {
+func (x *ProfileDataRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UserDataRequest) ProtoMessage() {}
+func (*ProfileDataRequest) ProtoMessage() {}
 
-func (x *UserDataRequest) ProtoReflect() protoreflect.Message {
+func (x *ProfileDataRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_user_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,41 +54,42 @@ func (x *UserDataRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UserDataRequest.ProtoReflect.Descriptor instead.
-func (*UserDataRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProfileDataRequest.ProtoReflect.Descriptor instead.
+func (*ProfileDataRequest) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *UserDataRequest) GetUserId() string {
+func (x *ProfileDataRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-type UseDataResponse struct {
+type ProfileDataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	FirstName     string                 `protobuf:"bytes,2,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
 	LastName      string                 `protobuf:"bytes,3,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
+	Code          base.ErrorCode         `protobuf:"varint,4,opt,name=code,proto3,enum=base.ErrorCode" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UseDataResponse) Reset() {
-	*x = UseDataResponse{}
+func (x *ProfileDataResponse) Reset() {
+	*x = ProfileDataResponse{}
 	mi := &file_user_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UseDataResponse) String() string {
+func (x *ProfileDataResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UseDataResponse) ProtoMessage() {}
+func (*ProfileDataResponse) ProtoMessage() {}
 
-func (x *UseDataResponse) ProtoReflect() protoreflect.Message {
+func (x *ProfileDataResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_user_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -99,30 +101,37 @@ func (x *UseDataResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UseDataResponse.ProtoReflect.Descriptor instead.
-func (*UseDataResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProfileDataResponse.ProtoReflect.Descriptor instead.
+func (*ProfileDataResponse) Descriptor() ([]byte, []int) {
 	return file_user_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *UseDataResponse) GetUserId() string {
+func (x *ProfileDataResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *UseDataResponse) GetFirstName() string {
+func (x *ProfileDataResponse) GetFirstName() string {
 	if x != nil {
 		return x.FirstName
 	}
 	return ""
 }
 
-func (x *UseDataResponse) GetLastName() string {
+func (x *ProfileDataResponse) GetLastName() string {
 	if x != nil {
 		return x.LastName
 	}
 	return ""
+}
+
+func (x *ProfileDataResponse) GetCode() base.ErrorCode {
+	if x != nil {
+		return x.Code
+	}
+	return base.ErrorCode(0)
 }
 
 var File_user_proto protoreflect.FileDescriptor
@@ -130,16 +139,18 @@ var File_user_proto protoreflect.FileDescriptor
 const file_user_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"user.proto\x12\x04user\"*\n" +
-	"\x0fUserDataRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"f\n" +
-	"\x0fUseDataResponse\x12\x17\n" +
+	"user.proto\x12\x04user\x1a\n" +
+	"base.proto\"-\n" +
+	"\x12ProfileDataRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"\x8f\x01\n" +
+	"\x13ProfileDataResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1d\n" +
 	"\n" +
 	"first_name\x18\x02 \x01(\tR\tfirstName\x12\x1b\n" +
-	"\tlast_name\x18\x03 \x01(\tR\blastName2R\n" +
-	"\x0fSecurityService\x12?\n" +
-	"\x0fCheckPermission\x12\x15.user.UserDataRequest\x1a\x15.user.UseDataResponseB$Z\"fafnir/user-service/internal/pb;pbb\x06proto3"
+	"\tlast_name\x18\x03 \x01(\tR\blastName\x12#\n" +
+	"\x04code\x18\x04 \x01(\x0e2\x0f.base.ErrorCodeR\x04code2T\n" +
+	"\vUserService\x12E\n" +
+	"\x0eGetProfileData\x12\x18.user.ProfileDataRequest\x1a\x19.user.ProfileDataResponseB\x1eZ\x1cfafnir/shared/pb/security;pbb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once
@@ -155,17 +166,19 @@ func file_user_proto_rawDescGZIP() []byte {
 
 var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_user_proto_goTypes = []any{
-	(*UserDataRequest)(nil), // 0: user.UserDataRequest
-	(*UseDataResponse)(nil), // 1: user.UseDataResponse
+	(*ProfileDataRequest)(nil),  // 0: user.ProfileDataRequest
+	(*ProfileDataResponse)(nil), // 1: user.ProfileDataResponse
+	(base.ErrorCode)(0),         // 2: base.ErrorCode
 }
 var file_user_proto_depIdxs = []int32{
-	0, // 0: user.SecurityService.CheckPermission:input_type -> user.UserDataRequest
-	1, // 1: user.SecurityService.CheckPermission:output_type -> user.UseDataResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: user.ProfileDataResponse.code:type_name -> base.ErrorCode
+	0, // 1: user.UserService.GetProfileData:input_type -> user.ProfileDataRequest
+	1, // 2: user.UserService.GetProfileData:output_type -> user.ProfileDataResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }

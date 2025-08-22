@@ -10,11 +10,11 @@ import (
 	"fmt"
 )
 
-// CheckPermission is the resolver for the CheckPermission field.
-func (r *queryResolver) CheckPermission(ctx context.Context, request model.HasPermissionRequest) (*model.HasPermissionResponse, error) {
-	res, err := r.SecurityClient.CheckPermission(ctx, request.UserID, request.Permission)
+// GetProfileData is the resolver for the getProfileData field.
+func (r *queryResolver) GetProfileData(ctx context.Context, request model.ProfileDataRequest) (*model.ProfileDataResponse, error) {
+	res, err := r.UserClient.GetProfileData(ctx, request.UserID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to communicate with security service: %w", err)
+		return nil, fmt.Errorf("failed to communicate with user service: %w", err)
 	}
 
 	return res, nil

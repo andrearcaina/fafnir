@@ -2,66 +2,63 @@ package api
 
 import (
 	"context"
+	"fafnir/shared/pb/user"
 	"fafnir/user-service/internal/config"
 	"fafnir/user-service/internal/db"
 	"log"
-	"net/http"
+	"net"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"google.golang.org/grpc"
 )
 
 type Server struct {
-	HTTP *http.Server
+	handler    *UserHandler
+	grpcServer *grpc.Server
+	config     *config.Config
 }
 
 func NewServer() *Server {
-	router := chi.NewRouter()
-
-	// custom logger middleware (by go chi)
-	router.Use(
-		middleware.Logger,
-		middleware.Recoverer,
-	)
-
 	cfg := config.NewConfig()
 
 	// just to make sure the database connection is established (will assign a var later once we have a service)
-	_, err := db.NewDBConnection(cfg)
+	dbConn, err := db.NewDBConnection(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// this will be handled differently using gRPC in the future
-	// for now, we will use a simple HTTP handler for REST API calls
-	securityService := NewUserService( /* pass in connections conn later */ )
-	securityHandler := NewUserHandler(securityService)
+	// create the user handler
+	userHandler := NewUserHandler(dbConn)
 
-	// mount the auth handler to the router
-	router.Mount("/security", securityHandler.ServeUserRoutes())
+	// create gRPC server with logging interceptor (interceptors are basically a middleware for gRPC)
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(loggingInterceptor),
+	)
 
-	// create a config instance for the server
+	// register the user service with the gRPC server
+	pb.RegisterUserServiceServer(grpcServer, userHandler)
+
 	return &Server{
-		HTTP: &http.Server{
-			Addr:    cfg.PORT,
-			Handler: router,
-		},
+		handler:    userHandler,
+		grpcServer: grpcServer,
+		config:     cfg,
 	}
 }
 
 func (s *Server) Run() error {
-	log.Printf("Starting user service on port %s\n", s.HTTP.Addr)
-	return s.HTTP.ListenAndServe()
+	log.Printf("Starting gRPC user service on port %s\n", s.config.PORT)
+
+	listener, err := net.Listen("tcp", s.config.PORT)
+	if err != nil {
+		return err
+	}
+
+	return s.grpcServer.Serve(listener)
 }
 
 func (s *Server) GracefulShutdown(ctx context.Context) error {
 	log.Println("Shutting down user service gracefully...")
 
-	err := s.HTTP.Shutdown(ctx)
-	if err != nil {
-		log.Printf("Error during graceful shutdown: %v\n", err)
-		return err
-	}
+	s.grpcServer.GracefulStop()
 
 	log.Println("User service shutdown complete.")
 	return nil
