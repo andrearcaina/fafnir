@@ -13,12 +13,12 @@ Fafnir is a modern, scalable microservices platform built with Go, featuring cen
 - **Observability**: Built-in monitoring with Prometheus and Grafana
 
 ## Technology Stack
-- **Backend**: Go microservices with gRPC/REST communication
+- **Backend**: Go (as of right now) microservices with gRPC/REST communication
 - **API Gateway**: GraphQL unified endpoint using gqlgen
 - **Database**: PostgreSQL with per-service databases
 - **Frontend**: Next.js with TypeScript and ShadCN/UI
 - **Containerization**: Docker with multi-stage builds
-- **Monitoring**: Prometheus, Grafana, Node Exporter, cAdvisor
+- **Monitoring**: Prometheus, Grafana
 - **Development**: Hot reload, centralized scripts, Make-based workflow
 
 ## Project Structure
@@ -66,8 +66,6 @@ fafnir/
 | **postgres**      | PostgreSQL database with per-service databases | 5432 (internal) | Data persistence     |
 | **prometheus**    | Metrics collection and monitoring              | 9090 (dev only) | Observability        |
 | **grafana**       | Metrics visualization and dashboards           | 3000 (dev only) | Monitoring UI        |
-| **node-exporter** | System metrics collection                      | 9100 (internal) | Host monitoring      |
-| **cadvisor**      | Container metrics collection                   | 8080 (internal) | Container monitoring |
 
 ## Network Architecture
 
@@ -100,12 +98,8 @@ fafnir/
 The current structure is designed to easily accommodate:
 - **Multi-Language Services**: Ready for Java, C#, Python services
 - **Additional Databases**: Redis, MongoDB can be added easily
-- **Service Mesh**: Istio/Linkerd integration possible
 - **Cloud Deployment**: Kubernetes manifests can be added
 - **CI/CD Pipelines**: GitHub Actions workflows ready to implement
-
-TODO:
-- Implement more services like `notification-service`, `payment-service`, ...
 
 ## Data Flow
 Below is the ideal data flow for the application. A concept drawing will be added later. For authentication data flow, check the [Authentication Guide](./authentication.md).
