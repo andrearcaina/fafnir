@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"fafnir/auth-service/internal/config"
-	"fafnir/auth-service/internal/db"
+	"fafnir/stock-service/internal/config"
+	"fafnir/stock-service/internal/db"
 	"log"
 	"net/http"
 
@@ -39,19 +39,19 @@ func NewServer() *Server {
 
 	cfg := config.NewConfig()
 
-	// connect to auth db by instantiating a new database connection
+	// connect to stock db by instantiating a new database connection
 	// and passing the config to it
 	dbInstance, err := db.New(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// create an auth service and handler instance
-	authService := NewAuthService(dbInstance, cfg.JWT)
-	authHandler := NewAuthHandler(authService)
+	// create a stock service and handler instance
+	stockService := NewStockService(dbInstance)
+	stockHandler := NewStockHandler(stockService)
 
-	// mount the auth handler to the router
-	router.Mount("/auth", authHandler.ServeAuthRoutes())
+	// mount the stock handler to the router
+	router.Mount("/stock", stockHandler.ServeStockRoutes())
 
 	// create a config instance for the server
 	return &Server{
@@ -64,12 +64,12 @@ func NewServer() *Server {
 }
 
 func (s *Server) Run() error {
-	log.Printf("Starting auth service on port %s\n", s.HTTP.Addr)
+	log.Printf("Starting stock service on port %s\n", s.HTTP.Addr)
 	return s.HTTP.ListenAndServe()
 }
 
 func (s *Server) GracefulShutdown(ctx context.Context) error {
-	log.Println("Shutting down auth service gracefully...")
+	log.Println("Shutting down stock service gracefully...")
 
 	if s.Database != nil {
 		log.Println("Database connection closed.")
@@ -81,6 +81,6 @@ func (s *Server) GracefulShutdown(ctx context.Context) error {
 		return err
 	}
 
-	log.Println("Auth service shutdown complete.")
+	log.Println("Stock service shutdown complete.")
 	return nil
 }

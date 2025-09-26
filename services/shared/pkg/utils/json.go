@@ -21,7 +21,7 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 // DecodeJSON reads JSON from the request body and returns a proper AppError for validation failures
 func DecodeJSON(r *http.Request, v interface{}) error {
 	if r.Body == nil {
-		return apperrors.ValidationError("Request body is required")
+		return apperrors.BadRequestError("Request body is required")
 	}
 
 	defer func() {
@@ -31,7 +31,7 @@ func DecodeJSON(r *http.Request, v interface{}) error {
 	}()
 
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
-		return apperrors.ValidationError("Invalid JSON format in request body")
+		return apperrors.BadRequestError("Invalid JSON format in request body")
 	}
 
 	return nil

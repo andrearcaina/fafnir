@@ -12,6 +12,7 @@ type Config struct {
 type ClientsConfig struct {
 	SecurityClient *clients.SecurityClient
 	UserClient     *clients.UserClient
+	StockClient    *clients.StockClient
 }
 
 func NewConfig() *Config {
@@ -20,6 +21,7 @@ func NewConfig() *Config {
 		CLIENTS: ClientsConfig{
 			SecurityClient: clients.NewSecurityClient("security-service:8082"),
 			UserClient:     clients.NewUserClient("user-service:8083"),
+			StockClient:    clients.NewStockClient("http://stock-service:8084/stock"),
 		},
 	}
 }

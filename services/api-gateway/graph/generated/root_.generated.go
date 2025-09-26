@@ -53,9 +53,19 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		CheckPermission func(childComplexity int, request model.HasPermissionRequest) int
-		GetProfileData  func(childComplexity int, request model.ProfileDataRequest) int
-		Health          func(childComplexity int) int
+		CheckPermission  func(childComplexity int, request model.HasPermissionRequest) int
+		GetProfileData   func(childComplexity int, userID string) int
+		GetStockMetadata func(childComplexity int, symbol string) int
+		Health           func(childComplexity int) int
+	}
+
+	StockData struct {
+		Symbol func(childComplexity int) int
+	}
+
+	StockMetadataResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
 	}
 }
 
@@ -142,7 +152,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetProfileData(childComplexity, args["request"].(model.ProfileDataRequest)), true
+		return e.complexity.Query.GetProfileData(childComplexity, args["userId"].(string)), true
+
+	case "Query.getStockMetadata":
+		if e.complexity.Query.GetStockMetadata == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStockMetadata_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStockMetadata(childComplexity, args["symbol"].(string)), true
 
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
@@ -150,6 +172,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Health(childComplexity), true
+
+	case "StockData.symbol":
+		if e.complexity.StockData.Symbol == nil {
+			break
+		}
+
+		return e.complexity.StockData.Symbol(childComplexity), true
+
+	case "StockMetadataResponse.code":
+		if e.complexity.StockMetadataResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.StockMetadataResponse.Code(childComplexity), true
+
+	case "StockMetadataResponse.data":
+		if e.complexity.StockMetadataResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.StockMetadataResponse.Data(childComplexity), true
 
 	}
 	return 0, false
@@ -160,7 +203,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputHasPermissionRequest,
-		ec.unmarshalInputProfileDataRequest,
 	)
 	first := true
 
@@ -265,11 +307,19 @@ type HasPermissionResponse {
 extend type Query {
     checkPermission(request: HasPermissionRequest!): HasPermissionResponse!
 }`, BuiltIn: false},
-	{Name: "../schemas/user.graphqls", Input: `input ProfileDataRequest {
-    userId: String!
+	{Name: "../schemas/stock.graphqls", Input: `type StockMetadataResponse {
+    code: Int!
+    data: StockData!
 }
 
-type ProfileDataResponse {
+type StockData {
+    symbol: String!
+}
+
+extend type Query {
+    getStockMetadata(symbol: String!): StockMetadataResponse!
+}`, BuiltIn: false},
+	{Name: "../schemas/user.graphqls", Input: `type ProfileDataResponse {
     userId: String!
     firstName: String!
     lastName: String!
@@ -277,7 +327,7 @@ type ProfileDataResponse {
 }
 
 extend type Query {
-    getProfileData(request: ProfileDataRequest!): ProfileDataResponse!
+    getProfileData(userId: String!): ProfileDataResponse!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

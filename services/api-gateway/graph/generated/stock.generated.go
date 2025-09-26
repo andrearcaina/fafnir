@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fafnir/api-gateway/graph/model"
+	"fmt"
 	"strconv"
 	"sync/atomic"
 
@@ -27,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _ProfileDataResponse_userId(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_userId(ctx, field)
+func (ec *executionContext) _StockData_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockData_symbol(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -41,7 +42,7 @@ func (ec *executionContext) _ProfileDataResponse_userId(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.UserID, nil
+		return obj.Symbol, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -58,9 +59,9 @@ func (ec *executionContext) _ProfileDataResponse_userId(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StockData_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
+		Object:     "StockData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -71,8 +72,8 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_userId(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _ProfileDataResponse_firstName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_firstName(ctx, field)
+func (ec *executionContext) _StockMetadataResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockMetadataResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockMetadataResponse_code(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -85,7 +86,7 @@ func (ec *executionContext) _ProfileDataResponse_firstName(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.FirstName, nil
+		return obj.Code, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -97,26 +98,26 @@ func (ec *executionContext) _ProfileDataResponse_firstName(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_firstName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StockMetadataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
+		Object:     "StockMetadataResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _ProfileDataResponse_lastName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_lastName(ctx, field)
+func (ec *executionContext) _StockMetadataResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.StockMetadataResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockMetadataResponse_data(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -129,7 +130,7 @@ func (ec *executionContext) _ProfileDataResponse_lastName(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.LastName, nil
+		return obj.Data, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -141,63 +142,23 @@ func (ec *executionContext) _ProfileDataResponse_lastName(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*model.StockData)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_lastName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StockMetadataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
+		Object:     "StockMetadataResponse",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ProfileDataResponse_permissionCode(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_permissionCode(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PermissionCode, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ProfileDataResponse_permissionCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "symbol":
+				return ec.fieldContext_StockData_symbol(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StockData", field.Name)
 		},
 	}
 	return fc, nil
@@ -215,34 +176,63 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_permissionCode(_ co
 
 // region    **************************** object.gotpl ****************************
 
-var profileDataResponseImplementors = []string{"ProfileDataResponse"}
+var stockDataImplementors = []string{"StockData"}
 
-func (ec *executionContext) _ProfileDataResponse(ctx context.Context, sel ast.SelectionSet, obj *model.ProfileDataResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, profileDataResponseImplementors)
+func (ec *executionContext) _StockData(ctx context.Context, sel ast.SelectionSet, obj *model.StockData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stockDataImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ProfileDataResponse")
-		case "userId":
-			out.Values[i] = ec._ProfileDataResponse_userId(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("StockData")
+		case "symbol":
+			out.Values[i] = ec._StockData_symbol(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "firstName":
-			out.Values[i] = ec._ProfileDataResponse_firstName(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var stockMetadataResponseImplementors = []string{"StockMetadataResponse"}
+
+func (ec *executionContext) _StockMetadataResponse(ctx context.Context, sel ast.SelectionSet, obj *model.StockMetadataResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stockMetadataResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StockMetadataResponse")
+		case "code":
+			out.Values[i] = ec._StockMetadataResponse_code(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "lastName":
-			out.Values[i] = ec._ProfileDataResponse_lastName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "permissionCode":
-			out.Values[i] = ec._ProfileDataResponse_permissionCode(ctx, field, obj)
+		case "data":
+			out.Values[i] = ec._StockMetadataResponse_data(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -273,18 +263,28 @@ func (ec *executionContext) _ProfileDataResponse(ctx context.Context, sel ast.Se
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNProfileDataResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileDataResponse(ctx context.Context, sel ast.SelectionSet, v model.ProfileDataResponse) graphql.Marshaler {
-	return ec._ProfileDataResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNProfileDataResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileDataResponse(ctx context.Context, sel ast.SelectionSet, v *model.ProfileDataResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx context.Context, sel ast.SelectionSet, v *model.StockData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._ProfileDataResponse(ctx, sel, v)
+	return ec._StockData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStockMetadataResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockMetadataResponse(ctx context.Context, sel ast.SelectionSet, v model.StockMetadataResponse) graphql.Marshaler {
+	return ec._StockMetadataResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStockMetadataResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockMetadataResponse(ctx context.Context, sel ast.SelectionSet, v *model.StockMetadataResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StockMetadataResponse(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

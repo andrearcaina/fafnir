@@ -30,6 +30,7 @@ func NewServer() *Server {
 			Resolvers: &resolvers.Resolver{
 				SecurityClient: cfg.CLIENTS.SecurityClient,
 				UserClient:     cfg.CLIENTS.UserClient,
+				StockClient:    cfg.CLIENTS.StockClient,
 			},
 		},
 	))

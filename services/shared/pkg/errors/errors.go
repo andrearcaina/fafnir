@@ -93,8 +93,8 @@ func TokenError(message string) *AppError {
 	return New(ErrInvalidToken, message).WithHTTPStatus(http.StatusUnauthorized)
 }
 
-// ValidationError returns an errors for invalid input (will be used if a member tries to access an endpoint with invalid parameters)
-func ValidationError(message string) *AppError {
+// BadRequestError returns an errors for invalid input (will be used if a member tries to access an endpoint with invalid parameters)
+func BadRequestError(message string) *AppError {
 	return New(ErrInvalidInput, message).WithHTTPStatus(http.StatusBadRequest)
 }
 

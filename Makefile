@@ -66,7 +66,7 @@ migrate-down:
 migrate-status:
 	./tools/scripts/migrate.sh status
 
-# make migrate-create connections=auth name=seed_some_data
+# make migrate-create db=auth name=seed_some_data
 migrate-create:
 	./tools/scripts/migrate.sh create $(db) $(name)
 

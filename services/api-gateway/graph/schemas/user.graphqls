@@ -1,7 +1,3 @@
-input ProfileDataRequest {
-    userId: String!
-}
-
 type ProfileDataResponse {
     userId: String!
     firstName: String!
@@ -10,5 +6,5 @@ type ProfileDataResponse {
 }
 
 extend type Query {
-    getProfileData(request: ProfileDataRequest!): ProfileDataResponse!
+    getProfileData(userId: String!): ProfileDataResponse!
 }

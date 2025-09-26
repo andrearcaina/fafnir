@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/vektah/gqlparser/v2 v2.5.30
 	google.golang.org/grpc v1.74.2
+	resty.dev/v3 v3.0.0-beta.3
 )
 
 require (

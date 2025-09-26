@@ -79,7 +79,7 @@ func GetUserIdFromContext(ctx context.Context) (uuid.UUID, error) {
 
 	parsed, err := uuid.Parse(userIDStr)
 	if err != nil {
-		return uuid.Nil, apperrors.ValidationError("Invalid user ID format").
+		return uuid.Nil, apperrors.BadRequestError("Invalid user ID format").
 			WithDetails("User ID must be a valid UUID")
 	}
 

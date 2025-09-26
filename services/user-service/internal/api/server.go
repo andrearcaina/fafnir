@@ -21,13 +21,13 @@ func NewServer() *Server {
 	cfg := config.NewConfig()
 
 	// just to make sure the database connection is established (will assign a var later once we have a service)
-	dbConn, err := db.NewDBConnection(cfg)
+	dbInstance, err := db.New(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
 	// create the user handler
-	userHandler := NewUserHandler(dbConn)
+	userHandler := NewUserHandler(dbInstance)
 
 	// create gRPC server with logging interceptor (interceptors are basically a middleware for gRPC)
 	grpcServer := grpc.NewServer(

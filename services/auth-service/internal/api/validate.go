@@ -19,7 +19,7 @@ func ValidateAuthRequest(req AuthRequest) error {
 
 	// Check if both are missing
 	if email == "" && password == "" {
-		return apperrors.ValidationError("Email and password are required")
+		return apperrors.BadRequestError("Email and password are required")
 	}
 
 	// Validate email
@@ -37,11 +37,11 @@ func ValidateAuthRequest(req AuthRequest) error {
 
 func validateEmail(email string) error {
 	if email == "" {
-		return apperrors.ValidationError("Email is required")
+		return apperrors.BadRequestError("Email is required")
 	}
 
 	if !EmailRegex.MatchString(email) {
-		return apperrors.ValidationError("Email must be a valid email address").
+		return apperrors.BadRequestError("Email must be a valid email address").
 			WithDetails("The provided email has an invalid format")
 	}
 
@@ -50,11 +50,11 @@ func validateEmail(email string) error {
 
 func validatePassword(password string) error {
 	if password == "" {
-		return apperrors.ValidationError("Password is required")
+		return apperrors.BadRequestError("Password is required")
 	}
 
 	if len(password) < 8 {
-		return apperrors.ValidationError("Password must be at least 8 characters long").
+		return apperrors.BadRequestError("Password must be at least 8 characters long").
 			WithDetails("The provided password has an invalid format")
 	}
 
@@ -63,7 +63,7 @@ func validatePassword(password string) error {
 	hasDigit := strings.ContainsAny(password, "0123456789")
 
 	if !hasUpper || !hasLower || !hasDigit {
-		return apperrors.ValidationError("Password does not meet strength requirements").
+		return apperrors.BadRequestError("Password does not meet strength requirements").
 			WithDetails("Password must contain at least one uppercase letter, one lowercase letter, and one digit")
 	}
 

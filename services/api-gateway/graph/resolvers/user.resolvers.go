@@ -11,8 +11,8 @@ import (
 )
 
 // GetProfileData is the resolver for the getProfileData field.
-func (r *queryResolver) GetProfileData(ctx context.Context, request model.ProfileDataRequest) (*model.ProfileDataResponse, error) {
-	res, err := r.UserClient.GetProfileData(ctx, request.UserID)
+func (r *queryResolver) GetProfileData(ctx context.Context, userID string) (*model.ProfileDataResponse, error) {
+	res, err := r.UserClient.GetProfileData(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to communicate with user service: %w", err)
 	}

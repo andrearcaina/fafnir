@@ -5,7 +5,7 @@ FROM golang:${GO_VERSION}-alpine AS development
 ARG SERVICE_NAME
 
 RUN apk add --no-cache git curl && \
-    go install github.com/air-verse/air@latest
+    go install github.com/air-verse/air@v1.62.0
 
 WORKDIR /app
 

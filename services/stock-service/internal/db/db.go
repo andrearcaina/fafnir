@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"errors"
-	"fafnir/user-service/internal/config"
-	"fafnir/user-service/internal/db/generated"
+	"fafnir/stock-service/internal/config"
+	"fafnir/stock-service/internal/db/generated"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
