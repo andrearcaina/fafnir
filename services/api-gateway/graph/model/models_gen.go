@@ -30,3 +30,12 @@ type StockMetadataResponse struct {
 	Code int32      `json:"code"`
 	Data *StockData `json:"data"`
 }
+
+type StockPriceData struct {
+	Symbol string `json:"symbol"`
+}
+
+type StockQuoteResponse struct {
+	Code int32           `json:"code"`
+	Data *StockPriceData `json:"data"`
+}

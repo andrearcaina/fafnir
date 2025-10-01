@@ -164,6 +164,142 @@ func (ec *executionContext) fieldContext_StockMetadataResponse_data(_ context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _StockPriceData_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockPriceData_symbol(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Symbol, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StockPriceData_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockPriceData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockQuoteResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockQuoteResponse_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int32)
+	fc.Result = res
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StockQuoteResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockQuoteResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockQuoteResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockQuoteResponse_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.StockPriceData)
+	fc.Result = res
+	return ec.marshalNStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StockQuoteResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockQuoteResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "symbol":
+				return ec.fieldContext_StockPriceData_symbol(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StockPriceData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -259,6 +395,89 @@ func (ec *executionContext) _StockMetadataResponse(ctx context.Context, sel ast.
 	return out
 }
 
+var stockPriceDataImplementors = []string{"StockPriceData"}
+
+func (ec *executionContext) _StockPriceData(ctx context.Context, sel ast.SelectionSet, obj *model.StockPriceData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stockPriceDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StockPriceData")
+		case "symbol":
+			out.Values[i] = ec._StockPriceData_symbol(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var stockQuoteResponseImplementors = []string{"StockQuoteResponse"}
+
+func (ec *executionContext) _StockQuoteResponse(ctx context.Context, sel ast.SelectionSet, obj *model.StockQuoteResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stockQuoteResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StockQuoteResponse")
+		case "code":
+			out.Values[i] = ec._StockQuoteResponse_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "data":
+			out.Values[i] = ec._StockQuoteResponse_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -285,6 +504,30 @@ func (ec *executionContext) marshalNStockMetadataResponse2ᚖfafnirᚋapiᚑgate
 		return graphql.Null
 	}
 	return ec._StockMetadataResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx context.Context, sel ast.SelectionSet, v *model.StockPriceData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StockPriceData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStockQuoteResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockQuoteResponse(ctx context.Context, sel ast.SelectionSet, v model.StockQuoteResponse) graphql.Marshaler {
+	return ec._StockQuoteResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStockQuoteResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockQuoteResponse(ctx context.Context, sel ast.SelectionSet, v *model.StockQuoteResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StockQuoteResponse(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

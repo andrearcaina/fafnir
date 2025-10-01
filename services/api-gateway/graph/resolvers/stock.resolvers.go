@@ -22,3 +22,16 @@ func (r *queryResolver) GetStockMetadata(ctx context.Context, symbol string) (*m
 		Data: resp.Data,
 	}, nil
 }
+
+// GetStockQuote is the resolver for the getStockQuote field.
+func (r *queryResolver) GetStockQuote(ctx context.Context, symbol string) (*model.StockQuoteResponse, error) {
+	resp, err := r.StockClient.GetStockQuote(ctx, symbol)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get stock quote: %w", err)
+	}
+
+	return &model.StockQuoteResponse{
+		Code: resp.Code,
+		Data: resp.Data,
+	}, nil
+}

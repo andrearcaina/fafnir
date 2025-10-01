@@ -29,6 +29,27 @@ func (q *Queries) GetStockMetadataBySymbol(ctx context.Context, symbol string) (
 	return i, err
 }
 
+const getStockQuoteBySymbol = `-- name: GetStockQuoteBySymbol :one
+SELECT symbol, last_price, price_change, price_change_pct, volume, market_cap, pe_ratio, dividend_yield, updated_at FROM stock_quote WHERE symbol = $1
+`
+
+func (q *Queries) GetStockQuoteBySymbol(ctx context.Context, symbol pgtype.Text) (StockQuote, error) {
+	row := q.db.QueryRow(ctx, getStockQuoteBySymbol, symbol)
+	var i StockQuote
+	err := row.Scan(
+		&i.Symbol,
+		&i.LastPrice,
+		&i.PriceChange,
+		&i.PriceChangePct,
+		&i.Volume,
+		&i.MarketCap,
+		&i.PeRatio,
+		&i.DividendYield,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const searchStockMetadataByName = `-- name: SearchStockMetadataByName :many
 SELECT symbol, name, exchange, currency, type, sector FROM stock_metadata WHERE name ILIKE '%' || $1 || '%' LIMIT $2 OFFSET $3
 `

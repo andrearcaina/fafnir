@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 		CheckPermission  func(childComplexity int, request model.HasPermissionRequest) int
 		GetProfileData   func(childComplexity int, userID string) int
 		GetStockMetadata func(childComplexity int, symbol string) int
+		GetStockQuote    func(childComplexity int, symbol string) int
 		Health           func(childComplexity int) int
 	}
 
@@ -64,6 +65,15 @@ type ComplexityRoot struct {
 	}
 
 	StockMetadataResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	StockPriceData struct {
+		Symbol func(childComplexity int) int
+	}
+
+	StockQuoteResponse struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
 	}
@@ -166,6 +176,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.GetStockMetadata(childComplexity, args["symbol"].(string)), true
 
+	case "Query.getStockQuote":
+		if e.complexity.Query.GetStockQuote == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStockQuote_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStockQuote(childComplexity, args["symbol"].(string)), true
+
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
 			break
@@ -193,6 +215,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockMetadataResponse.Data(childComplexity), true
+
+	case "StockPriceData.symbol":
+		if e.complexity.StockPriceData.Symbol == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.Symbol(childComplexity), true
+
+	case "StockQuoteResponse.code":
+		if e.complexity.StockQuoteResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.StockQuoteResponse.Code(childComplexity), true
+
+	case "StockQuoteResponse.data":
+		if e.complexity.StockQuoteResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.StockQuoteResponse.Data(childComplexity), true
 
 	}
 	return 0, false
@@ -316,8 +359,18 @@ type StockData {
     symbol: String!
 }
 
+type StockPriceData {
+    symbol: String!
+}
+
+type StockQuoteResponse {
+    code: Int!
+    data: StockPriceData!
+}
+
 extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
+    getStockQuote(symbol: String!): StockQuoteResponse!
 }`, BuiltIn: false},
 	{Name: "../schemas/user.graphqls", Input: `type ProfileDataResponse {
     userId: String!

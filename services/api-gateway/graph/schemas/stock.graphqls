@@ -7,6 +7,16 @@ type StockData {
     symbol: String!
 }
 
+type StockPriceData {
+    symbol: String!
+}
+
+type StockQuoteResponse {
+    code: Int!
+    data: StockPriceData!
+}
+
 extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
+    getStockQuote(symbol: String!): StockQuoteResponse!
 }

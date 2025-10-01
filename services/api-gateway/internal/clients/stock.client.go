@@ -48,3 +48,29 @@ func (c *StockClient) GetStockMetadata(ctx context.Context, symbol string) (mode
 
 	return response, nil
 }
+
+func (c *StockClient) GetStockQuote(ctx context.Context, symbol string) (model.StockQuoteResponse, error) {
+	resp, err := c.Client.R().
+		SetContext(ctx).
+		SetPathParam("symbol", symbol).
+		SetResult(&model.StockPriceData{}).
+		SetError(&model.StockPriceData{}).
+		Get("/quote/{symbol}")
+
+	if err != nil {
+		return model.StockQuoteResponse{}, err
+	}
+
+	var response model.StockQuoteResponse
+
+	response.Code = int32(resp.StatusCode())
+
+	if resp.IsError() {
+		response.Data = nil
+	}
+	if resp.IsSuccess() {
+		response.Data = resp.Result().(*model.StockPriceData)
+	}
+
+	return response, nil
+}
