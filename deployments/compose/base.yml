@@ -143,6 +143,15 @@ services:
     networks:
       - fafnir-network
 
+  redis:
+    image: "redis:latest"
+    container_name: fafnir-stock-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - fafnir-network
+
   web-app:
     build:
       context: ../../
