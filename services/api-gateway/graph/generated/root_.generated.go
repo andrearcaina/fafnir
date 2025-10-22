@@ -61,7 +61,11 @@ type ComplexityRoot struct {
 	}
 
 	StockData struct {
-		Symbol func(childComplexity int) int
+		Currency         func(childComplexity int) int
+		Exchange         func(childComplexity int) int
+		ExchangeFullName func(childComplexity int) int
+		Name             func(childComplexity int) int
+		Symbol           func(childComplexity int) int
 	}
 
 	StockMetadataResponse struct {
@@ -70,7 +74,18 @@ type ComplexityRoot struct {
 	}
 
 	StockPriceData struct {
-		Symbol func(childComplexity int) int
+		DayHigh            func(childComplexity int) int
+		DayLow             func(childComplexity int) int
+		MarketCap          func(childComplexity int) int
+		Open               func(childComplexity int) int
+		PreviousClose      func(childComplexity int) int
+		Price              func(childComplexity int) int
+		PriceChange        func(childComplexity int) int
+		PriceChangePercent func(childComplexity int) int
+		Symbol             func(childComplexity int) int
+		Volume             func(childComplexity int) int
+		YearHigh           func(childComplexity int) int
+		YearLow            func(childComplexity int) int
 	}
 
 	StockQuoteResponse struct {
@@ -195,6 +210,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Health(childComplexity), true
 
+	case "StockData.currency":
+		if e.complexity.StockData.Currency == nil {
+			break
+		}
+
+		return e.complexity.StockData.Currency(childComplexity), true
+
+	case "StockData.exchange":
+		if e.complexity.StockData.Exchange == nil {
+			break
+		}
+
+		return e.complexity.StockData.Exchange(childComplexity), true
+
+	case "StockData.exchangeFullName":
+		if e.complexity.StockData.ExchangeFullName == nil {
+			break
+		}
+
+		return e.complexity.StockData.ExchangeFullName(childComplexity), true
+
+	case "StockData.name":
+		if e.complexity.StockData.Name == nil {
+			break
+		}
+
+		return e.complexity.StockData.Name(childComplexity), true
+
 	case "StockData.symbol":
 		if e.complexity.StockData.Symbol == nil {
 			break
@@ -216,12 +259,89 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StockMetadataResponse.Data(childComplexity), true
 
+	case "StockPriceData.dayHigh":
+		if e.complexity.StockPriceData.DayHigh == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.DayHigh(childComplexity), true
+
+	case "StockPriceData.dayLow":
+		if e.complexity.StockPriceData.DayLow == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.DayLow(childComplexity), true
+
+	case "StockPriceData.marketCap":
+		if e.complexity.StockPriceData.MarketCap == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.MarketCap(childComplexity), true
+
+	case "StockPriceData.open":
+		if e.complexity.StockPriceData.Open == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.Open(childComplexity), true
+
+	case "StockPriceData.previousClose":
+		if e.complexity.StockPriceData.PreviousClose == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.PreviousClose(childComplexity), true
+
+	case "StockPriceData.price":
+		if e.complexity.StockPriceData.Price == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.Price(childComplexity), true
+
+	case "StockPriceData.priceChange":
+		if e.complexity.StockPriceData.PriceChange == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.PriceChange(childComplexity), true
+
+	case "StockPriceData.priceChangePercent":
+		if e.complexity.StockPriceData.PriceChangePercent == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.PriceChangePercent(childComplexity), true
+
 	case "StockPriceData.symbol":
 		if e.complexity.StockPriceData.Symbol == nil {
 			break
 		}
 
 		return e.complexity.StockPriceData.Symbol(childComplexity), true
+
+	case "StockPriceData.volume":
+		if e.complexity.StockPriceData.Volume == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.Volume(childComplexity), true
+
+	case "StockPriceData.yearHigh":
+		if e.complexity.StockPriceData.YearHigh == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.YearHigh(childComplexity), true
+
+	case "StockPriceData.yearLow":
+		if e.complexity.StockPriceData.YearLow == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.YearLow(childComplexity), true
 
 	case "StockQuoteResponse.code":
 		if e.complexity.StockQuoteResponse.Code == nil {
@@ -350,17 +470,34 @@ type HasPermissionResponse {
 extend type Query {
     checkPermission(request: HasPermissionRequest!): HasPermissionResponse!
 }`, BuiltIn: false},
-	{Name: "../schemas/stock.graphqls", Input: `type StockMetadataResponse {
+	{Name: "../schemas/stock.graphqls", Input: `scalar Int64
+
+type StockMetadataResponse {
     code: Int!
     data: StockData!
 }
 
 type StockData {
     symbol: String!
+    name: String!
+    exchange: String!
+    exchangeFullName: String!
+    currency: String!
 }
 
 type StockPriceData {
     symbol: String!
+    price: Float!
+    open: Float!
+    previousClose: Float!
+    priceChange: Float!
+    priceChangePercent: Float!
+    volume: Int64!
+    marketCap: Int64!
+    dayLow: Float!
+    dayHigh: Float!
+    yearHigh: Float!
+    yearLow: Float!
 }
 
 type StockQuoteResponse {

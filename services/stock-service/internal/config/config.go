@@ -6,8 +6,10 @@ import (
 )
 
 type Config struct {
-	PORT string
-	DB   PostgresConfig
+	PORT  string
+	DB    PostgresConfig
+	FMP   FMPConfig
+	Cache RedisConfig
 }
 
 type PostgresConfig struct {
@@ -19,10 +21,21 @@ type PostgresConfig struct {
 	URL      string
 }
 
+type FMPConfig struct {
+	APIKey string
+}
+
+type RedisConfig struct {
+	Host string
+	Port string
+}
+
 func NewConfig() *Config {
 	return &Config{
-		PORT: fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
-		DB:   newPostgresConfig(),
+		PORT:  fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
+		DB:    newPostgresConfig(),
+		FMP:   newFMPConfig(),
+		Cache: newRedisConfig(),
 	}
 }
 
@@ -46,5 +59,23 @@ func newPostgresConfig() PostgresConfig {
 			port,
 			dbName,
 		),
+	}
+}
+
+func newFMPConfig() FMPConfig {
+	apiKey := os.Getenv("FMP_API_KEY")
+
+	return FMPConfig{
+		APIKey: apiKey,
+	}
+}
+
+func newRedisConfig() RedisConfig {
+	host := os.Getenv("REDIS_HOST")
+	port := os.Getenv("REDIS_PORT")
+
+	return RedisConfig{
+		Host: host,
+		Port: port,
 	}
 }

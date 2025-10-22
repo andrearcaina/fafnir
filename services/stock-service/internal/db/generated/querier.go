@@ -6,13 +6,13 @@ package generated
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	CreateStockMetadata(ctx context.Context, arg CreateStockMetadataParams) (StockMetadatum, error)
 	GetStockMetadataBySymbol(ctx context.Context, symbol string) (StockMetadatum, error)
-	GetStockQuoteBySymbol(ctx context.Context, symbol pgtype.Text) (StockQuote, error)
+	GetStockQuoteBySymbol(ctx context.Context, symbol string) (StockQuote, error)
+	InsertOrUpdateStockQuote(ctx context.Context, arg InsertOrUpdateStockQuoteParams) (StockQuote, error)
 	SearchStockMetadataByName(ctx context.Context, arg SearchStockMetadataByNameParams) ([]StockMetadatum, error)
 }
 

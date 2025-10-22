@@ -4,6 +4,8 @@ import (
 	"context"
 	"fafnir/stock-service/internal/config"
 	"fafnir/stock-service/internal/db"
+	"fafnir/stock-service/internal/fmp"
+	"fafnir/stock-service/internal/redis"
 	"log"
 	"net/http"
 
@@ -46,8 +48,18 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
+	redisCache, err := redis.New(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmpClient, err := fmp.NewFMPClient(cfg.FMP.APIKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// create a stock service and handler instance
-	stockService := NewStockService(dbInstance)
+	stockService := NewStockService(dbInstance, redisCache, fmpClient)
 	stockHandler := NewStockHandler(stockService)
 
 	// mount the stock handler to the router

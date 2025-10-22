@@ -9,22 +9,25 @@ import (
 )
 
 type StockMetadatum struct {
-	Symbol   string `json:"symbol"`
-	Name     string `json:"name"`
-	Exchange string `json:"exchange"`
-	Currency string `json:"currency"`
-	Type     string `json:"type"`
-	Sector   string `json:"sector"`
+	Symbol           string `json:"symbol"`
+	Name             string `json:"name"`
+	Exchange         string `json:"exchange"`
+	ExchangeFullName string `json:"exchange_full_name"`
+	Currency         string `json:"currency"`
 }
 
 type StockQuote struct {
-	Symbol         pgtype.Text        `json:"symbol"`
-	LastPrice      pgtype.Numeric     `json:"last_price"`
-	PriceChange    pgtype.Numeric     `json:"price_change"`
-	PriceChangePct pgtype.Numeric     `json:"price_change_pct"`
-	Volume         int64              `json:"volume"`
-	MarketCap      int64              `json:"market_cap"`
-	PeRatio        pgtype.Numeric     `json:"pe_ratio"`
-	DividendYield  pgtype.Numeric     `json:"dividend_yield"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	Symbol             string             `json:"symbol"`
+	OpenPrice          float64            `json:"open_price"`
+	LastPrice          float64            `json:"last_price"`
+	PreviousClosePrice float64            `json:"previous_close_price"`
+	PriceChange        float64            `json:"price_change"`
+	PriceChangePct     float64            `json:"price_change_pct"`
+	Volume             int64              `json:"volume"`
+	MarketCap          int64              `json:"market_cap"`
+	DayLow             float64            `json:"day_low"`
+	DayHigh            float64            `json:"day_high"`
+	YearLow            float64            `json:"year_low"`
+	YearHigh           float64            `json:"year_high"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 }
