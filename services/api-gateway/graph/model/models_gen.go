@@ -23,7 +23,11 @@ type Query struct {
 }
 
 type StockData struct {
-	Symbol string `json:"symbol"`
+	Symbol           string `json:"symbol"`
+	Name             string `json:"name"`
+	Exchange         string `json:"exchange"`
+	ExchangeFullName string `json:"exchangeFullName"`
+	Currency         string `json:"currency"`
 }
 
 type StockMetadataResponse struct {
@@ -32,7 +36,18 @@ type StockMetadataResponse struct {
 }
 
 type StockPriceData struct {
-	Symbol string `json:"symbol"`
+	Symbol             string  `json:"symbol"`
+	Price              float64 `json:"price"`
+	Open               float64 `json:"open"`
+	PreviousClose      float64 `json:"previousClose"`
+	PriceChange        float64 `json:"priceChange"`
+	PriceChangePercent float64 `json:"priceChangePercent"`
+	Volume             int64   `json:"volume"`
+	MarketCap          int64   `json:"marketCap"`
+	DayLow             float64 `json:"dayLow"`
+	DayHigh            float64 `json:"dayHigh"`
+	YearHigh           float64 `json:"yearHigh"`
+	YearLow            float64 `json:"yearLow"`
 }
 
 type StockQuoteResponse struct {

@@ -1,3 +1,5 @@
+scalar Int64
+
 type StockMetadataResponse {
     code: Int!
     data: StockData!
@@ -5,10 +7,25 @@ type StockMetadataResponse {
 
 type StockData {
     symbol: String!
+    name: String!
+    exchange: String!
+    exchangeFullName: String!
+    currency: String!
 }
 
 type StockPriceData {
     symbol: String!
+    price: Float!
+    open: Float!
+    previousClose: Float!
+    priceChange: Float!
+    priceChangePercent: Float!
+    volume: Int64!
+    marketCap: Int64!
+    dayLow: Float!
+    dayHigh: Float!
+    yearHigh: Float!
+    yearLow: Float!
 }
 
 type StockQuoteResponse {

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fafnir/shared/pkg/errors"
 	"fafnir/shared/pkg/utils"
 	"net/http"
 
@@ -30,23 +29,23 @@ func (h *Handler) ServeStockRoutes() http.Handler {
 func (h *Handler) getStockMetadata(w http.ResponseWriter, r *http.Request) {
 	symbol := chi.URLParam(r, "symbol")
 
-	if symbol == "" {
-		utils.HandleError(w, errors.BadRequestError("Invalid symbol").WithDetails("The provided symbol is empty"))
+	metadata, err := h.stockService.GetStockMetadata(r.Context(), symbol)
+	if err != nil {
+		utils.HandleError(w, err)
+		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"symbol": symbol,
-	})
+	utils.WriteJSON(w, http.StatusOK, metadata)
 }
 
 func (h *Handler) getStockQuote(w http.ResponseWriter, r *http.Request) {
 	symbol := chi.URLParam(r, "symbol")
 
-	if symbol == "" {
-		utils.HandleError(w, errors.BadRequestError("Invalid symbol").WithDetails("The provided symbol is empty"))
+	quote, err := h.stockService.SearchStockQuote(r.Context(), symbol)
+	if err != nil {
+		utils.HandleError(w, err)
+		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, map[string]string{
-		"symbol": symbol,
-	})
+	utils.WriteJSON(w, http.StatusOK, quote)
 }

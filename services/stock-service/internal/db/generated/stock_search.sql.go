@@ -11,8 +11,41 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createStockMetadata = `-- name: CreateStockMetadata :one
+INSERT INTO stock_metadata (symbol, name, exchange, exchange_full_name, currency)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING symbol, name, exchange, exchange_full_name, currency
+`
+
+type CreateStockMetadataParams struct {
+	Symbol           string `json:"symbol"`
+	Name             string `json:"name"`
+	Exchange         string `json:"exchange"`
+	ExchangeFullName string `json:"exchange_full_name"`
+	Currency         string `json:"currency"`
+}
+
+func (q *Queries) CreateStockMetadata(ctx context.Context, arg CreateStockMetadataParams) (StockMetadatum, error) {
+	row := q.db.QueryRow(ctx, createStockMetadata,
+		arg.Symbol,
+		arg.Name,
+		arg.Exchange,
+		arg.ExchangeFullName,
+		arg.Currency,
+	)
+	var i StockMetadatum
+	err := row.Scan(
+		&i.Symbol,
+		&i.Name,
+		&i.Exchange,
+		&i.ExchangeFullName,
+		&i.Currency,
+	)
+	return i, err
+}
+
 const getStockMetadataBySymbol = `-- name: GetStockMetadataBySymbol :one
-SELECT symbol, name, exchange, currency, type, sector FROM stock_metadata WHERE symbol = $1
+SELECT symbol, name, exchange, exchange_full_name, currency FROM stock_metadata WHERE symbol = $1
 `
 
 func (q *Queries) GetStockMetadataBySymbol(ctx context.Context, symbol string) (StockMetadatum, error) {
@@ -22,36 +55,113 @@ func (q *Queries) GetStockMetadataBySymbol(ctx context.Context, symbol string) (
 		&i.Symbol,
 		&i.Name,
 		&i.Exchange,
+		&i.ExchangeFullName,
 		&i.Currency,
-		&i.Type,
-		&i.Sector,
 	)
 	return i, err
 }
 
 const getStockQuoteBySymbol = `-- name: GetStockQuoteBySymbol :one
-SELECT symbol, last_price, price_change, price_change_pct, volume, market_cap, pe_ratio, dividend_yield, updated_at FROM stock_quote WHERE symbol = $1
+SELECT symbol, open_price, last_price, previous_close_price, price_change, price_change_pct, volume, market_cap, day_low, day_high, year_low, year_high, updated_at FROM stock_quote WHERE symbol = $1
 `
 
-func (q *Queries) GetStockQuoteBySymbol(ctx context.Context, symbol pgtype.Text) (StockQuote, error) {
+func (q *Queries) GetStockQuoteBySymbol(ctx context.Context, symbol string) (StockQuote, error) {
 	row := q.db.QueryRow(ctx, getStockQuoteBySymbol, symbol)
 	var i StockQuote
 	err := row.Scan(
 		&i.Symbol,
+		&i.OpenPrice,
 		&i.LastPrice,
+		&i.PreviousClosePrice,
 		&i.PriceChange,
 		&i.PriceChangePct,
 		&i.Volume,
 		&i.MarketCap,
-		&i.PeRatio,
-		&i.DividendYield,
+		&i.DayLow,
+		&i.DayHigh,
+		&i.YearLow,
+		&i.YearHigh,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertOrUpdateStockQuote = `-- name: InsertOrUpdateStockQuote :one
+INSERT INTO stock_quote (
+    symbol, open_price, last_price, previous_close_price, price_change, price_change_pct,
+    volume, market_cap, day_low, day_high, year_low, year_high, updated_at
+)
+VALUES (
+    $1, $2, $3, $4, $5, $6,
+    $7, $8, $9, $10, $11, $12, NOW()
+)
+ON CONFLICT (symbol) DO UPDATE SET
+    open_price = EXCLUDED.open_price,
+    last_price = EXCLUDED.last_price,
+    previous_close_price = EXCLUDED.previous_close_price,
+    price_change = EXCLUDED.price_change,
+    price_change_pct = EXCLUDED.price_change_pct,
+    volume = EXCLUDED.volume,
+    market_cap = EXCLUDED.market_cap,
+    day_low = EXCLUDED.day_low,
+    day_high = EXCLUDED.day_high,
+    year_low = EXCLUDED.year_low,
+    year_high = EXCLUDED.year_high,
+    updated_at = NOW()
+RETURNING symbol, open_price, last_price, previous_close_price, price_change, price_change_pct, volume, market_cap, day_low, day_high, year_low, year_high, updated_at
+`
+
+type InsertOrUpdateStockQuoteParams struct {
+	Symbol             string  `json:"symbol"`
+	OpenPrice          float64 `json:"open_price"`
+	LastPrice          float64 `json:"last_price"`
+	PreviousClosePrice float64 `json:"previous_close_price"`
+	PriceChange        float64 `json:"price_change"`
+	PriceChangePct     float64 `json:"price_change_pct"`
+	Volume             int64   `json:"volume"`
+	MarketCap          int64   `json:"market_cap"`
+	DayLow             float64 `json:"day_low"`
+	DayHigh            float64 `json:"day_high"`
+	YearLow            float64 `json:"year_low"`
+	YearHigh           float64 `json:"year_high"`
+}
+
+func (q *Queries) InsertOrUpdateStockQuote(ctx context.Context, arg InsertOrUpdateStockQuoteParams) (StockQuote, error) {
+	row := q.db.QueryRow(ctx, insertOrUpdateStockQuote,
+		arg.Symbol,
+		arg.OpenPrice,
+		arg.LastPrice,
+		arg.PreviousClosePrice,
+		arg.PriceChange,
+		arg.PriceChangePct,
+		arg.Volume,
+		arg.MarketCap,
+		arg.DayLow,
+		arg.DayHigh,
+		arg.YearLow,
+		arg.YearHigh,
+	)
+	var i StockQuote
+	err := row.Scan(
+		&i.Symbol,
+		&i.OpenPrice,
+		&i.LastPrice,
+		&i.PreviousClosePrice,
+		&i.PriceChange,
+		&i.PriceChangePct,
+		&i.Volume,
+		&i.MarketCap,
+		&i.DayLow,
+		&i.DayHigh,
+		&i.YearLow,
+		&i.YearHigh,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const searchStockMetadataByName = `-- name: SearchStockMetadataByName :many
-SELECT symbol, name, exchange, currency, type, sector FROM stock_metadata WHERE name ILIKE '%' || $1 || '%' LIMIT $2 OFFSET $3
+SELECT symbol, name, exchange, exchange_full_name, currency FROM stock_metadata WHERE name ILIKE '%' || $1 || '%' LIMIT $2 OFFSET $3
 `
 
 type SearchStockMetadataByNameParams struct {
@@ -73,9 +183,8 @@ func (q *Queries) SearchStockMetadataByName(ctx context.Context, arg SearchStock
 			&i.Symbol,
 			&i.Name,
 			&i.Exchange,
+			&i.ExchangeFullName,
 			&i.Currency,
-			&i.Type,
-			&i.Sector,
 		); err != nil {
 			return nil, err
 		}
