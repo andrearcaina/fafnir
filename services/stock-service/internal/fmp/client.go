@@ -3,7 +3,6 @@ package fmp
 import (
 	"fafnir/stock-service/internal/dto"
 	"fmt"
-	"log"
 
 	"resty.dev/v3"
 )
@@ -51,8 +50,6 @@ func (c *Client) GetStockMetadata(symbol string) (*dto.StockMetadataResponse, er
 func (c *Client) GetStockQuote(symbol string) (*dto.StockQuoteResponse, error) {
 	var result []dto.StockQuoteResponse
 
-	log.Printf("FMP GetStockQuote called with symbol: %s", symbol)
-
 	_, err := c.client.R().
 		SetQueryParams(map[string]string{
 			"symbol": symbol,
@@ -61,11 +58,8 @@ func (c *Client) GetStockQuote(symbol string) (*dto.StockQuoteResponse, error) {
 		SetResult(&result).
 		Get("/quote")
 	if err != nil {
-		log.Printf("FMP GetStockQuote error: %v", err)
 		return nil, err
 	}
-
-	log.Printf("FMP GetStockQuote result: %+v", result)
 
 	if len(result) == 0 {
 		return nil, fmt.Errorf("no stock quote")
@@ -88,7 +82,6 @@ func (c *Client) GetStockHistoricalData(symbol string, from string, to string) (
 		Get("/historical-price-eod/full")
 
 	if err != nil {
-		log.Printf("FMP GetStockHistoricalData error: %v", err)
 		return nil, err
 	}
 
