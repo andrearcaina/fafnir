@@ -18,7 +18,7 @@ CREATE TABLE stock_quote (
      price_change FLOAT NOT NULL,
      price_change_pct FLOAT NOT NULL,
      volume BIGINT NOT NULL,
-     market_cap BIGINT NOT NULL,
+     market_cap FLOAT NOT NULL,
      day_low FLOAT NOT NULL,
      day_high FLOAT NOT NULL,
      year_low FLOAT NOT NULL,
@@ -28,8 +28,23 @@ CREATE TABLE stock_quote (
 );
 -- +goose StatementEnd
 
+CREATE TABLE stock_historical_data (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(10) REFERENCES stock_metadata(symbol) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    open_price FLOAT NOT NULL,
+    close_price FLOAT NOT NULL,
+    high_price FLOAT NOT NULL,
+    low_price FLOAT NOT NULL,
+    volume BIGINT NOT NULL,
+    price_change FLOAT NOT NULL,
+    price_change_pct FLOAT NOT NULL,
+    UNIQUE(symbol, date)
+);
+
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE IF EXISTS stock_quote;
+DROP TABLE IF EXISTS stock_historical_data;
 DROP TABLE IF EXISTS stock_metadata;
 -- +goose StatementEnd

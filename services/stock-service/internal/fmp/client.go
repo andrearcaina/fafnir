@@ -26,6 +26,27 @@ func NewFMPClient(apiKey string) (*Client, error) {
 	}, nil
 }
 
+func (c *Client) GetStockMetadata(symbol string) (*dto.StockMetadataResponse, error) {
+	var result []dto.StockMetadataResponse
+
+	_, err := c.client.R().
+		SetQueryParams(map[string]string{
+			"query":  symbol,
+			"apikey": c.apiKey,
+		}).
+		SetResult(&result).
+		Get("/search-symbol")
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return nil, fmt.Errorf("no stock metadata")
+	}
+
+	return &result[0], nil
+}
+
 func (c *Client) GetStockQuote(symbol string) (*dto.StockQuoteResponse, error) {
 	var result []dto.StockQuoteResponse
 
@@ -47,23 +68,26 @@ func (c *Client) GetStockQuote(symbol string) (*dto.StockQuoteResponse, error) {
 	return &result[0], nil
 }
 
-func (c *Client) GetStockMetadata(symbol string) (*dto.StockMetadataResponse, error) {
-	var result []dto.StockMetadataResponse
+func (c *Client) GetStockHistoricalData(symbol string, from string, to string) ([]dto.StockHistoricalDataResponse, error) {
+	var result []dto.StockHistoricalDataResponse
 
 	_, err := c.client.R().
 		SetQueryParams(map[string]string{
-			"query":  symbol,
+			"symbol": symbol,
+			"from":   from,
+			"to":     to,
 			"apikey": c.apiKey,
 		}).
 		SetResult(&result).
-		Get("/search-symbol")
+		Get("/historical-price-eod/full")
+
 	if err != nil {
 		return nil, err
 	}
 
 	if len(result) == 0 {
-		return nil, fmt.Errorf("no stock metadata")
+		return nil, fmt.Errorf("no historical stock data")
 	}
 
-	return &result[0], nil
+	return result, nil
 }

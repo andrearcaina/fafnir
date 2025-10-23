@@ -8,6 +8,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type StockHistoricalDatum struct {
+	ID             int32       `json:"id"`
+	Symbol         pgtype.Text `json:"symbol"`
+	Date           pgtype.Date `json:"date"`
+	OpenPrice      float64     `json:"open_price"`
+	ClosePrice     float64     `json:"close_price"`
+	HighPrice      float64     `json:"high_price"`
+	LowPrice       float64     `json:"low_price"`
+	Volume         int64       `json:"volume"`
+	PriceChange    float64     `json:"price_change"`
+	PriceChangePct float64     `json:"price_change_pct"`
+}
+
 type StockMetadatum struct {
 	Symbol           string `json:"symbol"`
 	Name             string `json:"name"`
@@ -24,7 +37,7 @@ type StockQuote struct {
 	PriceChange        float64            `json:"price_change"`
 	PriceChangePct     float64            `json:"price_change_pct"`
 	Volume             int64              `json:"volume"`
-	MarketCap          int64              `json:"market_cap"`
+	MarketCap          float64            `json:"market_cap"`
 	DayLow             float64            `json:"day_low"`
 	DayHigh            float64            `json:"day_high"`
 	YearLow            float64            `json:"year_low"`

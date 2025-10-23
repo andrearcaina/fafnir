@@ -10,9 +10,11 @@ import (
 
 type Querier interface {
 	CreateStockMetadata(ctx context.Context, arg CreateStockMetadataParams) (StockMetadatum, error)
+	GetStockHistoricalDataBySymbolAndDateRange(ctx context.Context, arg GetStockHistoricalDataBySymbolAndDateRangeParams) ([]StockHistoricalDatum, error)
 	GetStockMetadataBySymbol(ctx context.Context, symbol string) (StockMetadatum, error)
 	GetStockQuoteBySymbol(ctx context.Context, symbol string) (StockQuote, error)
 	InsertOrUpdateStockQuote(ctx context.Context, arg InsertOrUpdateStockQuoteParams) (StockQuote, error)
+	InsertStockHistoricalData(ctx context.Context, arg InsertStockHistoricalDataParams) (StockHistoricalDatum, error)
 	SearchStockMetadataByName(ctx context.Context, arg SearchStockMetadataByNameParams) ([]StockMetadatum, error)
 }
 

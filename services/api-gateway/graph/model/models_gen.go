@@ -30,6 +30,23 @@ type StockData struct {
 	Currency         string `json:"currency"`
 }
 
+type StockHistoricalData struct {
+	Symbol        string  `json:"symbol"`
+	Date          string  `json:"date"`
+	Open          float64 `json:"open"`
+	High          float64 `json:"high"`
+	Low           float64 `json:"low"`
+	Close         float64 `json:"close"`
+	Volume        int64   `json:"volume"`
+	Change        float64 `json:"change"`
+	ChangePercent float64 `json:"changePercent"`
+}
+
+type StockHistoricalDataResponse struct {
+	Code int32                  `json:"code"`
+	Data []*StockHistoricalData `json:"data"`
+}
+
 type StockMetadataResponse struct {
 	Code int32      `json:"code"`
 	Data *StockData `json:"data"`
@@ -43,11 +60,16 @@ type StockPriceData struct {
 	PriceChange        float64 `json:"priceChange"`
 	PriceChangePercent float64 `json:"priceChangePercent"`
 	Volume             int64   `json:"volume"`
-	MarketCap          int64   `json:"marketCap"`
+	MarketCap          float64 `json:"marketCap"`
 	DayLow             float64 `json:"dayLow"`
 	DayHigh            float64 `json:"dayHigh"`
 	YearHigh           float64 `json:"yearHigh"`
 	YearLow            float64 `json:"yearLow"`
+}
+
+type StockQuoteBatchResponse struct {
+	Code int32             `json:"code"`
+	Data []*StockPriceData `json:"data"`
 }
 
 type StockQuoteResponse struct {

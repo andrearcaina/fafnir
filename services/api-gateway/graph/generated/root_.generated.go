@@ -53,11 +53,13 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		CheckPermission  func(childComplexity int, request model.HasPermissionRequest) int
-		GetProfileData   func(childComplexity int, userID string) int
-		GetStockMetadata func(childComplexity int, symbol string) int
-		GetStockQuote    func(childComplexity int, symbol string) int
-		Health           func(childComplexity int) int
+		CheckPermission        func(childComplexity int, request model.HasPermissionRequest) int
+		GetProfileData         func(childComplexity int, userID string) int
+		GetStockHistoricalData func(childComplexity int, symbol string, period *string) int
+		GetStockMetadata       func(childComplexity int, symbol string) int
+		GetStockQuote          func(childComplexity int, symbol string) int
+		GetStockQuoteBatch     func(childComplexity int, symbols []string) int
+		Health                 func(childComplexity int) int
 	}
 
 	StockData struct {
@@ -66,6 +68,23 @@ type ComplexityRoot struct {
 		ExchangeFullName func(childComplexity int) int
 		Name             func(childComplexity int) int
 		Symbol           func(childComplexity int) int
+	}
+
+	StockHistoricalData struct {
+		Change        func(childComplexity int) int
+		ChangePercent func(childComplexity int) int
+		Close         func(childComplexity int) int
+		Date          func(childComplexity int) int
+		High          func(childComplexity int) int
+		Low           func(childComplexity int) int
+		Open          func(childComplexity int) int
+		Symbol        func(childComplexity int) int
+		Volume        func(childComplexity int) int
+	}
+
+	StockHistoricalDataResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
 	}
 
 	StockMetadataResponse struct {
@@ -86,6 +105,11 @@ type ComplexityRoot struct {
 		Volume             func(childComplexity int) int
 		YearHigh           func(childComplexity int) int
 		YearLow            func(childComplexity int) int
+	}
+
+	StockQuoteBatchResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
 	}
 
 	StockQuoteResponse struct {
@@ -179,6 +203,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.GetProfileData(childComplexity, args["userId"].(string)), true
 
+	case "Query.getStockHistoricalData":
+		if e.complexity.Query.GetStockHistoricalData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStockHistoricalData_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStockHistoricalData(childComplexity, args["symbol"].(string), args["period"].(*string)), true
+
 	case "Query.getStockMetadata":
 		if e.complexity.Query.GetStockMetadata == nil {
 			break
@@ -202,6 +238,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.GetStockQuote(childComplexity, args["symbol"].(string)), true
+
+	case "Query.getStockQuoteBatch":
+		if e.complexity.Query.GetStockQuoteBatch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStockQuoteBatch_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStockQuoteBatch(childComplexity, args["symbols"].([]string)), true
 
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
@@ -244,6 +292,83 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockData.Symbol(childComplexity), true
+
+	case "StockHistoricalData.change":
+		if e.complexity.StockHistoricalData.Change == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Change(childComplexity), true
+
+	case "StockHistoricalData.changePercent":
+		if e.complexity.StockHistoricalData.ChangePercent == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.ChangePercent(childComplexity), true
+
+	case "StockHistoricalData.close":
+		if e.complexity.StockHistoricalData.Close == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Close(childComplexity), true
+
+	case "StockHistoricalData.date":
+		if e.complexity.StockHistoricalData.Date == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Date(childComplexity), true
+
+	case "StockHistoricalData.high":
+		if e.complexity.StockHistoricalData.High == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.High(childComplexity), true
+
+	case "StockHistoricalData.low":
+		if e.complexity.StockHistoricalData.Low == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Low(childComplexity), true
+
+	case "StockHistoricalData.open":
+		if e.complexity.StockHistoricalData.Open == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Open(childComplexity), true
+
+	case "StockHistoricalData.symbol":
+		if e.complexity.StockHistoricalData.Symbol == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Symbol(childComplexity), true
+
+	case "StockHistoricalData.volume":
+		if e.complexity.StockHistoricalData.Volume == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.Volume(childComplexity), true
+
+	case "StockHistoricalDataResponse.code":
+		if e.complexity.StockHistoricalDataResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalDataResponse.Code(childComplexity), true
+
+	case "StockHistoricalDataResponse.data":
+		if e.complexity.StockHistoricalDataResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalDataResponse.Data(childComplexity), true
 
 	case "StockMetadataResponse.code":
 		if e.complexity.StockMetadataResponse.Code == nil {
@@ -342,6 +467,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockPriceData.YearLow(childComplexity), true
+
+	case "StockQuoteBatchResponse.code":
+		if e.complexity.StockQuoteBatchResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.StockQuoteBatchResponse.Code(childComplexity), true
+
+	case "StockQuoteBatchResponse.data":
+		if e.complexity.StockQuoteBatchResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.StockQuoteBatchResponse.Data(childComplexity), true
 
 	case "StockQuoteResponse.code":
 		if e.complexity.StockQuoteResponse.Code == nil {
@@ -477,12 +616,39 @@ type StockMetadataResponse {
     data: StockData!
 }
 
+type StockQuoteResponse {
+    code: Int!
+    data: StockPriceData!
+}
+
+type StockQuoteBatchResponse {
+    code: Int!
+    data: [StockPriceData!]!
+}
+
+type StockHistoricalDataResponse {
+    code: Int!
+    data: [StockHistoricalData!]!
+}
+
 type StockData {
     symbol: String!
     name: String!
     exchange: String!
     exchangeFullName: String!
     currency: String!
+}
+
+type StockHistoricalData {
+    symbol: String!
+    date: String!
+    open: Float!
+    high: Float!
+    low: Float!
+    close: Float!
+    volume: Int64!
+    change: Float!
+    changePercent: Float!
 }
 
 type StockPriceData {
@@ -493,21 +659,18 @@ type StockPriceData {
     priceChange: Float!
     priceChangePercent: Float!
     volume: Int64!
-    marketCap: Int64!
+    marketCap: Float!
     dayLow: Float!
     dayHigh: Float!
     yearHigh: Float!
     yearLow: Float!
 }
 
-type StockQuoteResponse {
-    code: Int!
-    data: StockPriceData!
-}
-
 extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
+    getStockHistoricalData(symbol: String!, period: String): StockHistoricalDataResponse!
+    getStockQuoteBatch(symbols: [String!]!): StockQuoteBatchResponse!
 }`, BuiltIn: false},
 	{Name: "../schemas/user.graphqls", Input: `type ProfileDataResponse {
     userId: String!
