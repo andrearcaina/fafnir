@@ -44,6 +44,49 @@ func (q *Queries) CreateStockMetadata(ctx context.Context, arg CreateStockMetada
 	return i, err
 }
 
+const getStockHistoricalDataBySymbolAndDateRange = `-- name: GetStockHistoricalDataBySymbolAndDateRange :many
+SELECT id, symbol, date, open_price, close_price, high_price, low_price, volume, price_change, price_change_pct FROM stock_historical_data
+WHERE symbol = $1 AND date BETWEEN $2 AND $3
+ORDER BY date ASC
+`
+
+type GetStockHistoricalDataBySymbolAndDateRangeParams struct {
+	Symbol pgtype.Text `json:"symbol"`
+	Date   pgtype.Date `json:"date"`
+	Date_2 pgtype.Date `json:"date_2"`
+}
+
+func (q *Queries) GetStockHistoricalDataBySymbolAndDateRange(ctx context.Context, arg GetStockHistoricalDataBySymbolAndDateRangeParams) ([]StockHistoricalDatum, error) {
+	rows, err := q.db.Query(ctx, getStockHistoricalDataBySymbolAndDateRange, arg.Symbol, arg.Date, arg.Date_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []StockHistoricalDatum{}
+	for rows.Next() {
+		var i StockHistoricalDatum
+		if err := rows.Scan(
+			&i.ID,
+			&i.Symbol,
+			&i.Date,
+			&i.OpenPrice,
+			&i.ClosePrice,
+			&i.HighPrice,
+			&i.LowPrice,
+			&i.Volume,
+			&i.PriceChange,
+			&i.PriceChangePct,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getStockMetadataBySymbol = `-- name: GetStockMetadataBySymbol :one
 SELECT symbol, name, exchange, exchange_full_name, currency FROM stock_metadata WHERE symbol = $1
 `
@@ -119,7 +162,7 @@ type InsertOrUpdateStockQuoteParams struct {
 	PriceChange        float64 `json:"price_change"`
 	PriceChangePct     float64 `json:"price_change_pct"`
 	Volume             int64   `json:"volume"`
-	MarketCap          int64   `json:"market_cap"`
+	MarketCap          float64 `json:"market_cap"`
 	DayLow             float64 `json:"day_low"`
 	DayHigh            float64 `json:"day_high"`
 	YearLow            float64 `json:"year_low"`
@@ -156,6 +199,62 @@ func (q *Queries) InsertOrUpdateStockQuote(ctx context.Context, arg InsertOrUpda
 		&i.YearLow,
 		&i.YearHigh,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertStockHistoricalData = `-- name: InsertStockHistoricalData :one
+INSERT INTO stock_historical_data (
+    symbol, date, open_price, close_price, high_price, low_price, volume, price_change, price_change_pct
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (symbol, date) DO UPDATE SET
+    open_price = EXCLUDED.open_price,
+    close_price = EXCLUDED.close_price,
+    high_price = EXCLUDED.high_price,
+    low_price = EXCLUDED.low_price,
+    volume = EXCLUDED.volume,
+    price_change = EXCLUDED.price_change,
+    price_change_pct = EXCLUDED.price_change_pct
+RETURNING id, symbol, date, open_price, close_price, high_price, low_price, volume, price_change, price_change_pct
+`
+
+type InsertStockHistoricalDataParams struct {
+	Symbol         pgtype.Text `json:"symbol"`
+	Date           pgtype.Date `json:"date"`
+	OpenPrice      float64     `json:"open_price"`
+	ClosePrice     float64     `json:"close_price"`
+	HighPrice      float64     `json:"high_price"`
+	LowPrice       float64     `json:"low_price"`
+	Volume         int64       `json:"volume"`
+	PriceChange    float64     `json:"price_change"`
+	PriceChangePct float64     `json:"price_change_pct"`
+}
+
+func (q *Queries) InsertStockHistoricalData(ctx context.Context, arg InsertStockHistoricalDataParams) (StockHistoricalDatum, error) {
+	row := q.db.QueryRow(ctx, insertStockHistoricalData,
+		arg.Symbol,
+		arg.Date,
+		arg.OpenPrice,
+		arg.ClosePrice,
+		arg.HighPrice,
+		arg.LowPrice,
+		arg.Volume,
+		arg.PriceChange,
+		arg.PriceChangePct,
+	)
+	var i StockHistoricalDatum
+	err := row.Scan(
+		&i.ID,
+		&i.Symbol,
+		&i.Date,
+		&i.OpenPrice,
+		&i.ClosePrice,
+		&i.HighPrice,
+		&i.LowPrice,
+		&i.Volume,
+		&i.PriceChange,
+		&i.PriceChangePct,
 	)
 	return i, err
 }

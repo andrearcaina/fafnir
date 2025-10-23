@@ -22,6 +22,7 @@ func (h *Handler) ServeStockRoutes() http.Handler {
 
 	r.Get("/metadata/{symbol}", h.getStockMetadata)
 	r.Get("/quote/{symbol}", h.getStockQuote)
+	r.Get("/historical/{symbol}/{period}", h.getStockHistoricalData)
 
 	return r
 }
@@ -41,11 +42,24 @@ func (h *Handler) getStockMetadata(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getStockQuote(w http.ResponseWriter, r *http.Request) {
 	symbol := chi.URLParam(r, "symbol")
 
-	quote, err := h.stockService.SearchStockQuote(r.Context(), symbol)
+	quote, err := h.stockService.GetStockQuote(r.Context(), symbol)
 	if err != nil {
 		utils.HandleError(w, err)
 		return
 	}
 
 	utils.WriteJSON(w, http.StatusOK, quote)
+}
+
+func (h *Handler) getStockHistoricalData(w http.ResponseWriter, r *http.Request) {
+	symbol := chi.URLParam(r, "symbol")
+	period := chi.URLParam(r, "period")
+
+	historicalData, err := h.stockService.GetStockHistoricalData(r.Context(), symbol, period)
+	if err != nil {
+		utils.HandleError(w, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, historicalData)
 }

@@ -35,3 +35,23 @@ ON CONFLICT (symbol) DO UPDATE SET
     year_high = EXCLUDED.year_high,
     updated_at = NOW()
 RETURNING *;
+
+-- name: GetStockHistoricalDataBySymbolAndDateRange :many
+SELECT * FROM stock_historical_data
+WHERE symbol = $1 AND date BETWEEN $2 AND $3
+ORDER BY date ASC;
+
+-- name: InsertStockHistoricalData :one
+INSERT INTO stock_historical_data (
+    symbol, date, open_price, close_price, high_price, low_price, volume, price_change, price_change_pct
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (symbol, date) DO UPDATE SET
+    open_price = EXCLUDED.open_price,
+    close_price = EXCLUDED.close_price,
+    high_price = EXCLUDED.high_price,
+    low_price = EXCLUDED.low_price,
+    volume = EXCLUDED.volume,
+    price_change = EXCLUDED.price_change,
+    price_change_pct = EXCLUDED.price_change_pct
+RETURNING *;

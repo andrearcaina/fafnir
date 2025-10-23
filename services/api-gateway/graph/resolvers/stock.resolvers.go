@@ -35,3 +35,16 @@ func (r *queryResolver) GetStockQuote(ctx context.Context, symbol string) (*mode
 		Data: resp.Data,
 	}, nil
 }
+
+// GetStockHistoricalData is the resolver for the getStockHistoricalData field.
+func (r *queryResolver) GetStockHistoricalData(ctx context.Context, symbol string, period *string) (*model.StockHistoricalDataResponse, error) {
+	resp, err := r.StockClient.GetStockHistoricalData(ctx, symbol, *period)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get stock historical data: %w", err)
+	}
+
+	return &model.StockHistoricalDataResponse{
+		Code: resp.Code,
+		Data: resp.Data,
+	}, nil
+}
