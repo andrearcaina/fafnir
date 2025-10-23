@@ -23,6 +23,7 @@ type QueryResolver interface {
 	GetStockMetadata(ctx context.Context, symbol string) (*model.StockMetadataResponse, error)
 	GetStockQuote(ctx context.Context, symbol string) (*model.StockQuoteResponse, error)
 	GetStockHistoricalData(ctx context.Context, symbol string, period *string) (*model.StockHistoricalDataResponse, error)
+	GetStockQuoteBatch(ctx context.Context, symbols []string) (*model.StockQuoteBatchResponse, error)
 	GetProfileData(ctx context.Context, userID string) (*model.ProfileDataResponse, error)
 }
 
@@ -87,6 +88,17 @@ func (ec *executionContext) field_Query_getStockMetadata_args(ctx context.Contex
 		return nil, err
 	}
 	args["symbol"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getStockQuoteBatch_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "symbols", ec.unmarshalNString2ᚕstringᚄ)
+	if err != nil {
+		return nil, err
+	}
+	args["symbols"] = arg0
 	return args, nil
 }
 
@@ -391,6 +403,67 @@ func (ec *executionContext) fieldContext_Query_getStockHistoricalData(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_getStockHistoricalData_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getStockQuoteBatch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getStockQuoteBatch(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetStockQuoteBatch(rctx, fc.Args["symbols"].([]string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.StockQuoteBatchResponse)
+	fc.Result = res
+	return ec.marshalNStockQuoteBatchResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockQuoteBatchResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getStockQuoteBatch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_StockQuoteBatchResponse_code(ctx, field)
+			case "data":
+				return ec.fieldContext_StockQuoteBatchResponse_data(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StockQuoteBatchResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getStockQuoteBatch_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -722,6 +795,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getStockHistoricalData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getStockQuoteBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getStockQuoteBatch(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

@@ -3,6 +3,7 @@ package clients
 import (
 	"context"
 	"fafnir/api-gateway/graph/model"
+	"strings"
 
 	"resty.dev/v3"
 )
@@ -70,6 +71,32 @@ func (c *StockClient) GetStockQuote(ctx context.Context, symbol string) (model.S
 	}
 	if resp.IsSuccess() {
 		response.Data = resp.Result().(*model.StockPriceData)
+	}
+
+	return response, nil
+}
+
+func (c *StockClient) GetStockQuoteBatch(ctx context.Context, symbols []string) (model.StockQuoteBatchResponse, error) {
+	resp, err := c.Client.R().
+		SetContext(ctx).
+		SetQueryParam("symbols", strings.Join(symbols, ",")).
+		SetResult(&[]*model.StockPriceData{}).
+		SetError(&[]*model.StockPriceData{}).
+		Get("/quote/batch")
+
+	if err != nil {
+		return model.StockQuoteBatchResponse{}, err
+	}
+
+	var response model.StockQuoteBatchResponse
+
+	response.Code = int32(resp.StatusCode())
+
+	if resp.IsError() {
+		response.Data = nil
+	}
+	if resp.IsSuccess() {
+		response.Data = *resp.Result().(*[]*model.StockPriceData)
 	}
 
 	return response, nil

@@ -10,6 +10,11 @@ type StockQuoteResponse {
     data: StockPriceData!
 }
 
+type StockQuoteBatchResponse {
+    code: Int!
+    data: [StockPriceData!]!
+}
+
 type StockHistoricalDataResponse {
     code: Int!
     data: [StockHistoricalData!]!
@@ -54,4 +59,5 @@ extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
     getStockHistoricalData(symbol: String!, period: String): StockHistoricalDataResponse!
+    getStockQuoteBatch(symbols: [String!]!): StockQuoteBatchResponse!
 }

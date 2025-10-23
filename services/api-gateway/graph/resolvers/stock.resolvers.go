@@ -48,3 +48,16 @@ func (r *queryResolver) GetStockHistoricalData(ctx context.Context, symbol strin
 		Data: resp.Data,
 	}, nil
 }
+
+// GetStockQuoteBatch is the resolver for the getStockQuoteBatch field.
+func (r *queryResolver) GetStockQuoteBatch(ctx context.Context, symbols []string) (*model.StockQuoteBatchResponse, error) {
+	resp, err := r.StockClient.GetStockQuoteBatch(ctx, symbols)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get stock quote batch: %w", err)
+	}
+
+	return &model.StockQuoteBatchResponse{
+		Code: resp.Code,
+		Data: resp.Data,
+	}, nil
+}

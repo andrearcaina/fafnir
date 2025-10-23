@@ -126,6 +126,107 @@ func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQ
 	return fmpStockQuote, nil
 }
 
+func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*dto.StockQuoteResponse, error) {
+	if len(symbols) == 0 {
+		return nil, errors.BadRequestError("Invalid symbols").
+			WithDetails("The provided symbols list is empty")
+	}
+
+	result := make(map[string]*dto.StockQuoteResponse)
+	missingSymbols := make([]string, 0)
+
+	// first, try get from redis cache
+	for _, symbol := range symbols {
+		cached, err := s.redis.Get(ctx, symbol)
+		if err == nil && cached != "" {
+			var stock dto.StockQuoteResponse
+			if err := json.Unmarshal([]byte(cached), &stock); err == nil {
+				result[symbol] = &stock
+				continue
+			}
+		}
+		missingSymbols = append(missingSymbols, symbol)
+	}
+
+	if len(missingSymbols) == 0 {
+		return convertMapToSlice(result, symbols), nil
+	}
+
+	// for missing symbols, try get from database
+	for _, symbol := range missingSymbols {
+		stockQuote, err := s.db.GetQueries().GetStockQuoteBySymbol(ctx, symbol)
+		if err == nil {
+			stock := convertStockQuoteToDTO(stockQuote)
+			result[symbol] = &stock
+
+			// populate redis cache for future requests
+			data, _ := json.Marshal(stock)
+			err := s.redis.Set(ctx, symbol, string(data))
+			if err != nil {
+				log.Println("Warning: Failed to cache stock quote from database: " + err.Error())
+			}
+			continue
+		}
+	}
+
+	// check which symbols are still missing
+	stillMissingSymbols := make([]string, 0)
+	for _, symbol := range missingSymbols {
+		if _, exists := result[symbol]; !exists {
+			stillMissingSymbols = append(stillMissingSymbols, symbol)
+		}
+	}
+
+	// for still missing symbols, call fmp client
+	for _, symbol := range stillMissingSymbols {
+		fmpStockQuote, err := s.fmp.GetStockQuote(symbol)
+		if err != nil {
+			log.Println("Warning: Failed to fetch stock quote from FMP for symbol " + symbol + ": " + err.Error())
+			continue
+		}
+
+		params := generated.InsertOrUpdateStockQuoteParams{
+			Symbol:             fmpStockQuote.Symbol,
+			LastPrice:          fmpStockQuote.LastPrice,
+			OpenPrice:          fmpStockQuote.OpenPrice,
+			PreviousClosePrice: fmpStockQuote.PreviousClose,
+			DayHigh:            fmpStockQuote.DayHigh,
+			DayLow:             fmpStockQuote.DayLow,
+			YearHigh:           fmpStockQuote.YearHigh,
+			YearLow:            fmpStockQuote.YearLow,
+			Volume:             fmpStockQuote.Volume,
+			MarketCap:          fmpStockQuote.MarketCap,
+			PriceChange:        fmpStockQuote.Change,
+			PriceChangePct:     fmpStockQuote.ChangePct,
+		}
+
+		// before storing stock quote in database, ensure stock metadata exists
+		_, err = s.db.GetQueries().GetStockMetadataBySymbol(ctx, symbol)
+		if err != nil {
+			_, err = s.getStockMetadataFromFMP(ctx, symbol) // store stock metadata from FMP
+			if err != nil {
+				log.Println("Warning: Failed to populate stock metadata from FMP: " + err.Error())
+			}
+		}
+
+		// populate postgresql table with stock quote (or update if it already exists)
+		_, err = s.db.GetQueries().InsertOrUpdateStockQuote(ctx, params)
+		if err != nil {
+			log.Println("Warning: Failed to store stock quote from FMP to database: " + err.Error())
+		}
+
+		data, _ := json.Marshal(fmpStockQuote)
+		err = s.redis.Set(ctx, symbol, string(data))
+		if err != nil {
+			log.Println("Warning: Failed to cache stock quote from FMP: " + err.Error())
+		}
+
+		result[symbol] = fmpStockQuote
+	}
+
+	return convertMapToSlice(result, symbols), nil
+}
+
 func (s *Service) GetStockHistoricalData(ctx context.Context, symbol string, period string) ([]dto.StockHistoricalDataResponse, error) {
 	// check if symbol exists
 	if symbol == "" {
@@ -268,6 +369,16 @@ func convertStockMetadataToDTO(dbMetadata generated.StockMetadatum) *dto.StockMe
 		Exchange:         dbMetadata.Exchange,
 		ExchangeFullName: dbMetadata.ExchangeFullName,
 	}
+}
+
+func convertMapToSlice(m map[string]*dto.StockQuoteResponse, keys []string) []*dto.StockQuoteResponse {
+	result := make([]*dto.StockQuoteResponse, 0, len(keys))
+	for _, key := range keys {
+		if val, exists := m[key]; exists {
+			result = append(result, val)
+		}
+	}
+	return result
 }
 
 func getDateRangeFromPeriod(period string) (string, string) {

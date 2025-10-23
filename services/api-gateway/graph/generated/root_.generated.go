@@ -58,6 +58,7 @@ type ComplexityRoot struct {
 		GetStockHistoricalData func(childComplexity int, symbol string, period *string) int
 		GetStockMetadata       func(childComplexity int, symbol string) int
 		GetStockQuote          func(childComplexity int, symbol string) int
+		GetStockQuoteBatch     func(childComplexity int, symbols []string) int
 		Health                 func(childComplexity int) int
 	}
 
@@ -104,6 +105,11 @@ type ComplexityRoot struct {
 		Volume             func(childComplexity int) int
 		YearHigh           func(childComplexity int) int
 		YearLow            func(childComplexity int) int
+	}
+
+	StockQuoteBatchResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
 	}
 
 	StockQuoteResponse struct {
@@ -232,6 +238,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.GetStockQuote(childComplexity, args["symbol"].(string)), true
+
+	case "Query.getStockQuoteBatch":
+		if e.complexity.Query.GetStockQuoteBatch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStockQuoteBatch_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStockQuoteBatch(childComplexity, args["symbols"].([]string)), true
 
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
@@ -450,6 +468,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StockPriceData.YearLow(childComplexity), true
 
+	case "StockQuoteBatchResponse.code":
+		if e.complexity.StockQuoteBatchResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.StockQuoteBatchResponse.Code(childComplexity), true
+
+	case "StockQuoteBatchResponse.data":
+		if e.complexity.StockQuoteBatchResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.StockQuoteBatchResponse.Data(childComplexity), true
+
 	case "StockQuoteResponse.code":
 		if e.complexity.StockQuoteResponse.Code == nil {
 			break
@@ -589,6 +621,11 @@ type StockQuoteResponse {
     data: StockPriceData!
 }
 
+type StockQuoteBatchResponse {
+    code: Int!
+    data: [StockPriceData!]!
+}
+
 type StockHistoricalDataResponse {
     code: Int!
     data: [StockHistoricalData!]!
@@ -633,6 +670,7 @@ extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
     getStockHistoricalData(symbol: String!, period: String): StockHistoricalDataResponse!
+    getStockQuoteBatch(symbols: [String!]!): StockQuoteBatchResponse!
 }`, BuiltIn: false},
 	{Name: "../schemas/user.graphqls", Input: `type ProfileDataResponse {
     userId: String!

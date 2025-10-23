@@ -67,6 +67,11 @@ type StockPriceData struct {
 	YearLow            float64 `json:"yearLow"`
 }
 
+type StockQuoteBatchResponse struct {
+	Code int32             `json:"code"`
+	Data []*StockPriceData `json:"data"`
+}
+
 type StockQuoteResponse struct {
 	Code int32           `json:"code"`
 	Data *StockPriceData `json:"data"`
