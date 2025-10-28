@@ -15,11 +15,11 @@ This repository was created as an educational project to learn more about modern
 
 ## TODO
 In no particular order:
-- [ ] Build and design basic microservices for app utilizing other languages (Java, Python, C#, Ruby)
-- [ ] Add Pub/Sub for async events/messaging and decoupled microservices (implement saga pattern)
+- [ ] Build and design the rest of the microservices needed
+- [ ] Add NATS and Pub/Sub pattern for async events/messaging (implement saga pattern)
 - [ ] Sketch a basic design of data flow as well as other services (orchestrate events that happen in the app)
 - [ ] Add orchestrating/simulation engine or key app events (saga pattern)
+- [ ] Simulate load testing with multiple users and services interacting using Locust (simulate real world usage and concurrent users)
 - [ ] Figure out how kubernetes fits in (test locally with minikube first maybe)
-- [ ] Add unit and integration tests for each microservice (might be a lot of work)
-- [ ] Add CI/CD pipeline for automated testing and deployment
-- [ ] Somehow deploy to the cloud (GCP, Render, VPS?)
+- [ ] Add unit and integration tests for each microservice (going to be a lot of work)
+- [ ] Add CI/CD pipeline for automated testing and docker image builds

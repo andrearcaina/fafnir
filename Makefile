@@ -1,4 +1,4 @@
-.PHONY: default help run-auth-service run-user-service run-security-service run-api-gateway run-web-app run build start pause stop status logs rm-volumes prune clean reset migrate-up migrate-down migrate-status migrate-create generate seed
+.PHONY: default help run-auth-service run-user-service run-security-service run-api-gateway run build start pause stop status logs rm-volumes prune clean reset migrate-up migrate-down migrate-status migrate-create generate seed
 
 ### default makefile target command (runs help)
 
@@ -20,9 +20,6 @@ run-security-service:
 
 run-api-gateway:
 	./tools/scripts/docker.sh api-gateway
-
-run-web-app:
-	./tools/scripts/docker.sh web-app
 
 run:
 	./tools/scripts/docker.sh run $(monitoring)

@@ -7,7 +7,7 @@ BASE_FILES="-f deployments/compose/base.yml"
 MONITORING_FILES="$BASE_FILES -f deployments/compose/monitoring.yml"
 
 case "$1" in
-  auth-service|user-service|security-service|api-gateway|web-app)
+  auth-service|user-service|security-service|api-gateway)
     $COMPOSE_CMD $BASE_FILES up -d "$1" ;;
   build)
     $COMPOSE_CMD $BASE_FILES build --pull --no-cache ;;
