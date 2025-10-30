@@ -2,7 +2,6 @@
 
 ## Prerequisites
 - **Go 1.21+** - For microservices development
-- **Node.js 18+** - For frontend development
 - **Docker & Docker Compose** - For containerized development
 - **Make** - For build automation (use WSL2 on Windows)
 
@@ -29,13 +28,12 @@
 
 ## Service Access Points
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Frontend** | [http://localhost:3001](http://localhost:3001) | Next.js web application |
-| **API Gateway** | [http://localhost:8080](http://localhost:8080) | GraphQL endpoint |
-| **Auth Service** | [http://localhost:8081](http://localhost:8081) | Authentication API |
-| **Grafana** | [http://localhost:3000](http://localhost:3000) | Monitoring dashboard |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090) | Metrics collection |
+| Service          | URL                                            | Description          |
+|------------------|------------------------------------------------|----------------------|
+| **API Gateway**  | [http://localhost:8080](http://localhost:8080) | GraphQL endpoint     |
+| **Auth Service** | [http://localhost:8081](http://localhost:8081) | Authentication API   |
+| **Grafana**      | [http://localhost:3000](http://localhost:3000) | Monitoring dashboard |
+| **Prometheus**   | [http://localhost:9090](http://localhost:9090) | Metrics collection   |
 
 ## Development Workflow
 
@@ -50,6 +48,8 @@ make run-monitoring
 # Start individual services
 make run-auth-service
 make run-user-service
+make run-security-service
+make run-stock-service
 make run-api-gateway
 ```
 
@@ -69,6 +69,7 @@ make seed db=all        # All databases
 make seed db=auth       # Auth database only
 make seed db=user       # User database only
 make seed db=security   # Security database only
+make seed db=stock      # Stock database only
 ```
 
 
@@ -121,12 +122,13 @@ You can run the following commands to seed the database with initial data after 
 
 You can also run certain microservices individually:
 
-| Command                 | Description                   |
-|-------------------------|-------------------------------|
-| `make run-auth-service` | Start the backend service     |
-| `make run-user-service` | Start the frontend service    |
-| `make run-api-gateway`  | Start the GraphQL API Gateway |
-| `make run-web-app`      | Start the web app             |
+| Command                     | Description                   |
+|-----------------------------|-------------------------------|
+| `make run-auth-service`     | Start the auth service        |
+| `make run-user-service`     | Start the user service        |
+| `make run-security-service` | Start the security service    |
+| `make stock-service`        | Start the stock service       |
+| `make run-api-gateway`      | Start the GraphQL API Gateway |
 
 For more information on the commands, check out the scripts folder.
 

@@ -18,6 +18,9 @@ run-user-service:
 run-security-service:
 	./tools/scripts/docker.sh security-service
 
+run-stock-service:
+	./tools/scripts/docker.sh stock-service
+
 run-api-gateway:
 	./tools/scripts/docker.sh api-gateway
 

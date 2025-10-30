@@ -1,5 +1,8 @@
 # Project Architecture
 
+### Architecture Designs
+- [Design #1](designs/dev_design_1.excalidraw)
+
 ### Key Architectural Principles
 - **Microservices**: Each service has its own database and is independently deployable
 - **Service Isolation**: Internal services not exposed to public network (only API Gateway and Auth service are public)
@@ -12,13 +15,11 @@
 - **Backend-for-Frontend (BFF)**: Designed for tailored client experiences (this means the API Gateway is optimized for a singular frontend)
 - **API Gateway Pattern**: Single entry point for all client requests, routing to appropriate services
 - **Database per Service**: Each microservice manages its own database schema and data
-- 
 
 ### Technology Stack
-- **Backend**: Go (as of right now) microservices with gRPC/REST communication
+- **Backend**: Go microservices with gRPC/REST communication (soon to change with NATS)
 - **API Gateway**: GraphQL unified endpoint using gqlgen
 - **Database**: PostgreSQL with per-service databases
-- **Frontend**: Next.js with TypeScript and ShadCN/UI
 - **Containerization**: Docker with multi-stage builds
 - **Monitoring**: Prometheus, Grafana
 - **Development**: Hot reload, centralized scripts, Make-based workflow
@@ -33,7 +34,6 @@ fafnir/
 ├── deployments/             # Deployment configurations
 │   └── compose/             # Docker Compose files
 ├── docs/                    # Documentation
-├── frontend/                # Next.js web application
 ├── infra/                   # Infrastructure configurations
 │   ├── env/                 # Environment files
 │   ├── monitoring/          # Prometheus & Grafana configs
@@ -57,8 +57,7 @@ fafnir/
 | **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi    | 8081 (public)   | auth_db     |
 | **user-service**     | User profile management and CRUD operations                      | Go, sqlc, go-chi    | 8083 (internal) | user_db     |
 | **security-service** | Role-based access control and authorization                      | Go, sqlc, go-chi    | 8082 (internal) | security_db |
-| **frontend**         | Next.js web application with TypeScript and ShadCN/UI            | Next.js, TypeScript | 3001 (public)   | -           |
-
+=
 ### Infrastructure Services
 
 | Service           | Description                                    | Ports           | Purpose              |
@@ -69,14 +68,13 @@ fafnir/
 
 ### Data Flow
 Below is the ideal data flow for the application. A concept drawing will be added later. For authentication data flow, check the [Authentication Guide](./authentication.md).
-1. Frontend → asks API Gateway for data
+1. Client → asks API Gateway for data
 2. API Gateway → routes request to appropriate service
 3. Services → interacts with their own PostgreSQL database
 4. Services → processes data and may call other services if needed
 5. Services → returns data to API Gateway
 6. API Gateway → aggregates data from multiple services if necessary
-7. API Gateway → sends data back to Frontend
-8. Frontend → displays data to the user
+7. API Gateway → sends data back to Client
 
 ### Helpful Resources and Readings
 - [Microservices](https://martinfowler.com/articles/microservices.html) by Martin Fowler
