@@ -5,6 +5,7 @@ import (
 	"fafnir/api-gateway/graph/generated"
 	"fafnir/api-gateway/graph/resolvers"
 	"fafnir/api-gateway/internal/config"
+	m "fafnir/api-gateway/internal/middleware"
 	"log"
 	"net/http"
 
@@ -53,8 +54,14 @@ func NewServer() *Server {
 		middleware.Recoverer,
 	)
 
+	// reverse proxy for auth service
+	router.Mount("/auth/", m.ReverseProxyMiddleware(cfg.PROXY.TargetURL))
+
+	// call
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
-	router.Handle("/graphql", srv)
+	router.With(
+		m.CheckAuth(cfg.ENV.JWT, true),
+	).Handle("/graphql", srv)
 
 	return &Server{
 		HTTP: &http.Server{

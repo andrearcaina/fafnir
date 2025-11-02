@@ -1,7 +1,8 @@
 # Project Architecture
 
 ### Architecture Designs
-- [Design #1](designs/dev_design_1.excalidraw)
+- [Initial Design #1](designs/images/dev_design_1.png)
+- [Revised Design of #1](designs/images/revised_dev_design_1.png)
 
 ### Key Architectural Principles
 - **Microservices**: Each service has its own database and is independently deployable
