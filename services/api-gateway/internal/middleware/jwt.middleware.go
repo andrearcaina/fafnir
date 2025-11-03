@@ -12,7 +12,7 @@ import (
 
 type contextKey string
 
-func CheckAuth(jwtKey string, skipCSRF bool) func(next http.Handler) http.Handler {
+func ValidateAuth(jwtKey string, skipCSRF bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			jwtCookie, err := r.Cookie("auth_token")
@@ -71,6 +71,7 @@ func CheckAuth(jwtKey string, skipCSRF bool) func(next http.Handler) http.Handle
 	}
 }
 
+// GetUserIdFromContext might be needed later on
 func GetUserIdFromContext(ctx context.Context) (uuid.UUID, error) {
 	val := ctx.Value(contextKey("auth/userIdContextKey"))
 	userIDStr, ok := val.(string)

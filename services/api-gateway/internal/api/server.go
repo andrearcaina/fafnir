@@ -49,18 +49,20 @@ func NewServer() *Server {
 
 	router := chi.NewRouter()
 
+	// global middlewares (chi default middlewares)
 	router.Use(
 		middleware.Logger,
 		middleware.Recoverer,
 	)
 
 	// reverse proxy for auth service
-	router.Mount("/auth/", m.ReverseProxyMiddleware(cfg.PROXY.TargetURL))
+	router.Mount("/auth/", m.ReverseProxy(cfg.PROXY.TargetURL))
 
-	// call
+	// graphql endpoints for core services (/ is the playground, which is like a UI to test queries)
+	// while /graphql is the actual endpoint to send queries and mutations
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	router.With(
-		m.CheckAuth(cfg.ENV.JWT, true),
+		m.ValidateAuth(cfg.ENV.JWT, true),
 	).Handle("/graphql", srv)
 
 	return &Server{

@@ -6,9 +6,9 @@
 
 ### Key Architectural Principles
 - **Microservices**: Each service has its own database and is independently deployable
-- **Service Isolation**: Internal services not exposed to public network (only API Gateway and Auth service are public)
+- **Service Isolation**: Internal services not exposed to public network (only API Gateway is public + Reverse Proxy to auth)
 - **Centralized Tooling**: Shared build tools, seeder, and scripts
-- **Multi-Language Ready**: Structured to support Go, Java, C#, and Python services
+- **Scalable Services**: Structured to add more services if needed (in any language too)
 - **Container-First**: Docker-native development and deployment
 - **Observability**: Built-in monitoring with Prometheus and Grafana
 
@@ -18,12 +18,14 @@
 - **Database per Service**: Each microservice manages its own database schema and data
 
 ### Technology Stack
-- **Backend**: Go microservices with gRPC/REST communication (soon to change with NATS)
+- **Backend**: Go microservices with gRPC/REST communication
 - **API Gateway**: GraphQL unified endpoint using gqlgen
+- **Message Broker**: NATS for event based communication
 - **Database**: PostgreSQL with per-service databases
+- **Cache**: Redis Cache used for core services in need of fast response times
 - **Containerization**: Docker with multi-stage builds
 - **Monitoring**: Prometheus, Grafana
-- **Development**: Hot reload, centralized scripts, Make-based workflow
+- **Development**: Hot reload (with air), centralized scripts, Make-based workflow
 
 ### Project Structure
 
@@ -31,10 +33,12 @@
 fafnir/
 ├── build/                   # Build configurations
 │   └── docker/              # Centralized Dockerfiles
-│   └── ci/                  # CI configurations
+│   └── ci/                  # CI configurations (if needed)
 ├── deployments/             # Deployment configurations
-│   └── compose/             # Docker Compose files
+│   ├── compose/             # Docker Compose files
+│   └── k8s/                 # Kubernetes Manifests (if needed)
 ├── docs/                    # Documentation
+│   └── designs/             # Excalidraw designs and images
 ├── infra/                   # Infrastructure configurations
 │   ├── env/                 # Environment files
 │   ├── monitoring/          # Prometheus & Grafana configs
@@ -44,6 +48,7 @@ fafnir/
 │   ├── auth-service/        # Authentication service
 │   ├── security-service/    # Authorization service
 │   ├── user-service/        # User management service
+│   ├── stock-service/        # User management service
 │   └── shared/              # Shared libraries and utilities
 └── tools/                   # Development tools
     ├── scripts/             # Build and deployment scripts
@@ -70,7 +75,7 @@ fafnir/
 | **grafana**    | Metrics visualization and dashboards           | 3000 (dev only) | Monitoring UI    |
 
 ### Data Flow
-Below is the ideal data flow for the application. A concept drawing will be added later. For authentication data flow, check the [Authentication Guide](./authentication.md).
+Below is the ideal data flow for the application. It will be updated when NATS is implemented.
 1. Client → asks API Gateway for data
 2. API Gateway → routes request to appropriate service
 3. Services → interacts with their own PostgreSQL database
@@ -80,7 +85,9 @@ Below is the ideal data flow for the application. A concept drawing will be adde
 7. API Gateway → sends data back to Client
 
 ### Helpful Resources and Readings
-- [Microservices](https://martinfowler.com/articles/microservices.html) by Martin Fowler
-- [A pattern language for microservices](https://microservices.io/patterns/) by Chris Richardson
-- [19 Microservices Patterns for System Design Interviews](https://dev.to/somadevtoo/19-microservices-patterns-for-system-design-interviews-3o39) by Soma
-- [A Crash Course on Microservices Design Patterns](https://blog.bytebytego.com/p/a-crash-course-on-microservices-design) by ByteByteGo
+- [Microservices](https://martinfowler.com/articles/microservices.html) by [Martin Fowler](https://martinfowler.com/)
+- [What is Microservices Architecture?](https://webandcrafts.com/blog/what-is-microservices-architecture) by [Anjaly Chandran](https://webandcrafts.com/author/anjaly-chandran)
+- [A pattern language for microservices](https://microservices.io/patterns/) by [Chris Richardson](https://microservices.io/about.html)
+- [19 Microservices Patterns for System Design Interviews](https://dev.to/somadevtoo/19-microservices-patterns-for-system-design-interviews-3o39) by [Soma](https://dev.to/somadevtoo)
+- [A Crash Course on Microservices Design Patterns](https://blog.bytebytego.com/p/a-crash-course-on-microservices-design) by [ByteByteGo](https://blog.bytebytego.com/about)
+- [NATS Documentation](https://docs.nats.io/) by [NATS](https://nats.io/about/)
