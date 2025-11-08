@@ -3,7 +3,7 @@
         run build start pause stop status logs rm-volumes prune clean reset \
         migrate-up migrate-down migrate-status migrate-create \
         generate seed \
-        kube-setup kube-deploy kube-delete kube-reset \
+        kube-start kube-deploy kube-delete kube-reset \
         kube-status kube-nodes kube-pods kube-svc kube-deployments kube-logs \
         kube-forward kube-tunnel
 
@@ -93,8 +93,8 @@ seed:
 
 ### k8s commands for Kubernetes deployment
 
-kube-setup:
-	./tools/scripts/k8s.sh setup
+kube-start:
+	./tools/scripts/k8s.sh start
 
 kube-deploy:
 	./tools/scripts/k8s.sh deploy $(pod)
@@ -123,8 +123,14 @@ kube-deployments:
 kube-logs:
 	./tools/scripts/k8s.sh logs $(pod)
 
+kube-dashboard:
+	minikube dashboard -p fafnir-cluster
+
+kube-ssh:
+	minikube ssh -p fafnir-cluster
+
 kube-forward:
 	./tools/scripts/k8s.sh forward $(pod)
 
 kube-tunnel:
-	minikube tunnel
+	minikube tunnel -p fafnir-cluster

@@ -3,6 +3,7 @@
 ### Architecture Designs
 - [Initial Design #1](designs/images/dev_design_1.png)
 - [Revised Design of #1](designs/images/revised_dev_design_1.png)
+- [Kubernetes Node & Network Design](designs/images/k8s_node_network_design_1.png)
 
 ### Key Architectural Principles
 - **Microservices**: Each service has its own database and is independently deployable
@@ -91,3 +92,4 @@ Below is the ideal data flow for the application. It will be updated when NATS i
 - [19 Microservices Patterns for System Design Interviews](https://dev.to/somadevtoo/19-microservices-patterns-for-system-design-interviews-3o39) by [Soma](https://dev.to/somadevtoo)
 - [A Crash Course on Microservices Design Patterns](https://blog.bytebytego.com/p/a-crash-course-on-microservices-design) by [ByteByteGo](https://blog.bytebytego.com/about)
 - [NATS Documentation](https://docs.nats.io/) by [NATS](https://nats.io/about/)
+- [Kubernetes Documentation](https://kubernetes.io/docs/concepts/architecture/) by [Kubernetes](https://kubernetes.io/)

@@ -3,6 +3,7 @@
 ## Prerequisites
 - **Go 1.21+** - For microservices development
 - **Docker & Docker Compose** - For containerized development
+- **Minikube & kubectl** - For Kubernetes local cluster and container orchestration
 - **Make** - For build automation (use WSL2 on Windows)
 
 ## Quick Setup
@@ -98,6 +99,25 @@ These commands help you manage the development environment using Docker:
 | `make docker-prune`      | Prune all images and cached builds                                                            |
 | `make docker-clean`      | Runs commands `docker-stop`, `docker-prune`, `docker-rm-volumes`                              |
 | `make docker-reset`      | Runs commands `docker-clean`, `docker-build`, `docker-start`                                  |
+
+These commands help you manage the development environment with Kubernetes (Minikube):
+
+| Command                 | Description                                     |
+|-------------------------|-------------------------------------------------|
+| `make kube-start`       | Start Minikube cluster with configurations      |
+| `make kube-deploy`      | Deploy all services to Minikube cluster         |
+| `make kube-delete`      | Delete all services from Minikube cluster       |
+| `make kube-reset`       | Reset services in Minikube cluster              |
+| `make kube-status`      | Check status of deployed services in Minikube   |
+| `make kube-nodes`       | List all nodes in Minikube cluster              |
+| `make kube-pods`        | List all pods in Minikube cluster               |
+| `make kube-svc`         | List all services in Minikube cluster           |
+| `make kube-deployments` | List all deployments in Minikube cluster        |
+| `make kube-logs`        | View logs of a specific pod in Minikube cluster |
+| `make kube-dashboard`   | Open Minikube dashboard in browser              |
+| `make kube-ssh`         | SSH into Minikube cluster                       |
+| `make kube-forward`     | Port forward a service from Minikube cluster    |
+| `make kube-tunnel`      | Create a tunnel to access Minikube services     |
 
 You can also use the following commands to migrate the database:
 

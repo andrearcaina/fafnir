@@ -6,7 +6,7 @@ ENV_FILE="infra/env/.env.dev"
 LOCAL_IMAGES=(fafnir-auth-service fafnir-user-service fafnir-security-service fafnir-stock-service fafnir-api-gateway)
 
 case "$1" in
-  setup)
+  start)
     # start a minikube cluster called fafnir-cluster with 1 control plane and 2 worker nodes
     # and utilizing the docker driver, with 2GB memory (RAM) and 2 CPUs
     # so a total of 3 nodes, 6GB RAM and 6 CPUs allocated for the cluster
@@ -95,5 +95,5 @@ case "$1" in
     kubectl -n fafnir port-forward svc/postgres 5432:5432
     ;;
   *)
-    echo "Usage: $0 {setup|deploy|delete|reset|status|pods|svc|deployments|logs|forward}"
+    echo "Usage: $0 {start|deploy|delete|reset|status|nodes|pods|svc|deployments|logs|forward}"
 esac
