@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  labels:
+    app: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: fafnir-auth-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SERVICE_NAME
+              value: "auth-service"
+            - name: SERVICE_PORT
+              value: "8081"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: POSTGRES_PASSWORD
+            - name: AUTH_DB
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: AUTH_DB
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: DB_HOST_MINIKUBE
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: DB_PORT
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: JWT_SECRET_KEY
+      restartPolicy: Always

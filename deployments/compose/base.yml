@@ -40,6 +40,10 @@ services:
         condition: service_started
       security-service:
         condition: service_started
+      stock-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
     ports:
       - "8080:8080"
     networks:

@@ -1,4 +1,9 @@
-.PHONY: default help run-auth-service run-user-service run-security-service run-api-gateway run build start pause stop status logs rm-volumes prune clean reset migrate-up migrate-down migrate-status migrate-create generate seed
+.PHONY: default help \
+		run-auth-service run-user-service run-security-service run-stock-service run-api-gateway \
+        run build start pause stop status logs rm-volumes prune clean reset \
+        migrate-up migrate-down migrate-status migrate-create \
+        generate seed \
+        k8s-setup k8s-deploy k8s-delete k8s-reset k8s-status k8s-pods k8s-services k8s-deployments k8s-logs k8s-forward
 
 ### default makefile target command (runs help)
 
@@ -24,36 +29,36 @@ run-stock-service:
 run-api-gateway:
 	./tools/scripts/docker.sh api-gateway
 
-run:
+docker-run:
 	./tools/scripts/docker.sh run $(monitoring)
 
-build:
+docker-build:
 	./tools/scripts/docker.sh build
 
-start:
+docker-start:
 	./tools/scripts/docker.sh start
 
-pause:
+docker-pause:
 	./tools/scripts/docker.sh pause
 
-stop:
+docker-stop:
 	./tools/scripts/docker.sh stop
 
-status:
+docker-status:
 	./tools/scripts/docker.sh status
 
-logs:
+docker-logs:
 	./tools/scripts/docker.sh logs
 
-rm-volumes:
+docker-rm-volumes:
 	./tools/scripts/docker.sh rm-volumes
 
-prune:
+docker-prune:
 	./tools/scripts/docker.sh prune
 
-clean: stop prune rm-volumes
+docker-clean: docker-stop docker-prune docker-rm-volumes
 
-reset: clean build run
+docker-reset: docker-clean docker-build docker-run
 
 ### migration commands for database
 
@@ -83,3 +88,38 @@ generate:
 # or seed all databases (db=all)
 seed:
 	cd tools/seeder && go run main.go --db $(db)
+
+### k8s commands for Kubernetes deployment
+
+k8s-setup:
+	./tools/scripts/k8s.sh setup
+
+k8s-deploy:
+	./tools/scripts/k8s.sh deploy $(pod)
+
+k8s-delete:
+	./tools/scripts/k8s.sh delete
+
+k8s-reset:
+	./tools/scripts/k8s.sh reset $(pod)
+
+k8s-status:
+	./tools/scripts/k8s.sh status
+
+k8s-pods:
+	./tools/scripts/k8s.sh pods
+
+k8s-svc:
+	./tools/scripts/k8s.sh svc
+
+k8s-deployments:
+	./tools/scripts/k8s.sh deployments
+
+k8s-logs:
+	./tools/scripts/k8s.sh logs $(pod)
+
+k8s-forward:
+	./tools/scripts/k8s.sh forward $(pod)
+
+k8s-tunnel:
+	minikube tunnel

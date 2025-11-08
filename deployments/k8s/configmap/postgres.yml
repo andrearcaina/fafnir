@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+  namespace: fafnir
+data:
+  init-dbs.sql: |
+    CREATE DATABASE auth_db;
+    CREATE DATABASE user_db;
+    CREATE DATABASE security_db;
+    CREATE DATABASE stock_db;

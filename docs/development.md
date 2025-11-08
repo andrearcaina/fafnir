@@ -86,18 +86,18 @@ make generate codegen=sqlc service=auth
 
 These commands help you manage the development environment using Docker:
 
-| Command           | Description                                                                                   |
-|-------------------|-----------------------------------------------------------------------------------------------|
-| `make build`      | Build all docker containers                                                                   |
-| `make start`      | Start all existing docker containers                                                          |
-| `make pause`      | Stops running all existing docker containers                                                  |
-| `make run`        | Creates and run docker containers (`make run monitoring=true` to run with grafana/prometheus) |
-| `make stop`       | Stops and deletes containers and volumes                                                      |
-| `make status`     | Check status of currently running docker containers                                           |
-| `make rm-volumes` | Remove all volumes of PostgreSQL DB                                                           |
-| `make prune`      | Prune all images and cached builds                                                            |
-| `make clean`      | Runs commands `stop`, `prune`, `rm-volumes`                                                   |
-| `make reset`      | Runs commands `clean`, `build`, `start`                                                       |
+| Command                  | Description                                                                                   |
+|--------------------------|-----------------------------------------------------------------------------------------------|
+| `make docker-build`      | Build all docker containers                                                                   |
+| `make docker-start`      | Start all existing docker containers                                                          |
+| `make docker-pause`      | Stops running all existing docker containers                                                  |
+| `make docker-run`        | Creates and run docker containers (`make run monitoring=true` to run with grafana/prometheus) |
+| `make docker-stop`       | Stops and deletes containers and volumes                                                      |
+| `make docker-status`     | Check status of currently running docker containers                                           |
+| `make docker-rm-volumes` | Remove all volumes of PostgreSQL DB                                                           |
+| `make docker-prune`      | Prune all images and cached builds                                                            |
+| `make docker-clean`      | Runs commands `docker-stop`, `docker-prune`, `docker-rm-volumes`                              |
+| `make docker-reset`      | Runs commands `docker-clean`, `docker-build`, `docker-start`                                  |
 
 You can also use the following commands to migrate the database:
 

@@ -36,7 +36,7 @@ fafnir/
 │   └── ci/                  # CI configurations (if needed)
 ├── deployments/             # Deployment configurations
 │   ├── compose/             # Docker Compose files
-│   └── k8s/                 # Kubernetes Manifests (if needed)
+│   └── k8s/                 # Kubernetes Manifests
 ├── docs/                    # Documentation
 │   └── designs/             # Excalidraw designs and images
 ├── infra/                   # Infrastructure configurations

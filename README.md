@@ -20,6 +20,6 @@ In no particular order:
 - [ ] Sketch a basic design of data flow as well as other services (orchestrate events that happen in the app)
 - [ ] Add orchestrating/simulation engine or key app events (saga pattern)
 - [ ] Simulate load testing with multiple users and services interacting using Locust (simulate real world usage and concurrent users)
-- [ ] Figure out how kubernetes fits in (test locally with minikube first maybe)
+- [X] Figure out how kubernetes fits in (check issue [kubernetes local implementation](https://github.com/andrearcaina/fafnir/issues/5))
 - [ ] Add unit and integration tests for each microservice (going to be a lot of work)
 - [ ] Add CI/CD pipeline for automated testing and docker image builds
