@@ -3,7 +3,9 @@
         run build start pause stop status logs rm-volumes prune clean reset \
         migrate-up migrate-down migrate-status migrate-create \
         generate seed \
-        k8s-setup k8s-deploy k8s-delete k8s-reset k8s-status k8s-pods k8s-services k8s-deployments k8s-logs k8s-forward
+        kube-setup kube-deploy kube-delete kube-reset \
+        kube-status kube-nodes kube-pods kube-svc kube-deployments kube-logs \
+        kube-forward kube-tunnel
 
 ### default makefile target command (runs help)
 
@@ -12,7 +14,7 @@ default: help
 help:
 	@echo "Usage: make <target> [options]"
 
-### docker commands for running services
+### docker commands for build images, running and stopping containers, etc.
 
 run-auth-service:
 	./tools/scripts/docker.sh auth-service
@@ -91,35 +93,38 @@ seed:
 
 ### k8s commands for Kubernetes deployment
 
-k8s-setup:
+kube-setup:
 	./tools/scripts/k8s.sh setup
 
-k8s-deploy:
+kube-deploy:
 	./tools/scripts/k8s.sh deploy $(pod)
 
-k8s-delete:
+kube-delete:
 	./tools/scripts/k8s.sh delete
 
-k8s-reset:
+kube-reset:
 	./tools/scripts/k8s.sh reset $(pod)
 
-k8s-status:
+kube-status:
 	./tools/scripts/k8s.sh status
 
-k8s-pods:
+kube-nodes:
+	./tools/scripts/k8s.sh nodes
+
+kube-pods:
 	./tools/scripts/k8s.sh pods
 
-k8s-svc:
+kube-svc:
 	./tools/scripts/k8s.sh svc
 
-k8s-deployments:
+kube-deployments:
 	./tools/scripts/k8s.sh deployments
 
-k8s-logs:
+kube-logs:
 	./tools/scripts/k8s.sh logs $(pod)
 
-k8s-forward:
+kube-forward:
 	./tools/scripts/k8s.sh forward $(pod)
 
-k8s-tunnel:
+kube-tunnel:
 	minikube tunnel

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fafnir/stock-service/internal/config"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,24 +15,43 @@ type Cache struct {
 	ttl    time.Duration // time to live (expiration duration) for cached items
 }
 
-func New(config *config.Config) (*Cache, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", config.Cache.Host, config.Cache.Port),
-		Password: "", // no password set
-		DB:       0,
-	})
+func New(cfg *config.Config) (*Cache, error) {
+	var rdb *redis.Client
+	var err error
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
+	const maxRetries = 10
+	const retryInterval = 5 * time.Second
 
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("redis ping failed: %v", err)
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		rdb = redis.NewClient(&redis.Options{
+			Addr:     fmt.Sprintf("%s:%s", cfg.Cache.Host, cfg.Cache.Port),
+			Password: "", // no password set
+			DB:       0,
+		})
+
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		err = rdb.Ping(ctx).Err()
+		cancel()
+
+		if err == nil {
+			log.Printf("Successfully connected to Redis on attempt %d", attempt)
+			return &Cache{
+				client: rdb,
+				ttl:    5 * time.Minute, // default TTL of 5 minutes
+			}, nil
+		}
+
+		log.Printf("Attempt %d/%d: Failed to ping Redis: %v", attempt, maxRetries, err)
+
+		rdb.Close()
+
+		if attempt < maxRetries {
+			log.Printf("Retrying Redis connection in %v...", retryInterval)
+			time.Sleep(retryInterval)
+		}
 	}
 
-	return &Cache{
-		client: rdb,
-		ttl:    5 * time.Minute, // default TTL of 5 minutes
-	}, nil
+	return nil, fmt.Errorf("failed to connect to Redis after %d attempts: %w", maxRetries, err)
 }
 
 func (c *Cache) Close() error {

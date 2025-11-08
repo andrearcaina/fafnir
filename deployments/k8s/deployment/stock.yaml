@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: stock-service
   namespace: fafnir
   labels:
-    app: auth-service
+    app: stock-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-service
+      app: stock-service
   template:
     metadata:
       labels:
-        app: auth-service
+        app: stock-service
     spec:
       containers:
-        - name: auth-service
-          image: fafnir-auth-service:latest
+        - name: stock-service
+          image: fafnir-stock-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - containerPort: 8084
           env:
             - name: SERVICE_NAME
-              value: "auth-service"
+              value: "stock-service"
             - name: SERVICE_PORT
-              value: "8081"
+              value: "8084"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -36,11 +36,11 @@ spec:
                 secretKeyRef:
                   name: fafnir-secrets
                   key: POSTGRES_PASSWORD
-            - name: AUTH_DB
+            - name: STOCK_DB
               valueFrom:
                 secretKeyRef:
                   name: fafnir-secrets
-                  key: AUTH_DB
+                  key: STOCK_DB
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
@@ -51,9 +51,16 @@ spec:
                 secretKeyRef:
                   name: fafnir-secrets
                   key: DB_PORT
-            - name: JWT_SECRET_KEY
+            - name: REDIS_HOST
               valueFrom:
                 secretKeyRef:
                   name: fafnir-secrets
-                  key: JWT_SECRET_KEY
+                  key: REDIS_HOST_MINIKUBE
+            - name: REDIS_PORT
+              value: "6379"
+            - name: FMP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: FMP_API_KEY
       restartPolicy: Always

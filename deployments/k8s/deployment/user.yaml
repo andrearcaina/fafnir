@@ -1,31 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-service
+  name: user-service
   namespace: fafnir
   labels:
-    app: auth-service
+    app: user-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth-service
+      app: user-service
   template:
     metadata:
       labels:
-        app: auth-service
+        app: user-service
     spec:
       containers:
-        - name: auth-service
-          image: fafnir-auth-service:latest
+        - name: user-service
+          image: fafnir-user-service:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - containerPort: 8083
           env:
             - name: SERVICE_NAME
-              value: "auth-service"
+              value: "user-service"
             - name: SERVICE_PORT
-              value: "8081"
+              value: "8083"
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -36,11 +36,11 @@ spec:
                 secretKeyRef:
                   name: fafnir-secrets
                   key: POSTGRES_PASSWORD
-            - name: AUTH_DB
+            - name: USER_DB
               valueFrom:
                 secretKeyRef:
                   name: fafnir-secrets
-                  key: AUTH_DB
+                  key: USER_DB
             - name: DB_HOST
               valueFrom:
                 secretKeyRef:
@@ -51,9 +51,4 @@ spec:
                 secretKeyRef:
                   name: fafnir-secrets
                   key: DB_PORT
-            - name: JWT_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: fafnir-secrets
-                  key: JWT_SECRET_KEY
       restartPolicy: Always

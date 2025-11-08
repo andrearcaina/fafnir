@@ -7,6 +7,20 @@ LOCAL_IMAGES=(fafnir-auth-service fafnir-user-service fafnir-security-service fa
 
 case "$1" in
   setup)
+    # start a minikube cluster called fafnir-cluster with 1 control plane and 2 worker nodes
+    # and utilizing the docker driver, with 2GB memory (RAM) and 2 CPUs
+    # so a total of 3 nodes, 6GB RAM and 6 CPUs allocated for the cluster
+    if ! minikube status -p fafnir-cluster &>/dev/null; then
+      echo "Starting minikube cluster 'fafnir-cluster'..."
+      minikube start -p fafnir-cluster --driver=docker --memory=2048 --cpus=2 --nodes=3
+    else
+      echo "Minikube cluster 'fafnir-cluster' is already running."
+    fi
+
+    # switch to the fafnir-cluster context
+    minikube profile fafnir-cluster
+    kubectl config use-context fafnir-cluster
+
     # create namespace
     kubectl create namespace fafnir --dry-run=client -o yaml | kubectl apply -f -
 
@@ -27,10 +41,10 @@ case "$1" in
     # load local docker images into minikube
     for image in "${LOCAL_IMAGES[@]}"; do
       echo "Loading image $image into minikube..."
-      minikube image load "$image:latest"
+      minikube image load "$image:latest" -p fafnir-cluster
     done
 
-    echo "Minikube setup completed."
+    echo "Minikube multi-node Kubernetes cluster setup completed."
     ;;
   deploy)
     if [[ "$2" == "all" ]]; then
@@ -54,23 +68,25 @@ case "$1" in
     fi
     ;;
   status)
-    kubectl get all -n fafnir
+    kubectl get all -n fafnir -o wide
+    ;;
+  nodes)
+    kubectl get nodes -o wide
     ;;
   pods)
-    kubectl get pods -n fafnir
+    kubectl get pods -n fafnir -o wide
     ;;
   svc)
-    kubectl get svc -n fafnir
+    kubectl get svc -n fafnir -o wide
     ;;
   deployments)
-    kubectl get deployments -n fafnir
+    kubectl get deployments -n fafnir -o wide
     ;;
   logs)
       [[ -z "$2" ]] && { echo "App name required for logs."; exit 1; }
       pod=$(kubectl get pods -n fafnir -l app="$2" -o jsonpath='{.items[0].metadata.name}')
       kubectl logs -n fafnir "$pod" --follow
       ;;
-
   forward)
     if [[ "$2" != "postgres" ]]; then
       echo "postgres is the only supported service for port-forwarding."
