@@ -49,7 +49,7 @@ fafnir/
 │   ├── auth-service/        # Authentication service
 │   ├── security-service/    # Authorization service
 │   ├── user-service/        # User management service
-│   ├── stock-service/        # User management service
+│   ├── stock-service/       # Stock service
 │   └── shared/              # Shared libraries and utilities
 └── tools/                   # Development tools
     ├── scripts/             # Build and deployment scripts
@@ -58,28 +58,28 @@ fafnir/
 
 ### Core Services
 
-| Service              | Description                                                      | Tech Stack         | Ports           | Database           |
-|----------------------|------------------------------------------------------------------|--------------------|-----------------|--------------------|
-| **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi | 8080 (public)   | -                  |
-| **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi   | 8081 (public)   | auth_db            |
-| **security-service** | Role-based access control and authorization                      | Go, sqlc, gRPC     | 8082 (internal) | security_db        |
-| **user-service**     | User profile management and CRUD operations                      | Go, sqlc, gRPC     | 8083 (internal) | user_db            |
-| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, go-chi   | 8084 (internal) | stock_db, redis_db |
+| Service              | Description                                                      | Tech Stack         | Ports           | Database        |
+|----------------------|------------------------------------------------------------------|--------------------|-----------------|-----------------|
+| **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi | 8080 (public)   | -               |
+| **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi   | 8081 (internal) | auth_db         |
+| **security-service** | Role-based access control and authorization                      | Go, sqlc, gRPC     | 8082 (internal) | security_db     |
+| **user-service**     | User profile management and CRUD operations                      | Go, sqlc, gRPC     | 8083 (internal) | user_db         |
+| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, go-chi   | 8084 (internal) | stock_db, redis |
 
 ### Infrastructure Services
 
-| Service        | Description                                    | Ports           | Purpose          |
-|----------------|------------------------------------------------|-----------------|------------------|
-| **postgres**   | PostgreSQL database with per-service databases | 5432 (internal) | Data persistence |
-| **redis**      | Redis caching for quick look up                | 6379 (internal) | Caching          |
-| **prometheus** | Metrics collection and monitoring              | 9090 (dev only) | Observability    |
-| **grafana**    | Metrics visualization and dashboards           | 3000 (dev only) | Monitoring UI    |
+| Service        | Description                                  | Ports           | Purpose          |
+|----------------|----------------------------------------------|-----------------|------------------|
+| **postgres**   | Postgres database with per-service databases | 5432 (internal) | Data persistence |
+| **redis**      | Redis caching for quick look up              | 6379 (internal) | Caching          |
+| **prometheus** | Metrics collection and monitoring            | 9090 (dev only) | Observability    |
+| **grafana**    | Metrics visualization and dashboards         | 3000 (dev only) | Monitoring UI    |
 
 ### Data Flow
 Below is the ideal data flow for the application. It will be updated when NATS is implemented.
 1. Client → asks API Gateway for data
 2. API Gateway → routes request to appropriate service
-3. Services → interacts with their own PostgreSQL database
+3. Services → interacts with their own Postgres database
 4. Services → processes data and may call other services if needed
 5. Services → returns data to API Gateway
 6. API Gateway → aggregates data from multiple services if necessary

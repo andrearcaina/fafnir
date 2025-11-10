@@ -1,89 +1,60 @@
 # Development Guide
 
-## Prerequisites
+## Prerequisites before Starting
 - **Go 1.21+** - For microservices development
 - **Docker & Docker Compose** - For containerized development
 - **Minikube & kubectl** - For Kubernetes local cluster and container orchestration
-- **Make** - For build automation (use WSL2 on Windows)
+- **Make or Task** - For DevOps automation scripts (Task for cross-platform compatibility, and Make for Linux/Mac)
 
-## Quick Setup
+## Setup Development Environment
 
 1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd fafnir
-   ```
+    ```bash
+    git clone git@github.com:andrearcaina/fafnir.git
+    cd fafnir
+    ```
 
 2. **Configure environment**
-   ```bash
-   cp infra/env/.env.dev.example infra/env/.env.dev
-   # Edit .env.dev with your configuration
-   ```
+    ```bash
+    cp infra/env/.env.dev.example infra/env/.env.dev
+    # Edit .env.dev with your configuration
+    ```
 
 3. **Start development environment**
-   ```bash
-   make run              # Start all services
-   make migrate-up       # Run database migrations
-   make seed serviceDB=all      # Seed databases with test data
-   ```
+    - Using Docker Compose
+      ```bash
+      make docker-run       # Start all services
+      make migrate-up       # Run database migrations
+      make seed db=all      # Seed databases with test data
+      ```
 
-## Service Access Points
+    - Using Kubernetes
+      ```bash
+      make docker-build              # Build docker images
+      make kube-start                # Start Minikube cluster
+      make kube-deploy               # Deploy services to Minikube
+      make kube-forward pod=postgres # Port forward Postgres service
+      
+      # Open a new terminal
+      make migrate-up                # Run database migrations
+      make kube-tunnel               # Create tunnel to access services via load balancer
+      ```
+4. **Access Services**
 
-| Service          | URL                                            | Description          |
-|------------------|------------------------------------------------|----------------------|
-| **API Gateway**  | [http://localhost:8080](http://localhost:8080) | GraphQL endpoint     |
-| **Auth Service** | [http://localhost:8081](http://localhost:8081) | Authentication API   |
-| **Grafana**      | [http://localhost:3000](http://localhost:3000) | Monitoring dashboard |
-| **Prometheus**   | [http://localhost:9090](http://localhost:9090) | Metrics collection   |
+   Grafana and Prometheus will be available if you started the monitoring stack (`make docker-run monitoring=true`).
 
-## Development Workflow
+   | Service         | URL                                            | Description                        |
+   |-----------------|------------------------------------------------|------------------------------------|
+   | **API Gateway** | [http://localhost:8080](http://localhost:8080) | Main entrypoint (GraphQL and REST) |
+   | **Grafana**     | [http://localhost:3000](http://localhost:3000) | Monitoring dashboard               |
+   | **Prometheus**  | [http://localhost:9090](http://localhost:9090) | Metrics collection                 |
 
-### Starting Services
-```bash
-# Start all core services
-make run
+## Development Automation Guide
 
-# Start with monitoring stack
-make run-monitoring
-
-# Start individual services
-make run-auth-service
-make run-user-service
-make run-security-service
-make run-stock-service
-make run-api-gateway
-```
-
-### Database Operations
-```bash
-# Run migrations
-make migrate-up
-
-# Check migration status
-make migrate-status
-```
-
-### Seed Operations
-```bash
-# Populate databases
-make seed db=all        # All databases
-make seed db=auth       # Auth database only
-make seed db=user       # User database only
-make seed db=security   # Security database only
-make seed db=stock      # Stock database only
-```
-
-
-### Code Generation
-```bash
-# Generate GraphQL resolvers
-make generate codegen=graphql
-
-# Generate SQLC code for specific service
-make generate codegen=sqlc service=auth
-```
-
-## Make Commands
+A lot of these `make` commands are wrappers around bash scripts located in the `tools/scripts/` directory. 
+I created a `Taskfile` for cross-platform compatibility, but `Makefile` was the first choice I used.
+Most of these commands can be run just by using `make <command>`, or `task <command>` if you are using Task.
+The difference is that with Task the command names are colon-separated instead of hyphen-separated.
 
 These commands help you manage the development environment using Docker:
 
@@ -95,7 +66,7 @@ These commands help you manage the development environment using Docker:
 | `make docker-run`        | Creates and run docker containers (`make run monitoring=true` to run with grafana/prometheus) |
 | `make docker-stop`       | Stops and deletes containers and volumes                                                      |
 | `make docker-status`     | Check status of currently running docker containers                                           |
-| `make docker-rm-volumes` | Remove all volumes of PostgreSQL DB                                                           |
+| `make docker-rm-volumes` | Remove all volumes of Postgres DB                                                             |
 | `make docker-prune`      | Prune all images and cached builds                                                            |
 | `make docker-clean`      | Runs commands `docker-stop`, `docker-prune`, `docker-rm-volumes`                              |
 | `make docker-reset`      | Runs commands `docker-clean`, `docker-build`, `docker-start`                                  |
@@ -130,9 +101,9 @@ You can also use the following commands to migrate the database:
 
 You can run the following commands to generate the GraphQL resolvers based on the schema:
 
-| Command         | Description                                                                                    |
-|-----------------|------------------------------------------------------------------------------------------------|
-| `make generate` | Generate GraphQL, sqlc, or proto boilerplate dependent on the .graphqls, .sql, or .proto files |
+| Command         | Description                                                                                          |
+|-----------------|------------------------------------------------------------------------------------------------------|
+| `make generate` | Generate GraphQL, SQLc, or proto boilerplate dependent on the `.graphqls`, `.sql`, or `.proto` files |
 
 You can run the following commands to seed the database with initial data after migrations:
 
@@ -142,24 +113,22 @@ You can run the following commands to seed the database with initial data after 
 
 You can also run certain microservices individually:
 
-| Command                     | Description                   |
-|-----------------------------|-------------------------------|
-| `make run-auth-service`     | Start the auth service        |
-| `make run-user-service`     | Start the user service        |
-| `make run-security-service` | Start the security service    |
-| `make stock-service`        | Start the stock service       |
-| `make run-api-gateway`      | Start the GraphQL API Gateway |
+| Command                        | Description                   |
+|--------------------------------|-------------------------------|
+| `make docker-auth-service`     | Start the auth service        |
+| `make docker-user-service`     | Start the user service        |
+| `make docker-security-service` | Start the security service    |
+| `make docker-stock-service`    | Start the stock service       |
+| `make docker-api-gateway`      | Start the GraphQL API Gateway |
 
-For more information on the commands, check out the scripts folder.
+For more information on the commands, check out the `scripts/` folder.
 
-| Bash Script                  | Description                        |
-|------------------------------|------------------------------------|
-| `./tools/scripts/docker.sh`  | All the docker command logic       |
-| `./tools/scripts/gqlgen.sh`  | All the gqlgen command logic       |
-| `./tools/scripts/help.sh`    | The help command logic             |
-| `./tools/scripts/migrate.sh` | The goose migrations command logic |
-| `./tools/scripts/seed.sh`    | Seed command logic                 |
-
+| Bash Script                  | Description                     |
+|------------------------------|---------------------------------|
+| `./tools/scripts/codegen.sh` | All the codegen command logic   |
+| `./tools/scripts/docker.sh`  | All the docker command logic    |
+| `./tools/scripts/k8s.sh`     | All the kube command logic      |
+| `./tools/scripts/migrate.sh` | All the migration command logic |
 
 ## Useful Links
 - [Architecture Overview](architecture.md)

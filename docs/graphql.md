@@ -21,18 +21,124 @@ Health Check Query
 }
 ```
 
+Check Permission Query
+
+```graphql
+query HasPermission($request: HasPermissionRequest!) {
+  checkPermission(request: $request) {
+    hasPermission
+    permissionCode
+  }
+}
+```
+
+Get Stock Quote Batch Query
+
+```graphql
+query {
+  getStockQuoteBatch(symbols: ["AAPL", "MSFT", "TSLA", "AMZN", "GOOGL", "META"]) {
+    code
+    data {
+      symbol
+      price
+      open
+      previousClose
+    }
+  }
+}
+
+```
+
+
 ## Example Mutations
 
 None yet
 
+## Example 200 Responses
 
-## Example Responses
+Successful Health Check Response
 
-### Successful Health Check Response
 ```json
 {
   "data": {
     "health": "API Gateway is running"
+  }
+}
+
+
+```
+
+Successful Check Permission Response
+
+```json
+{
+  "data": {
+    "checkPermission": {
+      "hasPermission": false,
+      "permissionCode": "PERMISSION_DENIED"
+    }
+  }
+}
+```
+
+Successful Get Stock Quote Batch Response
+
+```json
+{
+  "data": {
+    "getStockQuoteBatch": {
+      "code": 200,
+      "data": [
+        {
+          "symbol": "AAPL",
+          "price": 268.47,
+          "open": 269.795,
+          "previousClose": 269.77
+        },
+        {
+          "symbol": "MSFT",
+          "price": 496.82,
+          "open": 496.68,
+          "previousClose": 497.1
+        },
+        {
+          "symbol": "TSLA",
+          "price": 429.52,
+          "open": 437.89,
+          "previousClose": 445.91
+        },
+        {
+          "symbol": "AMZN",
+          "price": 244.41,
+          "open": 241.15,
+          "previousClose": 243.04
+        },
+        {
+          "symbol": "GOOGL",
+          "price": 278.83,
+          "open": 283.205,
+          "previousClose": 284.75
+        },
+        {
+          "symbol": "META",
+          "price": 621.71,
+          "open": 616.485,
+          "previousClose": 618.94
+        }
+      ]
+    }
+  }
+}
+```
+
+Example Error Response
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "details": "Authentication token not found in cookies",
+    "message": "Authentication required"
   }
 }
 ```

@@ -3,33 +3,37 @@
         run build start pause stop status logs rm-volumes prune clean reset \
         migrate-up migrate-down migrate-status migrate-create \
         generate seed \
-        kube-start kube-deploy kube-delete kube-reset \
+        kube-start kube-stop kube-deploy kube-delete kube-reset \
         kube-status kube-nodes kube-pods kube-svc kube-deployments kube-logs \
         kube-forward kube-tunnel
-
-### default makefile target command (runs help)
 
 default: help
 
 help:
 	@echo "Usage: make <target> [options]"
 
-### docker commands for build images, running and stopping containers, etc.
+# ------------------------------
+# Docker Service Operations
+# ------------------------------
 
-run-auth-service:
+docker-auth-service:
 	./tools/scripts/docker.sh auth-service
 
-run-user-service:
+docker-user-service:
 	./tools/scripts/docker.sh user-service
 
-run-security-service:
+docker-security-service:
 	./tools/scripts/docker.sh security-service
 
-run-stock-service:
+docker-stock-service:
 	./tools/scripts/docker.sh stock-service
 
-run-api-gateway:
+docker-api-gateway:
 	./tools/scripts/docker.sh api-gateway
+
+# ------------------------------
+# Docker Lifecycle Operations
+# ------------------------------
 
 docker-run:
 	./tools/scripts/docker.sh run $(monitoring)
@@ -62,7 +66,9 @@ docker-clean: docker-stop docker-prune docker-rm-volumes
 
 docker-reset: docker-clean docker-build docker-run
 
-### migration commands for database
+# ------------------------------
+# Database Migrations Operations
+# ------------------------------
 
 migrate-up:
 	./tools/scripts/migrate.sh up
@@ -77,24 +83,33 @@ migrate-status:
 migrate-create:
 	./tools/scripts/migrate.sh create $(db) $(name)
 
-#### codegen commands for generating GraphQL and SQLc go code from .graphqls and .sql files
+# ------------------------------
+# Codegen Operations
+# ------------------------------
 
 # make generate codegen=<graphql|sqlc>
 # if codegen is sqlc, then service is required (service=auth)
 generate:
 	./tools/scripts/codegen.sh generate $(codegen) $(service)
 
-### seed commands for seeding certain databases
+# ------------------------------
+# Database Seed Operations
+# ------------------------------
 
 # make seed db=<db_name> (db_name=auth)
 # or seed all databases (db=all)
 seed:
 	cd tools/seeder && go run main.go --db $(db)
 
-### k8s commands for Kubernetes deployment
+# ------------------------------
+# Kubernetes Operations
+# ------------------------------
 
 kube-start:
 	./tools/scripts/k8s.sh start
+
+kube-stop:
+	minikube stop -p fafnir-cluster
 
 kube-deploy:
 	./tools/scripts/k8s.sh deploy $(pod)

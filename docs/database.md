@@ -1,5 +1,10 @@
 # Database & Migrations
 
+## Architecture Design
+- Each microservice has its own dedicated Postgres database
+- This ensures data isolation and allows each service to manage its own schema and migrations independently
+- Each service connects to its respective database using environment variables defined in the Docker Compose and Kubernetes configuration files
+
 ## Overview
 - Uses Postgres (see `build/docker/postgres.Dockerfile`)
 - Migrations managed with [Goose](https://github.com/pressly/goose)
