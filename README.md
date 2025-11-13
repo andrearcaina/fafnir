@@ -21,9 +21,10 @@ stock data retrieval, buy/sell operations, and security/permissions.
 In no particular order:
 - [ ] Design and implement additional microservices.
 - [ ] Integrate NATS for asynchronous events and messaging (consider saga pattern).
-- [ ] Create a data flow diagram and orchestrate key app events.
+- [X] Create system architecture, network and data diagrams.
 - [ ] Build a simulation/orchestration engine for app events.
 - [ ] Perform load testing using Locust (or Siege) to simulate multiple concurrent users.
 - [X] Explore Kubernetes local implementation ([issue #5](https://github.com/andrearcaina/fafnir/issues/5)).
+- [ ] Explore centralized logging CLI with Elasticsearch ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
 - [ ] Add unit and integration tests for each microservice.
 - [ ] Implement a CI/CD pipeline for automated testing and Docker builds.
