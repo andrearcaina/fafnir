@@ -52,8 +52,10 @@ fafnir/
 │   ├── stock-service/       # Stock service
 │   └── shared/              # Shared libraries and utilities
 └── tools/                   # Development tools
+    ├── logctl/              # Centralized logging control tool
     ├── scripts/             # Build and deployment scripts
-    └── seeder/              # Centralized database seeder
+    └── seedctl/             # Centralized database seeder
+    
 ```
 
 ### Core Services

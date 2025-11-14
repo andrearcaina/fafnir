@@ -99,7 +99,7 @@ generate:
 # make seed db=<db_name> (db_name=auth)
 # or seed all databases (db=all)
 seed:
-	cd tools/seeder && go run main.go --db $(db)
+	cd tools/cli/seedctl && go run main.go --db $(db)
 
 # ------------------------------
 # Kubernetes Operations
