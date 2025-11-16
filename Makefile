@@ -136,7 +136,7 @@ kube-deployments:
 	./tools/scripts/k8s.sh deployments
 
 kube-logs:
-	./tools/scripts/k8s.sh logs $(pod)
+	./tools/scripts/k8s.sh logs $(pod) $(ns)
 
 kube-dashboard:
 	minikube dashboard -p fafnir-cluster

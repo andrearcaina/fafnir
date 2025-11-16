@@ -20,9 +20,15 @@ case "$1" in
     # switch to the fafnir-cluster context
     minikube profile fafnir-cluster
     kubectl config use-context fafnir-cluster
+    kubectl label node fafnir-cluster logging-exclude=false --overwrite
+    kubectl label node fafnir-cluster-m02 logging-exclude=false --overwrite
+    kubectl label node fafnir-cluster-m03 logging-exclude=false --overwrite
 
-    # create namespace
+    # create fafnir namespace (for app)
     kubectl create namespace fafnir --dry-run=client -o yaml | kubectl apply -f -
+
+    # create logging namespace (for fafnir logs)
+    kubectl create namespace logging --dry-run=client -o yaml | kubectl apply -f -
 
     # create or update secrets
     if kubectl get secret fafnir-secrets -n fafnir &>/dev/null; then
@@ -30,9 +36,7 @@ case "$1" in
       kubectl delete secret fafnir-secrets -n fafnir
     fi
 
-    kubectl create secret generic fafnir-secrets \
-      --from-env-file=$ENV_FILE \
-      --namespace=fafnir
+    kubectl create secret generic fafnir-secrets --from-env-file=$ENV_FILE --namespace=fafnir
 
     # verify creation
     kubectl get secret fafnir-secrets -n fafnir
@@ -49,50 +53,63 @@ case "$1" in
   deploy)
     if [[ "$2" == "all" ]]; then
       echo "Deploying all resources..."
-      kubectl apply -f deployments/k8s/ -n fafnir --recursive
+      kubectl apply -f deployments/k8s/ --recursive
     else
       echo "Deploying $2..."
-      kubectl apply -f deployments/k8s/deployment/$2.yaml -n fafnir
+      kubectl apply -f deployments/k8s/deployment/$2.yaml
     fi
     ;;
   delete)
-    kubectl delete -f deployments/k8s/ -n fafnir --recursive
+    kubectl delete -f deployments/k8s/ --recursive
     ;;
   reset)
     if [[ "$2" == "all" ]]; then
       echo "Restarting all deployments..."
-      kubectl rollout restart deployment -n fafnir
+      kubectl rollout restart deployment --all
     else
       echo "Restarting $2..."
       kubectl rollout restart deployment/$2 -n fafnir
     fi
     ;;
   status)
-    kubectl get all -n fafnir -o wide
+    for ns in fafnir logging; do
+      echo "=== Namespace: $ns ==="
+      kubectl get all -n $ns -o wide
+    done
     ;;
   nodes)
     kubectl get nodes -o wide
     ;;
   pods)
-    kubectl get pods -n fafnir -o wide
+    for ns in fafnir logging; do
+      echo "=== Namespace: $ns ==="
+      kubectl get pods -n $ns -o wide
+    done
     ;;
   svc)
-    kubectl get svc -n fafnir -o wide
+    for ns in fafnir logging; do
+      echo "=== Namespace: $ns ==="
+      kubectl get svc -n $ns -o wide
+    done
     ;;
   deployments)
-    kubectl get deployments -n fafnir -o wide
+    for ns in fafnir logging; do
+      echo "=== Namespace: $ns ==="
+      kubectl get deployments -n $ns -o wide
+    done
     ;;
   logs)
-      [[ -z "$2" ]] && { echo "App name required for logs."; exit 1; }
-      pod=$(kubectl get pods -n fafnir -l app="$2" -o jsonpath='{.items[0].metadata.name}')
-      kubectl logs -n fafnir "$pod" --follow
-      ;;
+    [[ -z "$2" ]] && { echo "App name required for logs."; exit 1; }
+    namespace="${3:-fafnir}" # defaults to fafnir if not provided
+    pod=$(kubectl get pods -n "$namespace" -l app="$2" -o jsonpath='{.items[0].metadata.name}')
+    kubectl logs -n "$namespace" "$pod" --follow
+    ;;
   forward)
-    if [[ "$2" != "postgres" ]]; then
-      echo "postgres is the only supported service for port-forwarding."
-      exit 1;
+    if [[ "$2" == "postgres" ]]; then
+      kubectl -n fafnir port-forward svc/postgres 5432:5432
+    else
+      echo "Unsupported service for port forwarding."
     fi
-    kubectl -n fafnir port-forward svc/postgres 5432:5432
     ;;
   *)
     echo "Usage: $0 {start|deploy|delete|reset|status|nodes|pods|svc|deployments|logs|forward}"
