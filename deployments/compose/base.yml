@@ -160,6 +160,32 @@ services:
     networks:
       - fafnir-network
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.7
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    networks:
+      - fafnir-network
+
+  elastic-agent:
+    image: docker.elastic.co/beats/elastic-agent:8.13.0
+    restart: always
+    user: root
+    environment:
+      - FLEET_ENROLL=0
+      - FLEET_INSECURE=true
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    depends_on:
+      - elasticsearch
+    networks:
+      - fafnir-network
+
 volumes:
   pgdata:
 

@@ -99,7 +99,7 @@ generate:
 # make seed db=<db_name> (db_name=auth)
 # or seed all databases (db=all)
 seed:
-	cd tools/seeder && go run main.go --db $(db)
+	cd tools/cli/seedctl && go run main.go --db $(db)
 
 # ------------------------------
 # Kubernetes Operations
@@ -136,7 +136,7 @@ kube-deployments:
 	./tools/scripts/k8s.sh deployments
 
 kube-logs:
-	./tools/scripts/k8s.sh logs $(pod)
+	./tools/scripts/k8s.sh logs $(pod) $(ns)
 
 kube-dashboard:
 	minikube dashboard -p fafnir-cluster
