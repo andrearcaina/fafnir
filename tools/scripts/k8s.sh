@@ -65,7 +65,8 @@ case "$1" in
   reset)
     if [[ "$2" == "all" ]]; then
       echo "Restarting all deployments..."
-      kubectl rollout restart deployment --all
+      kubectl rollout restart deployment -n fafnir  
+      kubectl rollout restart deployment -n logging
     else
       echo "Restarting $2..."
       kubectl rollout restart deployment/$2 -n fafnir
@@ -105,11 +106,21 @@ case "$1" in
     kubectl logs -n "$namespace" "$pod" --follow
     ;;
   forward)
-    if [[ "$2" == "postgres" ]]; then
-      kubectl -n fafnir port-forward svc/postgres 5432:5432
-    else
-      echo "Unsupported service for port forwarding."
-    fi
+    case "$2" in
+      ag)
+        kubectl port-forward -n fafnir svc/fafnir-api-gateway 8080:80
+        ;;
+      ps)
+        kubectl port-forward -n fafnir svc/fafnir-postgres 5432:5432
+        ;;
+      es)
+        kubectl port-forward -n logging svc/elasticsearch 9200:9200
+        ;;
+      *)
+        echo "Only postgres (ps), api-gateway (ag), and elasticsearch (es) supported for port forwarding."
+        exit 1
+        ;;
+    esac
     ;;
   *)
     echo "Usage: $0 {start|deploy|delete|reset|status|nodes|pods|svc|deployments|logs|forward}"
