@@ -20,7 +20,7 @@ stock data retrieval, buy/sell operations, and security/permissions.
 ## TODO
 In no particular order:
 - [ ] Design and implement additional microservices.
-- [ ] Integrate NATS for asynchronous events and messaging (consider saga pattern).
+- [ ] Integrate NATS for asynchronous events and messaging ([issue #4](https://github.com/andrearcaina/fafnir/issues/4)).
 - [X] Create system architecture, network and data diagrams.
 - [ ] Build a simulation/orchestration engine for app events.
 - [ ] Perform load testing using Locust to simulate concurrent users ([issue #8](https://github.com/andrearcaina/fafnir/issues/8)).
