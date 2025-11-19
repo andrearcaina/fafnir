@@ -9,12 +9,12 @@ RUN apk add --no-cache git curl && \
 
 WORKDIR /app
 
-COPY services/shared/ ./services/shared/
-COPY services/${SERVICE_NAME}/ ./services/${SERVICE_NAME}/
+COPY src/shared/ ./src/shared/
+COPY src/${SERVICE_NAME}/ ./src/${SERVICE_NAME}/
 COPY tools/.air.toml .air.toml
 
-RUN cd services/shared && go mod tidy
-RUN cd services/${SERVICE_NAME} && go mod tidy
+RUN cd src/shared && go mod tidy
+RUN cd src/${SERVICE_NAME} && go mod tidy
 
 EXPOSE 8080
 
@@ -28,13 +28,13 @@ RUN apk add --no-cache git ca-certificates tzdata
 
 WORKDIR /app
 
-COPY services/shared/ ./services/shared/
-COPY services/${SERVICE_NAME}/ ./services/${SERVICE_NAME}/
+COPY src/shared/ ./src/shared/
+COPY src/${SERVICE_NAME}/ ./src/${SERVICE_NAME}/
 
-RUN cd services/shared && go mod tidy
-RUN cd services/${SERVICE_NAME} && go mod tidy
+RUN cd src/shared && go mod tidy
+RUN cd src/${SERVICE_NAME} && go mod tidy
 
-RUN cd services/${SERVICE_NAME} && \
+RUN cd src/${SERVICE_NAME} && \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a -installsuffix cgo \

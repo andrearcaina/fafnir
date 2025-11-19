@@ -10,7 +10,7 @@ goose_cmd() {
   local service=$1 action=$2
   local db_var="${service^^}_DB"
   GOOSE_DRIVER=$GOOSE_DRIVER GOOSE_DBSTRING="$DB_BASE/${!db_var}?sslmode=disable" \
-    goose -dir "services/$service-service/internal/db/migrations" $action
+    goose -dir "src/$service-service/internal/db/migrations" $action
 }
 
 case "$1" in
@@ -19,8 +19,7 @@ case "$1" in
   create)
     [[ $# -lt 3 ]] && { echo "Usage: $0 create <db> <name>"; exit 1; }
     case "$2" in
-      auth|security|user|stock) goose -dir "services/$2-service/internal/db/migrations" create "$3" sql ;;
-      infra) goose -dir "infra/postgres/migrations" create "$3" sql ;;
+      auth|security|user|stock) goose -dir "src/$2-service/internal/db/migrations" create "$3" sql ;;
       *) echo "Invalid db. Use: auth, security, user, stock, infra"; exit 1 ;;
     esac ;;
   *) echo "Usage: $0 {up|down|status|create <db> <name>}"; exit 1 ;;

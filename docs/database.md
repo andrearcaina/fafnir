@@ -14,7 +14,7 @@
 ```
 
 ## Running Migrations
-- Each service has its own database and migration files located in `services/<service-name>/migrations/`
+- Each service has its own database and migration files located in `src/<service-name>/internal/db/migrations/`
 - To run migrations for a specific service, use:
 ```bash
 > make migrate-create db=<service_name> name=<migration_name>

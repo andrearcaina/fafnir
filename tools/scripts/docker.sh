@@ -3,8 +3,8 @@
 set -e
 
 COMPOSE_CMD="docker compose -p fafnir --env-file infra/env/.env.dev"
-BASE_FILES="-f deployments/compose/base.yml"
-MONITORING_FILES="$BASE_FILES -f deployments/compose/monitoring.yml"
+BASE_FILES="-f deployments/docker/base.yml"
+MONITORING_FILES="$BASE_FILES -f deployments/docker/monitoring.yml"
 
 case "$1" in
   auth-service|user-service|security-service|stock-service|api-gateway)

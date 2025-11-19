@@ -33,8 +33,8 @@ services:
       - SERVICE_PORT=8080
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     volumes:
-      - ../../services/api-gateway:/app/services/api-gateway:cached
-      - ../../services/shared:/app/services/shared:cached
+      - ../../src/api-gateway:/app/src/api-gateway:cached
+      - ../../src/shared:/app/src/shared:cached
     depends_on:
       user-service:
         condition: service_started
@@ -66,8 +66,8 @@ services:
       - DB_PORT=${DB_PORT}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     volumes:
-      - ../../services/auth-service:/app/services/auth-service:cached
-      - ../../services/shared:/app/services/shared:cached
+      - ../../src/auth-service:/app/src/auth-service:cached
+      - ../../src/shared:/app/src/shared:cached
     depends_on:
       db:
         condition: service_healthy
@@ -92,8 +92,8 @@ services:
       - DB_HOST=${DB_HOST_DOCKER}
       - DB_PORT=${DB_PORT}
     volumes:
-      - ../../services/security-service:/app/services/security-service:cached
-      - ../../services/shared:/app/services/shared:cached
+      - ../../src/security-service:/app/src/security-service:cached
+      - ../../src/shared:/app/src/shared:cached
     depends_on:
       db:
         condition: service_healthy
@@ -116,8 +116,8 @@ services:
       - DB_HOST=${DB_HOST_DOCKER}
       - DB_PORT=${DB_PORT}
     volumes:
-      - ../../services/user-service:/app/services/user-service:cached
-      - ../../services/shared:/app/services/shared:cached
+      - ../../src/user-service:/app/src/user-service:cached
+      - ../../src/shared:/app/src/shared:cached
     depends_on:
       db:
         condition: service_healthy
@@ -143,8 +143,8 @@ services:
       - REDIS_PORT=6379
       - FMP_API_KEY=${FMP_API_KEY}
     volumes:
-      - ../../services/stock-service:/app/services/stock-service:cached
-      - ../../services/shared:/app/services/shared:cached
+      - ../../src/stock-service:/app/src/stock-service:cached
+      - ../../src/shared:/app/src/shared:cached
     depends_on:
       db:
         condition: service_healthy
