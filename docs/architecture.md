@@ -19,14 +19,15 @@
 - **Database per Service**: Each microservice manages its own database schema and data
 
 ### Technology Stack
-- **Backend**: Go microservices with gRPC/REST communication
-- **API Gateway**: GraphQL unified endpoint using gqlgen
+- **Backend**: Go microservices with gRPC and/or REST communication
+- **API Gateway**: GraphQL unified endpoint using `gqlgen`
 - **Message Broker**: NATS for event based communication
 - **Database**: PostgreSQL with per-service databases
-- **Cache**: Redis Cache used for core services in need of fast response times
+- **Cache**: Redis cache used for core services in need of fast response times
 - **Containerization**: Docker with multi-stage builds
-- **Monitoring**: Prometheus, Grafana
-- **Development**: Hot reload (with air), centralized scripts, Make-based workflow
+- **Monitoring**: Prometheus, Grafana are configured
+- **Orchestration**: Both Docker Compose and Kubernetes are configured for local development
+- **Logging**: Centralized logging with Elasticsearch (via `logctl` CLI for Kubernetes only)
 
 ### Project Structure
 
@@ -34,9 +35,8 @@
 fafnir/
 ├── build/                   # Build configurations
 │   └── docker/              # Centralized Dockerfiles
-│   └── ci/                  # CI configurations (if needed)
 ├── deployments/             # Deployment configurations
-│   ├── compose/             # Docker Compose files
+│   ├── docker/              # Docker Compose files
 │   └── k8s/                 # Kubernetes Manifests
 ├── docs/                    # Documentation
 │   └── designs/             # Excalidraw designs and images
@@ -44,7 +44,7 @@ fafnir/
 │   ├── env/                 # Environment files
 │   ├── monitoring/          # Prometheus & Grafana configs
 │   └── postgres/            # Database initialization
-├── services/                # Microservices
+├── src/                     # Source code for microservices
 │   ├── api-gateway/         # GraphQL API Gateway
 │   ├── auth-service/        # Authentication service
 │   ├── security-service/    # Authorization service
@@ -52,9 +52,10 @@ fafnir/
 │   ├── stock-service/       # Stock service
 │   └── shared/              # Shared libraries and utilities
 └── tools/                   # Development tools
-    ├── logctl/              # Centralized logging control tool
-    ├── scripts/             # Build and deployment scripts
-    └── seedctl/             # Centralized database seeder
+    ├── cli/                 # some dev CLIs 
+    │   ├── logctl/          # Centralized Elasticsearch logging
+    │   └── seedctl/         # Database seeder
+    └── scripts/             # Build and deployment scripts
     
 ```
 
@@ -95,3 +96,4 @@ Below is the ideal data flow for the application. It will be updated when NATS i
 - [A Crash Course on Microservices Design Patterns](https://blog.bytebytego.com/p/a-crash-course-on-microservices-design) by [ByteByteGo](https://blog.bytebytego.com/about)
 - [NATS Documentation](https://docs.nats.io/) by [NATS](https://nats.io/about/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/concepts/architecture/) by [Kubernetes](https://kubernetes.io/)
+- [Elasticsearch Go Client Documentation](https://www.elastic.co/guide/en/elasticsearch/client/go-api/8.19/getting-started-go.html) by [Elastic](https://www.elastic.co/about)
