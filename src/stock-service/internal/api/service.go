@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fafnir/shared/pkg/errors"
+	"fafnir/shared/pkg/redis"
 	"fafnir/stock-service/internal/db"
 	"fafnir/stock-service/internal/db/generated"
 	"fafnir/stock-service/internal/dto"
 	"fafnir/stock-service/internal/fmp"
-	"fafnir/stock-service/internal/redis"
 	"log"
 	"time"
 
@@ -136,16 +136,27 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 	missingSymbols := make([]string, 0)
 
 	// first, try get from redis cache
-	for _, symbol := range symbols {
-		cached, err := s.redis.Get(ctx, symbol)
-		if err == nil && cached != "" {
-			var stock dto.StockQuoteResponse
-			if err := json.Unmarshal([]byte(cached), &stock); err == nil {
-				result[symbol] = &stock
-				continue
+	// use redis MGET for batch retrieval
+	cachedResults, err := s.redis.MGet(ctx, symbols)
+	if err == nil {
+		for i, cached := range cachedResults {
+			// for each symbol, check if it was found in cache
+			symbol := symbols[i]
+
+			// if found in cache, unmarshal and add to result
+			if cachedStr, ok := cached.(string); ok {
+				var stock dto.StockQuoteResponse
+				if err := json.Unmarshal([]byte(cachedStr), &stock); err == nil {
+					result[symbol] = &stock
+					continue
+				}
 			}
+
+			missingSymbols = append(missingSymbols, symbol)
 		}
-		missingSymbols = append(missingSymbols, symbol)
+	} else {
+		// if Redis fails entirely, fetch everything from DB
+		missingSymbols = symbols
 	}
 
 	if len(missingSymbols) == 0 {

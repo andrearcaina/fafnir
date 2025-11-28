@@ -1,194 +1,204 @@
 services:
-  db:
-    image: fafnir-postgres-db
-    build:
-      context: ../../
-      dockerfile: build/docker/postgres.Dockerfile
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USER: ${POSTGRES_USER}
-    volumes:
-      - pgdata:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
-    networks:
-      - fafnir-network
+    db:
+        image: fafnir-postgres-db
+        build:
+            context: ../../
+            dockerfile: build/docker/postgres.Dockerfile
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_USER: ${POSTGRES_USER}
+        volumes:
+            - pgdata:/var/lib/postgresql
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 60s
+        networks:
+            - fafnir-network
 
-  api-gateway:
-    build:
-      context: ../../
-      dockerfile: build/docker/go-services.Dockerfile
-      target: ${BUILD_TARGET:-development}
-      args:
-        SERVICE_NAME: api-gateway
-    environment:
-      - SERVICE_NAME=api-gateway
-      - SERVICE_PORT=8080
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-    volumes:
-      - ../../src/api-gateway:/app/src/api-gateway:cached
-      - ../../src/shared:/app/src/shared:cached
-    depends_on:
-      user-service:
-        condition: service_started
-      security-service:
-        condition: service_started
-      stock-service:
-        condition: service_started
-      auth-service:
-        condition: service_started
-    ports:
-      - "8080:8080"
-    networks:
-      - fafnir-network
+    api-gateway:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: api-gateway
+        environment:
+            - SERVICE_NAME=api-gateway
+            - SERVICE_PORT=8080
+            - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+        volumes:
+            - ../../src/api-gateway:/app/src/api-gateway:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            user-service:
+                condition: service_started
+            security-service:
+                condition: service_started
+            stock-service:
+                condition: service_started
+            auth-service:
+                condition: service_started
+        ports:
+            - "8080:8080"
+        networks:
+            - fafnir-network
 
-  auth-service:
-    build:
-      context: ../../
-      dockerfile: build/docker/go-services.Dockerfile
-      target: ${BUILD_TARGET:-development}
-      args:
-        SERVICE_NAME: auth-service
-    environment:
-      - SERVICE_NAME=auth-service
-      - SERVICE_PORT=8081
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - AUTH_DB=${AUTH_DB}
-      - DB_HOST=${DB_HOST_DOCKER}
-      - DB_PORT=${DB_PORT}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-    volumes:
-      - ../../src/auth-service:/app/src/auth-service:cached
-      - ../../src/shared:/app/src/shared:cached
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "8081:8081"
-    networks:
-      - fafnir-network
+    auth-service:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: auth-service
+        environment:
+            - SERVICE_NAME=auth-service
+            - SERVICE_PORT=8081
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - AUTH_DB=${AUTH_DB}
+            - DB_HOST=${DB_HOST_DOCKER}
+            - DB_PORT=${DB_PORT}
+            - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+        volumes:
+            - ../../src/auth-service:/app/src/auth-service:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            db:
+                condition: service_healthy
+        ports:
+            - "8081:8081"
+        networks:
+            - fafnir-network
 
-  security-service:
-    build:
-      context: ../../
-      dockerfile: build/docker/go-services.Dockerfile
-      target: ${BUILD_TARGET:-development}
-      args:
-        SERVICE_NAME: security-service
-    environment:
-      - SERVICE_NAME=security-service
-      - SERVICE_PORT=8082
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - SECURITY_DB=${SECURITY_DB}
-      - DB_HOST=${DB_HOST_DOCKER}
-      - DB_PORT=${DB_PORT}
-    volumes:
-      - ../../src/security-service:/app/src/security-service:cached
-      - ../../src/shared:/app/src/shared:cached
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - fafnir-network
+    security-service:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: security-service
+        environment:
+            - SERVICE_NAME=security-service
+            - SERVICE_PORT=8082
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - SECURITY_DB=${SECURITY_DB}
+            - DB_HOST=${DB_HOST_DOCKER}
+            - DB_PORT=${DB_PORT}
+        volumes:
+            - ../../src/security-service:/app/src/security-service:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - fafnir-network
 
-  user-service:
-    build:
-      context: ../../
-      dockerfile: build/docker/go-services.Dockerfile
-      target: ${BUILD_TARGET:-development}
-      args:
-        SERVICE_NAME: user-service
-    environment:
-      - SERVICE_NAME=user-service
-      - SERVICE_PORT=8083
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - USER_DB=${USER_DB}
-      - DB_HOST=${DB_HOST_DOCKER}
-      - DB_PORT=${DB_PORT}
-    volumes:
-      - ../../src/user-service:/app/src/user-service:cached
-      - ../../src/shared:/app/src/shared:cached
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - fafnir-network
+    user-service:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: user-service
+        environment:
+            - SERVICE_NAME=user-service
+            - SERVICE_PORT=8083
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - USER_DB=${USER_DB}
+            - DB_HOST=${DB_HOST_DOCKER}
+            - DB_PORT=${DB_PORT}
+        volumes:
+            - ../../src/user-service:/app/src/user-service:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - fafnir-network
 
-  stock-service:
-    build:
-      context: ../../
-      dockerfile: build/docker/go-services.Dockerfile
-      target: ${BUILD_TARGET:-development}
-      args:
-        SERVICE_NAME: stock-service
-    environment:
-      - SERVICE_NAME=stock-service
-      - SERVICE_PORT=8084
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - STOCK_DB=${STOCK_DB}
-      - DB_HOST=${DB_HOST_DOCKER}
-      - DB_PORT=${DB_PORT}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - FMP_API_KEY=${FMP_API_KEY}
-    volumes:
-      - ../../src/stock-service:/app/src/stock-service:cached
-      - ../../src/shared:/app/src/shared:cached
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - fafnir-network
+    stock-service:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: stock-service
+        environment:
+            - SERVICE_NAME=stock-service
+            - SERVICE_PORT=8084
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - STOCK_DB=${STOCK_DB}
+            - DB_HOST=${DB_HOST_DOCKER}
+            - DB_PORT=${DB_PORT}
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - FMP_API_KEY=${FMP_API_KEY}
+        volumes:
+            - ../../src/stock-service:/app/src/stock-service:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - fafnir-network
 
-  redis:
-    image: "redis:latest"
-    container_name: fafnir-stock-redis
-    restart: always
-    ports:
-      - "6379:6379"
-    networks:
-      - fafnir-network
+    nats:
+        image: "nats:latest"
+        container_name: fafnir-nats
+        restart: always
+        ports:
+            - "4222:4222"
+            - "8222:8222"
+        networks:
+            - fafnir-network
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.7
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-    networks:
-      - fafnir-network
+    redis:
+        image: "redis:latest"
+        container_name: fafnir-stock-redis
+        restart: always
+        ports:
+            - "6379:6379"
+        networks:
+            - fafnir-network
 
-  elastic-agent:
-    image: docker.elastic.co/beats/elastic-agent:8.13.0
-    restart: always
-    user: root
-    environment:
-      - FLEET_ENROLL=0
-      - FLEET_INSECURE=true
-      - ELASTICSEARCH_HOST=http://elasticsearch:9200
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    depends_on:
-      - elasticsearch
-    networks:
-      - fafnir-network
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.19.7
+        environment:
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+        ports:
+            - "9200:9200"
+        networks:
+            - fafnir-network
+
+    elastic-agent:
+        image: docker.elastic.co/beats/elastic-agent:8.13.0
+        restart: always
+        user: root
+        environment:
+            - FLEET_ENROLL=0
+            - FLEET_INSECURE=true
+            - ELASTICSEARCH_HOST=http://elasticsearch:9200
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+        depends_on:
+            - elasticsearch
+        networks:
+            - fafnir-network
 
 volumes:
-  pgdata:
+    pgdata:
 
 networks:
-  fafnir-network:
-    driver: bridge
+    fafnir-network:
+        driver: bridge
