@@ -2,8 +2,10 @@
 
 ### Architecture Designs
 - [Initial Design #1](designs/images/dev_design_1.png)
-- [Revised Design of #1](designs/images/revised_dev_design_1.png)
-- [Kubernetes Node & Network Design](designs/images/k8s_node_network_design_1.png)
+- [1st Revision of Initial Design](designs/images/revised_dev_design_1.png)
+- [2nd Revision of Initial Design](designs/images/revised_dev_design_1_1.png)
+- [K8s Node & Network Design #1](designs/images/k8s_node_network_design_1.png)
+- [1st Revision Of K8s Design](designs/images/revised_k8s_node_network_design_1.png)
 
 ### Key Architectural Principles
 - **Microservices**: Each service has its own database and is independently deployable
@@ -21,7 +23,7 @@
 ### Technology Stack
 - **Backend**: Go microservices with gRPC and/or REST communication
 - **API Gateway**: GraphQL unified endpoint using `gqlgen`
-- **Message Broker**: NATS for event based communication
+- **Event Bus & Message Broker**: NATS for event based communication
 - **Database**: PostgreSQL with per-service databases
 - **Cache**: Redis cache used for core services in need of fast response times
 - **Containerization**: Docker with multi-stage builds
@@ -77,13 +79,15 @@ fafnir/
 | **redis**      | Redis caching for quick look up              | 6379 (internal) | Caching          |
 | **prometheus** | Metrics collection and monitoring            | 9090 (dev only) | Observability    |
 | **grafana**    | Metrics visualization and dashboards         | 3000 (dev only) | Monitoring UI    |
+| **elasticsearch** | Centralized logging storage                | 9200 (dev only) | Logging storage  |
+| **nats**       | Message broker for event-based communication | 4222 (internal) | Event bus & message broker        |
 
 ### Data Flow
 Below is the ideal data flow for the application. It will be updated when NATS is implemented.
 1. Client → asks API Gateway for data
 2. API Gateway → routes request to appropriate service
-3. Services → interacts with their own Postgres database
-4. Services → processes data and may call other services if needed
+3. Services → interacts with their own Postgres database or Redis cache, and may publish events to NATS
+4. Services → processes data from database/cache and may subscribe to events from NATS
 5. Services → returns data to API Gateway
 6. API Gateway → aggregates data from multiple services if necessary
 7. API Gateway → sends data back to Client
