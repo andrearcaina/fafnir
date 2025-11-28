@@ -65,6 +65,8 @@ services:
             - DB_HOST=${DB_HOST_DOCKER}
             - DB_PORT=${DB_PORT}
             - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
         volumes:
             - ../../src/auth-service:/app/src/auth-service:cached
             - ../../src/shared:/app/src/shared:cached
@@ -91,6 +93,8 @@ services:
             - SECURITY_DB=${SECURITY_DB}
             - DB_HOST=${DB_HOST_DOCKER}
             - DB_PORT=${DB_PORT}
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
         volumes:
             - ../../src/security-service:/app/src/security-service:cached
             - ../../src/shared:/app/src/shared:cached
@@ -115,6 +119,8 @@ services:
             - USER_DB=${USER_DB}
             - DB_HOST=${DB_HOST_DOCKER}
             - DB_PORT=${DB_PORT}
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
         volumes:
             - ../../src/user-service:/app/src/user-service:cached
             - ../../src/shared:/app/src/shared:cached
@@ -167,32 +173,6 @@ services:
         restart: always
         ports:
             - "6379:6379"
-        networks:
-            - fafnir-network
-
-    elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.19.7
-        environment:
-            - discovery.type=single-node
-            - xpack.security.enabled=false
-        ports:
-            - "9200:9200"
-        networks:
-            - fafnir-network
-
-    elastic-agent:
-        image: docker.elastic.co/beats/elastic-agent:8.13.0
-        restart: always
-        user: root
-        environment:
-            - FLEET_ENROLL=0
-            - FLEET_INSECURE=true
-            - ELASTICSEARCH_HOST=http://elasticsearch:9200
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-            - /var/lib/docker/containers:/var/lib/docker/containers:ro
-        depends_on:
-            - elasticsearch
         networks:
             - fafnir-network
 

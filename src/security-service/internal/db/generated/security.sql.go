@@ -32,6 +32,16 @@ func (q *Queries) CheckUserPermission(ctx context.Context, arg CheckUserPermissi
 	return has_permission, err
 }
 
+const deleteUserRoleWithID = `-- name: DeleteUserRoleWithID :exec
+DELETE FROM users_roles
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteUserRoleWithID(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUserRoleWithID, userID)
+	return err
+}
+
 const insertUserRoleWithID = `-- name: InsertUserRoleWithID :one
 INSERT INTO users_roles (user_id, role_name)
 VALUES ($1, $2)
@@ -43,10 +53,15 @@ type InsertUserRoleWithIDParams struct {
 	RoleName string    `json:"role_name"`
 }
 
+type InsertUserRoleWithIDRow struct {
+	UserID   uuid.UUID `json:"user_id"`
+	RoleName string    `json:"role_name"`
+}
+
 // this is for seeding
-func (q *Queries) InsertUserRoleWithID(ctx context.Context, arg InsertUserRoleWithIDParams) (UsersRole, error) {
+func (q *Queries) InsertUserRoleWithID(ctx context.Context, arg InsertUserRoleWithIDParams) (InsertUserRoleWithIDRow, error) {
 	row := q.db.QueryRow(ctx, insertUserRoleWithID, arg.UserID, arg.RoleName)
-	var i UsersRole
+	var i InsertUserRoleWithIDRow
 	err := row.Scan(&i.UserID, &i.RoleName)
 	return i, err
 }

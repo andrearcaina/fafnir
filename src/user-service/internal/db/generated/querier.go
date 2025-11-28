@@ -11,8 +11,8 @@ import (
 )
 
 type Querier interface {
+	DeleteUserProfileById(ctx context.Context, id uuid.UUID) error
 	GetUserProfileById(ctx context.Context, id uuid.UUID) (GetUserProfileByIdRow, error)
-	// for seeding
 	InsertUserProfileById(ctx context.Context, arg InsertUserProfileByIdParams) (InsertUserProfileByIdRow, error)
 }
 

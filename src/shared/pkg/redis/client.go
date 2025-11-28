@@ -37,7 +37,7 @@ func New(host, port string) (*Cache, error) {
 		cancel()
 
 		if err == nil {
-			slog.Info("Successfully connected to Redis", "attempt", attempt, "addr", addr)
+			slog.Info("Successfully connected to Redis", "attempt", attempt, "addr", rdb.Options().Addr)
 			return &Cache{
 				client: rdb,
 				ttl:    5 * time.Minute,
