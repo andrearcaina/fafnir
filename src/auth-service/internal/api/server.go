@@ -4,6 +4,7 @@ import (
 	"context"
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db"
+	"fafnir/shared/pkg/nats"
 	"log"
 	"net/http"
 
@@ -46,8 +47,13 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
+	natsClient, err := nats.New(cfg.NATS.URL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// create an auth service and handler instance
-	authService := NewAuthService(dbInstance, cfg.JWT)
+	authService := NewAuthService(dbInstance, natsClient, cfg.JWT)
 	authHandler := NewAuthHandler(authService)
 
 	// mount the auth handler to the router

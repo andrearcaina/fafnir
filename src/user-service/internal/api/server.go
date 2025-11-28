@@ -2,7 +2,8 @@ package api
 
 import (
 	"context"
-	"fafnir/shared/pb/user"
+	pb "fafnir/shared/pb/user"
+	"fafnir/shared/pkg/nats"
 	"fafnir/user-service/internal/config"
 	"fafnir/user-service/internal/db"
 	"log"
@@ -20,14 +21,23 @@ type Server struct {
 func NewServer() *Server {
 	cfg := config.NewConfig()
 
-	// just to make sure the database connection is established (will assign a var later once we have a service)
+	// create a db instance
 	dbInstance, err := db.New(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// create a nats client
+	natsClient, err := nats.New(cfg.NATS.URL)
+	if err != nil {
+		log.Fatalf("Failed to connect to NATS: %v", err)
+	}
+
 	// create the user handler
-	userHandler := NewUserHandler(dbInstance)
+	userHandler := NewUserHandler(dbInstance, natsClient)
+
+	// register subscribe handlers for NATS
+	userHandler.RegisterSubscribeHandlers()
 
 	// create gRPC server with logging interceptor (interceptors are basically a middleware for gRPC)
 	grpcServer := grpc.NewServer(

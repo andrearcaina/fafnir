@@ -11,6 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+const deleteUserProfileById = `-- name: DeleteUserProfileById :exec
+DELETE FROM user_profiles
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUserProfileById(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUserProfileById, id)
+	return err
+}
+
 const getUserProfileById = `-- name: GetUserProfileById :one
 SELECT id, first_name, last_name
 FROM user_profiles
@@ -31,8 +41,8 @@ func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (GetUser
 }
 
 const insertUserProfileById = `-- name: InsertUserProfileById :one
-INSERT INTO user_profiles (id, first_name, last_name, created_at, updated_at)
-VALUES ($1, $2, $3, NOW(), NOW())
+INSERT INTO user_profiles (id, first_name, last_name, email, created_at, updated_at)
+VALUES ($1, $2, $3, $4, NOW(), NOW())
 RETURNING id, first_name, last_name
 `
 
@@ -40,6 +50,7 @@ type InsertUserProfileByIdParams struct {
 	ID        uuid.UUID `json:"id"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
 }
 
 type InsertUserProfileByIdRow struct {
@@ -48,9 +59,13 @@ type InsertUserProfileByIdRow struct {
 	LastName  string    `json:"last_name"`
 }
 
-// for seeding
 func (q *Queries) InsertUserProfileById(ctx context.Context, arg InsertUserProfileByIdParams) (InsertUserProfileByIdRow, error) {
-	row := q.db.QueryRow(ctx, insertUserProfileById, arg.ID, arg.FirstName, arg.LastName)
+	row := q.db.QueryRow(ctx, insertUserProfileById,
+		arg.ID,
+		arg.FirstName,
+		arg.LastName,
+		arg.Email,
+	)
 	var i InsertUserProfileByIdRow
 	err := row.Scan(&i.ID, &i.FirstName, &i.LastName)
 	return i, err

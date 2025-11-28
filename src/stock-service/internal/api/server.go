@@ -2,10 +2,10 @@ package api
 
 import (
 	"context"
+	"fafnir/shared/pkg/redis"
 	"fafnir/stock-service/internal/config"
 	"fafnir/stock-service/internal/db"
 	"fafnir/stock-service/internal/fmp"
-	"fafnir/stock-service/internal/redis"
 	"log"
 	"net/http"
 
@@ -48,7 +48,7 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
-	redisCache, err := redis.New(cfg)
+	redisCache, err := redis.New(cfg.Cache.Host, cfg.Cache.Port)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -4,7 +4,8 @@ import (
 	"context"
 	"fafnir/security-service/internal/config"
 	"fafnir/security-service/internal/db"
-	"fafnir/shared/pb/security"
+	pb "fafnir/shared/pb/security"
+	"fafnir/shared/pkg/nats"
 	"log"
 	"net"
 
@@ -20,14 +21,23 @@ type Server struct {
 func NewServer() *Server {
 	cfg := config.NewConfig()
 
-	// just to make sure the database connection is established (will assign a var later once we have a service)
+	// create a db instance
 	dbInstance, err := db.New(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// create a nats client
+	natsClient, err := nats.New(cfg.NATS.URL)
+	if err != nil {
+		log.Fatalf("Failed to connect to NATS: %v", err)
+	}
+
 	// create the security handler
-	securityHandler := NewSecurityHandler(dbInstance)
+	securityHandler := NewSecurityHandler(dbInstance, natsClient)
+
+	// register subscribe handlers for NATS
+	securityHandler.RegisterSubscribeHandlers()
 
 	// create gRPC server with logging interceptor (interceptors are basically a middleware for gRPC)
 	grpcServer := grpc.NewServer(

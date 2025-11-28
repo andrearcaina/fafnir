@@ -27,6 +27,7 @@ func (h *Handler) ServeAuthRoutes() chi.Router {
 	authMiddleware := CheckAuth(h.authService)
 
 	r.With(authMiddleware).Delete("/logout", h.logout)
+	r.With(authMiddleware).Delete("/delete", h.deleteAccount)
 	r.With(authMiddleware).Get("/me", h.getUserInfo)
 	return r
 }
@@ -83,6 +84,25 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) logout(w http.ResponseWriter, _ *http.Request) {
 	utils.SetCookie(w, "auth_token", "", -1, true, false, http.SameSiteLaxMode)
 	utils.SetCookie(w, "csrf_token", "", -1, false, false, http.SameSiteLaxMode)
+
+	utils.WriteJSON(w, http.StatusNoContent, nil)
+}
+
+func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
+	userId, err := GetUserIdFromContext(r.Context())
+	if err != nil {
+		utils.HandleError(w, err)
+		return
+	}
+
+	// logout the user first
+	h.logout(w, r)
+
+	// then delete the account
+	if err := h.authService.DeleteAccount(r.Context(), userId); err != nil {
+		utils.HandleError(w, err)
+		return
+	}
 
 	utils.WriteJSON(w, http.StatusNoContent, nil)
 }

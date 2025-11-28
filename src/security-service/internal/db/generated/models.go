@@ -25,6 +25,7 @@ type RolesPermission struct {
 }
 
 type UsersRole struct {
-	UserID   uuid.UUID `json:"user_id"`
-	RoleName string    `json:"role_name"`
+	UserID    uuid.UUID          `json:"user_id"`
+	RoleName  string             `json:"role_name"`
+	GrantedAt pgtype.Timestamptz `json:"granted_at"`
 }
