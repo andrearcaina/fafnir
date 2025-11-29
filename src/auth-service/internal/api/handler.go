@@ -2,6 +2,8 @@ package api
 
 import (
 	"fafnir/shared/pkg/utils"
+	"fafnir/shared/pkg/validator"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -9,11 +11,13 @@ import (
 
 type Handler struct {
 	authService *Service
+	validator   *validator.Validator
 }
 
-func NewAuthHandler(authService *Service) *Handler {
+func NewAuthHandler(authService *Service, validator *validator.Validator) *Handler {
 	return &Handler{
 		authService: authService,
+		validator:   validator,
 	}
 }
 
@@ -40,10 +44,14 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := ValidateAuthRequest(registerRequest); err != nil {
+	log.Printf("Received Registration: %+v\n", registerRequest)
+
+	if err := h.validator.ValidateRequest(registerRequest); err != nil {
 		utils.HandleError(w, err)
 		return
 	}
+
+	log.Printf("Sup")
 
 	resp, err := h.authService.RegisterUser(r.Context(), registerRequest)
 	if err != nil {
@@ -62,7 +70,7 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := ValidateAuthRequest(loginRequest); err != nil {
+	if err := h.validator.ValidateRequest(loginRequest); err != nil {
 		utils.HandleError(w, err)
 		return
 	}
@@ -95,16 +103,14 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// logout the user first
-	h.logout(w, r)
-
-	// then delete the account
+	// delete the account first
 	if err := h.authService.DeleteAccount(r.Context(), userId); err != nil {
 		utils.HandleError(w, err)
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusNoContent, nil)
+	// then logout the user and send 204 response
+	h.logout(w, r)
 }
 
 func (h *Handler) getUserInfo(w http.ResponseWriter, r *http.Request) {
