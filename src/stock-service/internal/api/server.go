@@ -80,7 +80,7 @@ func (s *Server) Run() error {
 	return s.HTTP.ListenAndServe()
 }
 
-func (s *Server) GracefulShutdown(ctx context.Context) error {
+func (s *Server) Close(ctx context.Context) error {
 	log.Println("Shutting down stock service gracefully...")
 
 	if s.Database != nil {

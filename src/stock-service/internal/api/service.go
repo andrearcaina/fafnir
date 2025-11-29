@@ -13,12 +13,14 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/sync/singleflight"
 )
 
 type Service struct {
-	db    *db.Database
-	redis *redis.Cache
-	fmp   *fmp.Client
+	db           *db.Database
+	redis        *redis.Cache
+	fmp          *fmp.Client
+	requestGroup singleflight.Group
 }
 
 func NewStockService(database *db.Database, redis *redis.Cache, fmp *fmp.Client) *Service {
@@ -30,6 +32,26 @@ func NewStockService(database *db.Database, redis *redis.Cache, fmp *fmp.Client)
 }
 
 func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
+	key := "metadata: " + symbol
+
+	// use singleflight to prevent duplicate requests for the same symbol (during high concurrency scenarios)
+	v, err, _ := s.requestGroup.Do(key, func() (interface{}, error) {
+		return s.getStockMetadataInternal(ctx, symbol)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stockMetadata, ok := v.(*dto.StockMetadataResponse)
+	if !ok {
+		return nil, errors.InternalError("Type assertion failed").
+			WithDetails("Failed to assert type to StockMetadataResponse")
+	}
+
+	return stockMetadata, nil
+}
+
+func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
 	if symbol == "" {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
@@ -50,6 +72,26 @@ func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.Sto
 }
 
 func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
+	key := "quote: " + symbol
+
+	// use singleflight to prevent duplicate requests for the same symbol (during high concurrency scenarios)
+	v, err, _ := s.requestGroup.Do(key, func() (interface{}, error) {
+		return s.getStockQuoteInternal(ctx, symbol)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stockQuote, ok := v.(*dto.StockQuoteResponse)
+	if !ok {
+		return nil, errors.InternalError("Type assertion failed").
+			WithDetails("Failed to assert type to StockQuoteResponse")
+	}
+
+	return stockQuote, nil
+}
+
+func (s *Service) getStockQuoteInternal(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
 	if symbol == "" {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")

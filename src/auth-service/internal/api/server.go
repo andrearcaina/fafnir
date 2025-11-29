@@ -5,6 +5,7 @@ import (
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db"
 	"fafnir/shared/pkg/nats"
+	"fafnir/shared/pkg/validator"
 	"log"
 	"net/http"
 
@@ -52,11 +53,15 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
-	// create an auth service and handler instance
-	authService := NewAuthService(dbInstance, natsClient, cfg.JWT)
-	authHandler := NewAuthHandler(authService)
+	// create a custom validator instance
+	// basically just a wrapper around go-playground/validator
+	validator := validator.New()
 
-	// mount the auth handler to the router
+	// create an auth service and handler instance passing in the db instance, nats client, config and validator
+	authService := NewAuthService(dbInstance, natsClient, cfg.JWT)
+	authHandler := NewAuthHandler(authService, validator)
+
+	// mount the auth handler to the router at /auth path
 	router.Mount("/auth", authHandler.ServeAuthRoutes())
 
 	// create a config instance for the server
@@ -74,7 +79,7 @@ func (s *Server) Run() error {
 	return s.HTTP.ListenAndServe()
 }
 
-func (s *Server) GracefulShutdown(ctx context.Context) error {
+func (s *Server) Close(ctx context.Context) error {
 	log.Println("Shutting down auth service gracefully...")
 
 	if s.Database != nil {

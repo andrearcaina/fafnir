@@ -21,7 +21,8 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
 // DecodeJSON reads JSON from the request body and returns a proper AppError for validation failures
 func DecodeJSON(r *http.Request, v interface{}) error {
 	if r.Body == nil {
-		return apperrors.BadRequestError("Request body is required")
+		return apperrors.BadRequestError("Request body is required").
+			WithDetails("The request body cannot be empty")
 	}
 
 	defer func() {
@@ -30,8 +31,12 @@ func DecodeJSON(r *http.Request, v interface{}) error {
 		}
 	}()
 
-	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
-		return apperrors.BadRequestError("Invalid JSON format in request body")
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields() // catch unknown fields in the JSON input
+
+	if err := decoder.Decode(v); err != nil {
+		return apperrors.BadRequestError("Invalid JSON format in request body").
+			WithDetails(err.Error())
 	}
 
 	return nil
@@ -40,6 +45,7 @@ func DecodeJSON(r *http.Request, v interface{}) error {
 // HandleError is the central errors handler for HTTP responses
 func HandleError(w http.ResponseWriter, err error) {
 	var appErr *apperrors.AppError
+
 	if errors.As(err, &appErr) {
 		if appErr.Cause != nil {
 			log.Printf("AppError [%s]: %s (caused by: %v)", appErr.Code, appErr.Message, appErr.Cause)

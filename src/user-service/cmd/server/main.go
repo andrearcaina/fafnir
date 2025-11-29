@@ -28,5 +28,5 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Fatal(server.GracefulShutdown(ctx))
+	log.Fatal(server.Close(ctx))
 }

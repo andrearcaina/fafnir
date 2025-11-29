@@ -60,10 +60,6 @@ func New(host, port string) (*Cache, error) {
 	return nil, fmt.Errorf("failed to connect to Redis after %d attempts: %w", maxRetries, err)
 }
 
-func (c *Cache) Close() error {
-	return c.client.Close()
-}
-
 // Set: to set a value for a key with an expiration time
 func (c *Cache) Set(ctx context.Context, key string, value string) error {
 	return c.client.Set(ctx, key, value, c.ttl).Err()
@@ -85,4 +81,11 @@ func (c *Cache) MGet(ctx context.Context, keys []string) ([]interface{}, error) 
 		return nil, errors.New("no keys provided")
 	}
 	return c.client.MGet(ctx, keys...).Result()
+}
+
+func (c *Cache) Close() error {
+	if c.client != nil {
+		return c.client.Close()
+	}
+	return nil
 }

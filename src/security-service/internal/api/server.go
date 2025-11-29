@@ -65,7 +65,7 @@ func (s *Server) Run() error {
 	return s.grpcServer.Serve(listener)
 }
 
-func (s *Server) GracefulShutdown(ctx context.Context) error {
+func (s *Server) Close(ctx context.Context) error {
 	log.Println("Shutting down security service gracefully...")
 
 	s.grpcServer.GracefulStop()
