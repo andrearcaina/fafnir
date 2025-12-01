@@ -33,7 +33,7 @@ func (c *NatsClient) Subscribe(subject string, handler nats.MsgHandler) (*nats.S
 
 func (c *NatsClient) Close() {
 	if c.conn != nil {
-		err := c.conn.Drain() // gGracefully close the connection
+		err := c.conn.Drain() // gracefully close the connection
 		if err != nil {
 			c.conn.Close()
 		}

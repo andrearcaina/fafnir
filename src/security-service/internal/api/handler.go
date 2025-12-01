@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fafnir/security-service/internal/db"
 	"fafnir/security-service/internal/db/generated"
+	"fmt"
 	"log"
 
 	basepb "fafnir/shared/pb/base"
@@ -13,23 +14,49 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
+
+	lru "github.com/hashicorp/golang-lru/v2"
 )
 
 type SecurityHandler struct {
 	db         *db.Database
 	natsClient *natsC.NatsClient
 	pb.UnimplementedSecurityServiceServer
+
+	// key: "userID:permission", value: true/false
+	// using an LRU cache to limit memory usage, we don't need this to be in redis as it's not critical data
+	// it is just for super fast permission checks within the service
+	permissionCache *lru.Cache[string, bool]
 }
 
 func NewSecurityHandler(database *db.Database, natsClient *natsC.NatsClient) *SecurityHandler {
+	cache, err := lru.New[string, bool](1000) // Cache size of 1000 entries
+	if err != nil {
+		log.Fatalf("Failed to create permission cache: %v", err)
+	}
+
 	return &SecurityHandler{
-		db:         database,
-		natsClient: natsClient,
+		db:              database,
+		natsClient:      natsClient,
+		permissionCache: cache,
 	}
 }
 
 // CheckPermission implements the gRPC CheckPermission method
 func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPermissionRequest) (*pb.CheckPermissionResponse, error) {
+	// check cache first
+	cachedKey := fmt.Sprintf("%s:%s", req.UserId, req.Permission)
+
+	// if found in cache, return cached value
+	if hasPermission, found := h.permissionCache.Get(cachedKey); found {
+		log.Printf("Permission cache hit for key: %s", cachedKey)
+		return &pb.CheckPermissionResponse{
+			HasPermission: hasPermission,
+			Code:          basepb.ErrorCode_OK,
+		}, nil
+	}
+
+	// else, check database
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return &pb.CheckPermissionResponse{
@@ -54,6 +81,9 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 			Code:          basepb.ErrorCode_PERMISSION_DENIED,
 		}, nil
 	}
+
+	// cache the positive result for future requests from the same user
+	h.permissionCache.Add(cachedKey, true)
 
 	return &pb.CheckPermissionResponse{
 		HasPermission: true,
