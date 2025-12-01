@@ -65,7 +65,7 @@ case "$1" in
   reset)
     if [[ "$2" == "all" ]]; then
       echo "Restarting all deployments..."
-      kubectl rollout restart deployment -n fafnir  
+      kubectl rollout restart deployment -n fafnir
       kubectl rollout restart deployment -n logging
     else
       echo "Restarting $2..."
@@ -111,7 +111,7 @@ case "$1" in
         kubectl port-forward -n fafnir svc/fafnir-api-gateway 8080:80
         ;;
       ps)
-        kubectl port-forward -n fafnir svc/fafnir-postgres 5432:5432
+        kubectl port-forward -n fafnir svc/postgres 5432:5432
         ;;
       es)
         kubectl port-forward -n logging svc/elasticsearch 9200:9200
