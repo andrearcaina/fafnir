@@ -6,12 +6,15 @@ package generated
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
 	CheckUserPermission(ctx context.Context, arg CheckUserPermissionParams) (bool, error)
+	DeleteUserRoleWithID(ctx context.Context, userID uuid.UUID) error
 	// this is for seeding
-	InsertUserRoleWithID(ctx context.Context, arg InsertUserRoleWithIDParams) (UsersRole, error)
+	InsertUserRoleWithID(ctx context.Context, arg InsertUserRoleWithIDParams) (InsertUserRoleWithIDRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

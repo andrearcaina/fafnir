@@ -2,9 +2,9 @@ package redis
 
 import (
 	"context"
-	"fafnir/stock-service/internal/config"
+	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,9 +13,12 @@ import (
 type Cache struct {
 	client *redis.Client
 	ttl    time.Duration // time to live (expiration duration) for cached items
+	host   string
+	port   string
 }
 
-func New(cfg *config.Config) (*Cache, error) {
+// New: initializes a new Redis client with retry logic
+func New(host, port string) (*Cache, error) {
 	var rdb *redis.Client
 	var err error
 
@@ -24,8 +27,8 @@ func New(cfg *config.Config) (*Cache, error) {
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		rdb = redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", cfg.Cache.Host, cfg.Cache.Port),
-			Password: "", // no password set
+			Addr:     fmt.Sprintf("%s:%s", host, port),
+			Password: "", // Consider passing this as an arg too
 			DB:       0,
 		})
 
@@ -34,19 +37,22 @@ func New(cfg *config.Config) (*Cache, error) {
 		cancel()
 
 		if err == nil {
-			log.Printf("Successfully connected to Redis on attempt %d", attempt)
+			slog.Info("Successfully connected to Redis", "attempt", attempt, "addr", rdb.Options().Addr)
 			return &Cache{
 				client: rdb,
-				ttl:    5 * time.Minute, // default TTL of 5 minutes
+				ttl:    5 * time.Minute,
 			}, nil
 		}
 
-		log.Printf("Attempt %d/%d: Failed to ping Redis: %v", attempt, maxRetries, err)
+		slog.Warn("Failed to ping Redis",
+			"attempt", attempt,
+			"error", err,
+			"retry_in", retryInterval.String(),
+		)
 
 		rdb.Close()
 
 		if attempt < maxRetries {
-			log.Printf("Retrying Redis connection in %v...", retryInterval)
 			time.Sleep(retryInterval)
 		}
 	}
@@ -54,23 +60,32 @@ func New(cfg *config.Config) (*Cache, error) {
 	return nil, fmt.Errorf("failed to connect to Redis after %d attempts: %w", maxRetries, err)
 }
 
-func (c *Cache) Close() error {
-	return c.client.Close()
-}
-
-// Redis uses 3 main commands (since it is a key-val store):
-
-// Set - to set a value for a key with an expiration time
+// Set: to set a value for a key with an expiration time
 func (c *Cache) Set(ctx context.Context, key string, value string) error {
 	return c.client.Set(ctx, key, value, c.ttl).Err()
 }
 
-// Get - to get the value for a key
+// Get: to get the value for a key
 func (c *Cache) Get(ctx context.Context, key string) (string, error) {
 	return c.client.Get(ctx, key).Result()
 }
 
-// Del - to delete a key
+// Del: to delete a key
 func (c *Cache) Del(ctx context.Context, key string) error {
 	return c.client.Del(ctx, key).Err()
+}
+
+// MGet: to get multiple values for multiple keys
+func (c *Cache) MGet(ctx context.Context, keys []string) ([]interface{}, error) {
+	if len(keys) == 0 {
+		return nil, errors.New("no keys provided")
+	}
+	return c.client.MGet(ctx, keys...).Result()
+}
+
+func (c *Cache) Close() error {
+	if c.client != nil {
+		return c.client.Close()
+	}
+	return nil
 }

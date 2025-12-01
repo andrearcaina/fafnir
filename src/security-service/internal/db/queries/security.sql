@@ -11,3 +11,7 @@ SELECT EXISTS (
     JOIN roles_permissions rp ON ur.role_name = rp.role_name
     WHERE ur.user_id = $1 AND rp.permission_name = $2
 ) AS has_permission;
+
+-- name: DeleteUserRoleWithID :exec
+DELETE FROM users_roles
+WHERE user_id = $1;

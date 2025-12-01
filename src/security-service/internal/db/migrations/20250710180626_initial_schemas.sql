@@ -24,6 +24,7 @@ CREATE TABLE roles_permissions (
 CREATE TABLE users_roles (
     user_id UUID NOT NULL,
     role_name VARCHAR(50) REFERENCES roles(name) ON DELETE CASCADE,
+    granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, role_name)
 );
 

@@ -2,27 +2,61 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fafnir/security-service/internal/db"
 	"fafnir/security-service/internal/db/generated"
+	"fmt"
+	"log"
+
 	basepb "fafnir/shared/pb/base"
-	"fafnir/shared/pb/security"
+	pb "fafnir/shared/pb/security"
+	natsC "fafnir/shared/pkg/nats"
 
 	"github.com/google/uuid"
+	"github.com/nats-io/nats.go"
+
+	lru "github.com/hashicorp/golang-lru/v2"
 )
 
 type SecurityHandler struct {
-	db *db.Database
+	db         *db.Database
+	natsClient *natsC.NatsClient
 	pb.UnimplementedSecurityServiceServer
+
+	// key: "userID:permission", value: true/false
+	// using an LRU cache to limit memory usage, we don't need this to be in redis as it's not critical data
+	// it is just for super fast permission checks within the service
+	permissionCache *lru.Cache[string, bool]
 }
 
-func NewSecurityHandler(database *db.Database) *SecurityHandler {
+func NewSecurityHandler(database *db.Database, natsClient *natsC.NatsClient) *SecurityHandler {
+	cache, err := lru.New[string, bool](1000) // Cache size of 1000 entries
+	if err != nil {
+		log.Fatalf("Failed to create permission cache: %v", err)
+	}
+
 	return &SecurityHandler{
-		db: database,
+		db:              database,
+		natsClient:      natsClient,
+		permissionCache: cache,
 	}
 }
 
 // CheckPermission implements the gRPC CheckPermission method
 func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPermissionRequest) (*pb.CheckPermissionResponse, error) {
+	// check cache first
+	cachedKey := fmt.Sprintf("%s:%s", req.UserId, req.Permission)
+
+	// if found in cache, return cached value
+	if hasPermission, found := h.permissionCache.Get(cachedKey); found {
+		log.Printf("Permission cache hit for key: %s", cachedKey)
+		return &pb.CheckPermissionResponse{
+			HasPermission: hasPermission,
+			Code:          basepb.ErrorCode_OK,
+		}, nil
+	}
+
+	// else, check database
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return &pb.CheckPermissionResponse{
@@ -48,8 +82,70 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 		}, nil
 	}
 
+	// cache the positive result for future requests from the same user
+	h.permissionCache.Add(cachedKey, true)
+
 	return &pb.CheckPermissionResponse{
 		HasPermission: true,
 		Code:          basepb.ErrorCode_OK,
 	}, nil
+}
+
+func (h *SecurityHandler) RegisterSubscribeHandlers() {
+	_, err := h.natsClient.Subscribe("user.registered", h.registerUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = h.natsClient.Subscribe("user.deleted", h.deleteUser)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (h *SecurityHandler) registerUser(msg *nats.Msg) {
+	var userData struct {
+		UserID string `json:"user_id"`
+	}
+
+	if err := json.Unmarshal(msg.Data, &userData); err != nil {
+		log.Printf("Error unmarshaling user registered event: %v", err)
+		return
+	}
+
+	uid := userData.UserID
+
+	params := generated.InsertUserRoleWithIDParams{
+		UserID:   uuid.MustParse(uid),
+		RoleName: "member", // hardcoded default for new users
+	}
+
+	_, err := h.db.GetQueries().InsertUserRoleWithID(context.Background(), params)
+	if err != nil {
+		log.Printf("Error creating user profile: %v", err)
+		return
+	}
+
+	log.Printf("User profile created for user ID: %s", uid)
+}
+
+func (h *SecurityHandler) deleteUser(msg *nats.Msg) {
+	var userData struct {
+		UserID string `json:"user_id"`
+	}
+
+	if err := json.Unmarshal(msg.Data, &userData); err != nil {
+		log.Printf("Error unmarshaling user deleted event: %v", err)
+		return
+	}
+
+	uid := userData.UserID
+
+	err := h.db.GetQueries().DeleteUserRoleWithID(context.Background(), uuid.MustParse(uid))
+	if err != nil {
+		log.Printf("Error deleting user roles: %v", err)
+		return
+	}
+
+	log.Printf("User roles deleted for user ID: %s", uid)
 }

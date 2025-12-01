@@ -11,6 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+const deleteUserById = `-- name: DeleteUserById :exec
+DELETE FROM users
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUserById(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUserById, id)
+	return err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, password_hash
 FROM users

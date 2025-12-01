@@ -4,21 +4,23 @@ import (
 	"context"
 	"encoding/json"
 	"fafnir/shared/pkg/errors"
+	"fafnir/shared/pkg/redis"
 	"fafnir/stock-service/internal/db"
 	"fafnir/stock-service/internal/db/generated"
 	"fafnir/stock-service/internal/dto"
 	"fafnir/stock-service/internal/fmp"
-	"fafnir/stock-service/internal/redis"
 	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/sync/singleflight"
 )
 
 type Service struct {
-	db    *db.Database
-	redis *redis.Cache
-	fmp   *fmp.Client
+	db           *db.Database
+	redis        *redis.Cache
+	fmp          *fmp.Client
+	requestGroup singleflight.Group
 }
 
 func NewStockService(database *db.Database, redis *redis.Cache, fmp *fmp.Client) *Service {
@@ -30,6 +32,26 @@ func NewStockService(database *db.Database, redis *redis.Cache, fmp *fmp.Client)
 }
 
 func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
+	key := "metadata: " + symbol
+
+	// use singleflight to prevent duplicate requests for the same symbol (during high concurrency scenarios)
+	v, err, _ := s.requestGroup.Do(key, func() (interface{}, error) {
+		return s.getStockMetadataInternal(ctx, symbol)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stockMetadata, ok := v.(*dto.StockMetadataResponse)
+	if !ok {
+		return nil, errors.InternalError("Type assertion failed").
+			WithDetails("Failed to assert type to StockMetadataResponse")
+	}
+
+	return stockMetadata, nil
+}
+
+func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
 	if symbol == "" {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
@@ -50,6 +72,26 @@ func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.Sto
 }
 
 func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
+	key := "quote: " + symbol
+
+	// use singleflight to prevent duplicate requests for the same symbol (during high concurrency scenarios)
+	v, err, _ := s.requestGroup.Do(key, func() (interface{}, error) {
+		return s.getStockQuoteInternal(ctx, symbol)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	stockQuote, ok := v.(*dto.StockQuoteResponse)
+	if !ok {
+		return nil, errors.InternalError("Type assertion failed").
+			WithDetails("Failed to assert type to StockQuoteResponse")
+	}
+
+	return stockQuote, nil
+}
+
+func (s *Service) getStockQuoteInternal(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
 	if symbol == "" {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
@@ -136,16 +178,27 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 	missingSymbols := make([]string, 0)
 
 	// first, try get from redis cache
-	for _, symbol := range symbols {
-		cached, err := s.redis.Get(ctx, symbol)
-		if err == nil && cached != "" {
-			var stock dto.StockQuoteResponse
-			if err := json.Unmarshal([]byte(cached), &stock); err == nil {
-				result[symbol] = &stock
-				continue
+	// use redis MGET for batch retrieval
+	cachedResults, err := s.redis.MGet(ctx, symbols)
+	if err == nil {
+		for i, cached := range cachedResults {
+			// for each symbol, check if it was found in cache
+			symbol := symbols[i]
+
+			// if found in cache, unmarshal and add to result
+			if cachedStr, ok := cached.(string); ok {
+				var stock dto.StockQuoteResponse
+				if err := json.Unmarshal([]byte(cachedStr), &stock); err == nil {
+					result[symbol] = &stock
+					continue
+				}
 			}
+
+			missingSymbols = append(missingSymbols, symbol)
 		}
-		missingSymbols = append(missingSymbols, symbol)
+	} else {
+		// if Redis fails entirely, fetch everything from DB
+		missingSymbols = symbols
 	}
 
 	if len(missingSymbols) == 0 {

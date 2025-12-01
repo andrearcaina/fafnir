@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	DeleteUserById(ctx context.Context, id uuid.UUID) error
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
 	// the query below is used for seeding
