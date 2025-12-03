@@ -5,7 +5,8 @@
         generate seed \
         kube-start kube-stop kube-deploy kube-delete kube-reset \
         kube-status kube-nodes kube-pods kube-svc kube-deployments kube-logs \
-        kube-forward kube-tunnel
+        kube-forward kube-tunnel \
+        locust-start
 
 default: help
 
@@ -149,3 +150,10 @@ kube-forward:
 
 kube-tunnel:
 	minikube tunnel -p fafnir-cluster
+
+# ------------------------------
+# Locust Operations
+# ------------------------------
+
+locust-start:
+	./tools/scripts/test.sh locust_start $(users) $(spawn_rate) $(headless)

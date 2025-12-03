@@ -24,13 +24,13 @@ func NewServer() *Server {
 	// create a db instance
 	dbInstance, err := db.New(cfg)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatal(err)
 	}
 
-	// create a nats client
+	// create a nats client instance
 	natsClient, err := nats.New(cfg.NATS.URL)
 	if err != nil {
-		log.Fatalf("Failed to connect to NATS: %v", err)
+		log.Fatal(err)
 	}
 
 	// create the user handler
