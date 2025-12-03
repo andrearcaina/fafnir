@@ -1,3 +1,6 @@
+SYMBOLS = ["AAPL", "MSFT", "TSLA", "AMZN", "GOOGL", "META", "NVDA", "NFLX"]
+PERIODS = ["1D", "1W", "1M", "3M", "6M"]  # no need for more than 1Y in load tests
+
 GET_STOCK_QUOTE = """
 query GetStockQuote($symbol: String!) {
   getStockQuote(symbol: $symbol) {

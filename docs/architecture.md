@@ -53,12 +53,22 @@ fafnir/
 │   ├── user-service/        # User management service
 │   ├── stock-service/       # Stock service
 │   └── shared/              # Shared libraries and utilities
-└── tools/                   # Development tools
-    ├── cli/                 # some dev CLIs 
-    │   ├── logctl/          # Centralized Elasticsearch logging
-    │   └── seedctl/         # Database seeder
-    └── scripts/             # Build and deployment scripts
-    
+├── tests/                   # Testing suites
+│   ├── e2e/                 # End-to-end tests 
+│   └── locust/              # Load testing with Locust
+├── tools/                   # Development tools
+│   ├── cli/                 # some dev CLIs 
+│   │   ├── logctl/          # Centralized Elasticsearch logging
+│   │   └── seedctl/         # Database seeder
+│   └── scripts/             # Build and deployment scripts
+├── tools/                   # Development tools
+├── .gitattributes
+├── .gitignore
+├── LICENSE
+├── Makefile                 # Build automation
+├── README.md                # Project overview and documentation
+└── Taskfile.yml             # Task runner configuration
+
 ```
 
 ### Core Services
@@ -73,14 +83,15 @@ fafnir/
 
 ### Infrastructure Services
 
-| Service        | Description                                  | Ports           | Purpose          |
-|----------------|----------------------------------------------|-----------------|------------------|
-| **postgres**   | Postgres database with per-service databases | 5432 (internal) | Data persistence |
-| **redis**      | Redis caching for quick look up              | 6379 (internal) | Caching          |
-| **prometheus** | Metrics collection and monitoring            | 9090 (dev only) | Observability    |
-| **grafana**    | Metrics visualization and dashboards         | 3000 (dev only) | Monitoring UI    |
-| **elasticsearch** | Centralized logging storage                | 9200 (dev only) | Logging storage  |
-| **nats**       | Message broker for event-based communication | 4222 (internal) | Event bus & message broker        |
+| Service           | Description                                       | Ports           | Purpose                    |
+|-------------------|---------------------------------------------------|-----------------|----------------------------|
+| **postgres**      | Postgres database with per-service databases      | 5432 (internal) | Data persistence           |
+| **redis**         | Redis caching for quick look up                   | 6379 (internal) | Caching                    |
+| **prometheus**    | Metrics collection and monitoring                 | 9090 (dev only) | Observability              |
+| **grafana**       | Metrics visualization and dashboards              | 3000 (dev only) | Monitoring UI              |
+| **elasticsearch** | Centralized logging storage                       | 9200 (dev only) | Logging storage            |
+| **nats**          | Message broker for event-based communication      | 4222 (internal) | Event bus & message broker |
+| **locust**        | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing UI            |
 
 ### Data Flow
 Below is the ideal data flow for the application. It will be updated when NATS is implemented.

@@ -33,7 +33,7 @@ case "$1" in
             BASE_LOCUST_CMD="$BASE_LOCUST_CMD --run-time $run_time"
         fi
 
-        $BASE_LOCUST_CMD --users $USER_COUNT --spawn-rate $SPAWN_RATE --run-time $run_time --html=tests/locust/locust_report.html
+        $BASE_LOCUST_CMD --users $USER_COUNT --spawn-rate $SPAWN_RATE --run-time $run_time --html=tests/locust/reports/locust_report.html --csv=tests/locust/reports/locust_report
         ;;
     *)
         echo "Usage: $0 {locust_start}"

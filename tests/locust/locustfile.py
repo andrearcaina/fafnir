@@ -2,20 +2,18 @@ import random
 import string
 
 from http_codes import ResponseStatusCodes
-from locust import FastHttpUser, task
-from locust.user.wait_time import between
+from locust import FastHttpUser, between, task
 from queries.stock import (
     GET_STOCK_HISTORY,
     GET_STOCK_METADATA,
     GET_STOCK_QUOTE,
     GET_STOCK_QUOTE_BATCH,
+    PERIODS,
+    SYMBOLS,
 )
 
-SYMBOLS = ["AAPL", "MSFT", "TSLA", "AMZN", "GOOGL", "META", "NVDA", "NFLX"]
-PERIODS = ["1D", "1W", "1M", "3M", "6M"]  # no need for more than 1Y in load tests
 
-
-class FafnirTrader(FastHttpUser):
+class FafnirUser(FastHttpUser):
     wait_time = between(1, 3)  # wait between 1 and 3 seconds between tasks
 
     csrf_token = None
