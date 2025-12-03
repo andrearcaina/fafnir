@@ -3,7 +3,6 @@ package api
 import (
 	"fafnir/shared/pkg/utils"
 	"fafnir/shared/pkg/validator"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -44,14 +43,10 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Received Registration: %+v\n", registerRequest)
-
 	if err := h.validator.ValidateRequest(registerRequest); err != nil {
 		utils.HandleError(w, err)
 		return
 	}
-
-	log.Printf("Sup")
 
 	resp, err := h.authService.RegisterUser(r.Context(), registerRequest)
 	if err != nil {
