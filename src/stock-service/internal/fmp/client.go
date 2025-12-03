@@ -12,9 +12,9 @@ type Client struct {
 	client *resty.Client
 }
 
-func NewFMPClient(apiKey string) (*Client, error) {
-	client := resty.New()
-	client.SetBaseURL("https://financialmodelingprep.com/stable")
+func New(apiKey string) (*Client, error) {
+	client := resty.New().
+		SetBaseURL("https://financialmodelingprep.com/stable")
 
 	if client == nil {
 		return nil, fmt.Errorf("failed to create resty client")

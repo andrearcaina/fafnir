@@ -48,13 +48,13 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
+	// create a nats client instance
 	natsClient, err := nats.New(cfg.NATS.URL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// create a custom validator instance
-	// basically just a wrapper around go-playground/validator
+	// create a custom validator instance for request payload validation
 	validator := validator.New()
 
 	// create an auth service and handler instance passing in the db instance, nats client, config and validator
