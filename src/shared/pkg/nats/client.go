@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"errors"
 	"log"
 
 	"github.com/nats-io/nats.go"
@@ -14,7 +15,7 @@ type NatsClient struct {
 func New(url string) (*NatsClient, error) {
 	conn, err := nats.Connect(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("could not connect to NATs server at specified URL")
 	}
 
 	log.Println("Successfully connected to NATS server")

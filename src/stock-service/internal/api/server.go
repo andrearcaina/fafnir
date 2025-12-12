@@ -48,12 +48,14 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
+	// create a redis cache instance for caching stock data
 	redisCache, err := redis.New(cfg.Cache.Host, cfg.Cache.Port)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmpClient, err := fmp.NewFMPClient(cfg.FMP.APIKey)
+	// create a client instance that fetches data from FMP (Financial Modeling Prep) API
+	fmpClient, err := fmp.New(cfg.FMP.APIKey)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -30,8 +30,8 @@ In no particular order:
   - [ ] Implement more events across services than just user creation.
 - [X] Create system architecture, network and data diagrams (upkeep as much as possible).
 - [ ] Build a simulation/orchestration engine for app events.
-- [ ] Perform load testing using Locust to simulate concurrent users ([issue #8](https://github.com/andrearcaina/fafnir/issues/8)).
+- [ ] Add unit, integration, end-to-end and load/stress tests.
+  - [X] Perform load testing using Locust to simulate concurrent users ([issue #8](https://github.com/andrearcaina/fafnir/issues/8)).
 - [X] Explore Kubernetes local implementation ([issue #5](https://github.com/andrearcaina/fafnir/issues/5)).
 - [X] Explore centralized logging CLI with Elasticsearch for Minikube ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
-- [ ] Add unit and integration tests for each microservice.
 - [ ] Implement a CI/CD pipeline for automated testing and Docker builds.
