@@ -6,7 +6,7 @@
         kube-start kube-stop kube-deploy kube-delete kube-reset \
         kube-status kube-nodes kube-pods kube-svc kube-deployments kube-logs \
         kube-forward kube-tunnel \
-        locust-start
+        locust
 
 default: help
 
@@ -35,6 +35,12 @@ docker-api-gateway:
 # ------------------------------
 # Docker Lifecycle Operations
 # ------------------------------
+
+docker-prod:
+	./tools/scripts/docker.sh prod
+
+docker-stats:
+	./tools/scripts/docker.sh stats
 
 docker-run:
 	./tools/scripts/docker.sh run $(monitoring)
@@ -155,5 +161,5 @@ kube-tunnel:
 # Locust Operations
 # ------------------------------
 
-locust-start:
-	./tools/scripts/test.sh locust_start $(users) $(spawn_rate) $(headless)
+locust:
+	./tools/scripts/test.sh locust $(users) $(spawn_rate) $(run_time) $(headless)
