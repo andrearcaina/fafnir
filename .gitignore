@@ -49,6 +49,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+!build/docker/
+!build/docker/**
 develop-eggs/
 dist/
 downloads/
@@ -193,6 +195,8 @@ activemq-data/
 .venv
 .venv_locust
 env/
+!env/
+!env/**
 venv/
 ENV/
 env.bak/

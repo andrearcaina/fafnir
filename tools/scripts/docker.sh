@@ -3,7 +3,9 @@
 set -e
 
 COMPOSE_CMD="docker compose -p fafnir --env-file infra/env/.env.dev"
-BASE_FILES="-f deployments/docker/base.yml"
+PROD_CMD="docker compose -p fafnir --env-file infra/env/.env.prod"
+BASE_FILES="-f deployments/docker/compose.dev.yml"
+PROD_FILES="-f deployments/docker/compose.prod.yml"
 MONITORING_FILES="$BASE_FILES -f deployments/docker/monitoring.yml"
 
 case "$1" in
@@ -14,6 +16,10 @@ case "$1" in
   run)
     FILES=${2:+$MONITORING_FILES}
     $COMPOSE_CMD ${FILES:-$BASE_FILES} up -d ;;
+  prod)
+    $PROD_CMD $PROD_FILES up -d ;;
+  stats)
+    docker stats $(docker ps --format '{{.Names}}' | grep '^fafnir-') ;;
   start|pause)
     $COMPOSE_CMD $BASE_FILES $1 ;;
   stop)
@@ -28,5 +34,5 @@ case "$1" in
     docker images --format "{{.Repository}}" | grep -E '^(fafnir-|prom/|grafana/)' | xargs -r docker rmi 2>/dev/null || true
     docker builder prune -a -f ;;
   *)
-    echo "Usage: $0 {service|build|run [monitoring]|start|pause|stop|status|logs [service]|rm-volumes|prune}"
+    echo "Usage: $0 {service|build|prod|run [monitoring]|start|pause|stop|status|logs [service]|rm-volumes|prune}"
 esac

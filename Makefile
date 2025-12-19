@@ -36,6 +36,12 @@ docker-api-gateway:
 # Docker Lifecycle Operations
 # ------------------------------
 
+docker-prod: docker-clean
+	./tools/scripts/docker.sh prod
+
+docker-stats:
+	./tools/scripts/docker.sh stats
+
 docker-run:
 	./tools/scripts/docker.sh run $(monitoring)
 
