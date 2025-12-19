@@ -3,6 +3,7 @@
 set -e
 
 COMPOSE_CMD="docker compose -p fafnir --env-file infra/env/.env.dev"
+PROD_CMD="docker compose -p fafnir --env-file infra/env/.env.prod"
 BASE_FILES="-f deployments/docker/compose.dev.yml"
 PROD_FILES="-f deployments/docker/compose.prod.yml"
 MONITORING_FILES="$BASE_FILES -f deployments/docker/monitoring.yml"
@@ -16,7 +17,7 @@ case "$1" in
     FILES=${2:+$MONITORING_FILES}
     $COMPOSE_CMD ${FILES:-$BASE_FILES} up -d ;;
   prod)
-    $COMPOSE_CMD $PROD_FILES up -d ;;
+    $PROD_CMD $PROD_FILES up -d ;;
   stats)
     docker stats $(docker ps --format '{{.Names}}' | grep '^fafnir-') ;;
   start|pause)

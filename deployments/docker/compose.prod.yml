@@ -15,6 +15,8 @@ services:
             timeout: 5s
             retries: 10
             start_period: 60s
+        ports:
+            - "127.0.0.1:${DB_PORT}:5432"
         networks:
             - fafnir-network
 
@@ -42,7 +44,7 @@ services:
             auth-service:
                 condition: service_started
         ports:
-            - "8080:8080"
+            - "127.0.0.1:8080:8080"
         networks:
             - fafnir-network
 
@@ -70,8 +72,6 @@ services:
         depends_on:
             db:
                 condition: service_healthy
-        ports:
-            - "8081:8081"
         networks:
             - fafnir-network
 
@@ -158,9 +158,6 @@ services:
         image: "nats:latest"
         container_name: fafnir-nats
         restart: always
-        ports:
-            - "4222:4222"
-            - "8222:8222"
         networks:
             - fafnir-network
 
@@ -168,8 +165,6 @@ services:
         image: "redis:latest"
         container_name: fafnir-stock-redis
         restart: always
-        ports:
-            - "6379:6379"
         networks:
             - fafnir-network
 
