@@ -57,18 +57,36 @@ func (h *UserHandler) GetProfileData(ctx context.Context, req *pb.ProfileDataReq
 }
 
 func (h *UserHandler) RegisterSubscribeHandlers() {
-	_, err := h.natsClient.Subscribe("user.registered", h.registerUser)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = h.natsClient.Subscribe("user.deleted", h.deleteUser)
+	_, err := h.natsClient.Subscribe("users.>", "users-service-main", "users-consumer", h.handleUserEvents)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (h *UserHandler) registerUser(msg *nats.Msg) {
+func (h *UserHandler) handleUserEvents(msg *nats.Msg) {
+	var err error
+
+	switch msg.Subject {
+	case "users.registered":
+		err = h.registerUser(msg)
+	case "users.deleted":
+		err = h.deleteUser(msg)
+	default:
+		// ignore events we don't care about
+		// we must ack them, otherwise they come back forever
+		msg.Ack()
+		return
+	}
+
+	if err != nil {
+		log.Printf("Failed to process %s: %v", msg.Subject, err)
+		msg.Nak() // retry later (negative ack)
+	} else {
+		msg.Ack() // success (acknowledge message)
+	}
+}
+
+func (h *UserHandler) registerUser(msg *nats.Msg) error {
 	var userData struct {
 		UserID    string `json:"user_id"`
 		Email     string `json:"email"`
@@ -78,31 +96,27 @@ func (h *UserHandler) registerUser(msg *nats.Msg) {
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
 		log.Printf("Error unmarshaling user registered event: %v", err)
-		return
+		return nil // don't want to retry unmarshaling errors
 	}
 
-	uid := userData.UserID
-	email := userData.Email
-	firstName := userData.FirstName
-	lastName := userData.LastName
-
 	params := generated.InsertUserProfileByIdParams{
-		ID:        uuid.MustParse(uid),
-		Email:     email,
-		FirstName: firstName,
-		LastName:  lastName,
+		ID:        uuid.MustParse(userData.UserID),
+		Email:     userData.Email,
+		FirstName: userData.FirstName,
+		LastName:  userData.LastName,
 	}
 
 	_, err := h.db.GetQueries().InsertUserProfileById(context.Background(), params)
 	if err != nil {
 		log.Printf("Error creating user profile: %v", err)
-		return
+		return err // want to retry on DB errors
 	}
 
-	log.Printf("User profile created for user ID: %s", uid)
+	log.Printf("User profile created for user ID: %s", userData.UserID)
+	return nil
 }
 
-func (h *UserHandler) deleteUser(msg *nats.Msg) {
+func (h *UserHandler) deleteUser(msg *nats.Msg) error {
 	var userData struct {
 		UserID string `json:"user_id"`
 		Email  string `json:"email"`
@@ -110,15 +124,16 @@ func (h *UserHandler) deleteUser(msg *nats.Msg) {
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
 		log.Printf("Error unmarshaling user deleted event: %v", err)
-		return
+		return nil // don't want to retry unmarshaling errors
 	}
 
 	uid := userData.UserID
 
-	if err := h.db.GetQueries().DeleteUserProfileById(context.Background(), uuid.MustParse(uid)); err != nil {
+	if err := h.db.GetQueries().DeleteUserProfileById(context.Background(), uuid.MustParse(userData.UserID)); err != nil {
 		log.Printf("Error deleting user profile: %v", err)
-		return
+		return err // want to retry on DB errors
 	}
 
 	log.Printf("User profile deleted for user ID: %s", uid)
+	return nil
 }

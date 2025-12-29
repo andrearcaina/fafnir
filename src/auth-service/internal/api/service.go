@@ -66,7 +66,7 @@ func (s *Service) RegisterUser(ctx context.Context, request RegisterRequest) (*R
 	}
 
 	// publish to NATS server so that other services can consume the event (e.g. user-service)
-	if err := s.nats.Publish("user.registered", publishPayload); err != nil {
+	if err := s.nats.Publish("users.registered", publishPayload); err != nil {
 		return nil, apperrors.InternalError("Failed to publish user registered event").
 			WithDetails("Could not publish user registered event to NATS")
 	}
@@ -122,7 +122,7 @@ func (s *Service) DeleteAccount(ctx context.Context, userID uuid.UUID) error {
 			WithDetails("Could not delete user record")
 	}
 
-	// then publish "user.deleted" event to Nats
+	// then publish "users.deleted" event to Nats
 	publishPayload, err := json.Marshal(map[string]string{
 		"user_id": user.ID.String(),
 		"email":   user.Email,
@@ -133,7 +133,7 @@ func (s *Service) DeleteAccount(ctx context.Context, userID uuid.UUID) error {
 	}
 
 	// publish to NATS server so that other services can consume the event (e.g. user-service)
-	if err := s.nats.Publish("user.deleted", publishPayload); err != nil {
+	if err := s.nats.Publish("users.deleted", publishPayload); err != nil {
 		return apperrors.InternalError("Failed to publish user deleted event").
 			WithDetails("Could not publish user deleted event to NATS")
 	}

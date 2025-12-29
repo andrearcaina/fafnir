@@ -1,6 +1,7 @@
 .PHONY: default help \
-		run-auth-service run-user-service run-security-service run-stock-service run-api-gateway \
-        run build start pause stop status logs rm-volumes prune clean reset \
+		docker-run-auth-service docker-run-user-service docker-run-security-service docker-run-stock-service docker-run-api-gateway \
+        docker-prod docker-stats docker-run docker-build docker-start docker-pause docker-stop docker-status \
+        docker-logs docker-nats docker-rm-volumes docker-prune docker-clean docker-reset \
         migrate-up migrate-down migrate-status migrate-create \
         generate seed \
         kube-start kube-stop kube-deploy kube-delete kube-reset \
@@ -62,6 +63,9 @@ docker-status:
 
 docker-logs:
 	./tools/scripts/docker.sh logs
+
+docker-nats:
+	./tools/scripts/docker.sh nats
 
 docker-rm-volumes:
 	./tools/scripts/docker.sh rm-volumes
