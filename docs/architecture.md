@@ -67,8 +67,6 @@ fafnir/
 ├── LICENSE
 ├── Makefile                 # Build automation
 ├── README.md                # Project overview and documentation
-└── Taskfile.yml             # Task runner configuration
-
 ```
 
 ### Core Services

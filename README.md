@@ -26,7 +26,8 @@ For more detailed information, please refer to the documentation in the `docs/` 
 ## TODO
 In no particular order:
 - [ ] Design and implement additional microservices.
-- [X] Integrate NATS (Pub/Sub pattern) for asynchronous events and messaging (issues [#11](https://github.com/andrearcaina/fafnir/issues/11) and [#20](https://github.com/andrearcaina/fafnir/issues/20)).
+- [X] Integrate NATS for asynchronous events and messaging ([issue #11](https://github.com/andrearcaina/fafnir/issues/11)).
+  - [X] Swapped from Pub/Sub to Worker Queues for message persistence with NATS JetStream ([issue #20](https://github.com/andrearcaina/fafnir/issues/20)).
   - [ ] Implement more events across services than just user creation.
 - [X] Create system architecture, network and data diagrams (upkeep as much as possible).
 - [ ] Build a simulation/orchestration engine for app events.
