@@ -6,6 +6,7 @@
 - [2nd Revision of Initial Design](designs/images/revised_dev_design_1_1.png)
 - [K8s Node & Network Design #1](designs/images/k8s_node_network_design_1.png)
 - [1st Revision Of K8s Design](designs/images/revised_k8s_node_network_design_1.png)
+- [2nd Revision of K8s Design](designs/images/revised_k8s_node_network_design_1_1.png)
 - [NATS JetStream Architecture #1](designs/images/nats_jetstream_1.png)
 
 ### Key Architectural Principles
