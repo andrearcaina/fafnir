@@ -57,7 +57,7 @@ func (h *UserHandler) GetProfileData(ctx context.Context, req *pb.ProfileDataReq
 }
 
 func (h *UserHandler) RegisterSubscribeHandlers() {
-	_, err := h.natsClient.Subscribe("users.>", "users-service-main", "users-consumer", h.handleUserEvents)
+	_, err := h.natsClient.QueueSubscribe("users.>", "users-service-main", "users-consumer", h.handleUserEvents)
 	if err != nil {
 		log.Fatal(err)
 	}

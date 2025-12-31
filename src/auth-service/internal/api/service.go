@@ -9,6 +9,7 @@ import (
 	"fafnir/shared/pkg/nats"
 	"fafnir/shared/pkg/utils"
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -66,7 +67,9 @@ func (s *Service) RegisterUser(ctx context.Context, request RegisterRequest) (*R
 	}
 
 	// publish to NATS server so that other services can consume the event (e.g. user-service)
-	if err := s.nats.Publish("users.registered", publishPayload); err != nil {
+	if ack, err := s.nats.Publish("users.registered", publishPayload); err != nil {
+		log.Printf("NATS publish ack: %+v\n", ack) // log the ack for debugging purposes
+
 		return nil, apperrors.InternalError("Failed to publish user registered event").
 			WithDetails("Could not publish user registered event to NATS")
 	}
@@ -133,7 +136,7 @@ func (s *Service) DeleteAccount(ctx context.Context, userID uuid.UUID) error {
 	}
 
 	// publish to NATS server so that other services can consume the event (e.g. user-service)
-	if err := s.nats.Publish("users.deleted", publishPayload); err != nil {
+	if _, err := s.nats.Publish("users.deleted", publishPayload); err != nil {
 		return apperrors.InternalError("Failed to publish user deleted event").
 			WithDetails("Could not publish user deleted event to NATS")
 	}

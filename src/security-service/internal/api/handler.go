@@ -92,7 +92,7 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 }
 
 func (h *SecurityHandler) RegisterSubscribeHandlers() {
-	_, err := h.natsClient.Subscribe("users.>", "security-service-main", "security-users-consumer", h.handleUserEvents)
+	_, err := h.natsClient.QueueSubscribe("users.>", "security-service-main", "security-users-consumer", h.handleUserEvents)
 	if err != nil {
 		log.Fatal(err)
 	}

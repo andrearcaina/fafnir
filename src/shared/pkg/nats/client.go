@@ -26,16 +26,6 @@ func New(url string) (*NatsClient, error) {
 		return nil, errors.New("could not connect to NATS JetStream server")
 	}
 
-	// add a users stream to JetStream with custom configuration
-	usersStreamConfig := createStreamConfig("users", []string{"users.>"})
-
-	_, err = js.AddStream(usersStreamConfig)
-	if err != nil {
-		return nil, fmt.Errorf("could not create users stream: %v", err)
-	}
-
-	// add more streams when needed
-
 	log.Println("Successfully connected to NATS JetStream server")
 
 	return &NatsClient{
@@ -44,34 +34,51 @@ func New(url string) (*NatsClient, error) {
 	}, nil
 }
 
-// Publish a message to a subject
-func (c *NatsClient) Publish(subject string, data []byte) error {
-	_, err := c.js.Publish(subject, data)
-	return err
-}
-
-// Subscribe subscribes to a subject with a queue group (this enables load balancing) and a durable name (to maintain state)
-func (c *NatsClient) Subscribe(subject, queue, durable string, handler nats.MsgHandler) (*nats.Subscription, error) {
-	return c.js.QueueSubscribe(subject, queue, handler, nats.Durable(durable), nats.ManualAck())
-}
-
-// Close closes the NATS connection
-func (c *NatsClient) Close() {
-	if c.nc != nil {
-		err := c.nc.Drain() // gracefully close the connection
-		if err != nil {
-			c.nc.Close()
-		}
-	}
-}
-
-func createStreamConfig(name string, subjects []string) *nats.StreamConfig {
-	return &nats.StreamConfig{
+// CreateStream with the given name and subjects (creates a new stream if it doesn't exist already)
+// this makes sure the microservice is the one responsible for managing the stream
+func (c *NatsClient) AddStream(name string, subjects []string) (*nats.StreamInfo, error) {
+	streamConfig := &nats.StreamConfig{
 		Name:      name,
 		Subjects:  subjects,
 		Storage:   nats.FileStorage,
 		Retention: nats.LimitsPolicy,
 		MaxAge:    7 * 24 * time.Hour, // Keep for 7 days
 		MaxBytes:  100 * 1024 * 1024,  // Or until 100 MB is reached
+	}
+
+	streamInfo, err := c.js.AddStream(streamConfig)
+	if err != nil {
+		// ensures idempotency - if the stream already exists, return its info (no error)
+		if err == nats.ErrStreamNameAlreadyInUse {
+			streamInfo, _ := c.js.StreamInfo(name)
+			log.Printf("Stream %s already exists", name)
+			return streamInfo, nil
+		}
+
+		return nil, fmt.Errorf("could not create %s stream: %v", name, err)
+	}
+
+	log.Printf("Stream %s created successfully", name)
+
+	return streamInfo, nil
+}
+
+// Publish a message to a subject
+func (c *NatsClient) Publish(subject string, data []byte) (*nats.PubAck, error) {
+	return c.js.Publish(subject, data)
+}
+
+// QueueSubscribeSubscribe to a subject with a queue group (this enables load balancing) and a durable name (to maintain state)
+func (c *NatsClient) QueueSubscribe(subject, queue, durable string, handler nats.MsgHandler) (*nats.Subscription, error) {
+	return c.js.QueueSubscribe(subject, queue, handler, nats.Durable(durable), nats.ManualAck())
+}
+
+// Close the NATS connection
+func (c *NatsClient) Close() {
+	if c.nc != nil {
+		err := c.nc.Drain() // gracefully close the connection
+		if err != nil {
+			c.nc.Close()
+		}
 	}
 }

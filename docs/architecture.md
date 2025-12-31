@@ -6,24 +6,21 @@
 - [2nd Revision of Initial Design](designs/images/revised_dev_design_1_1.png)
 - [K8s Node & Network Design #1](designs/images/k8s_node_network_design_1.png)
 - [1st Revision Of K8s Design](designs/images/revised_k8s_node_network_design_1.png)
+- [NATS JetStream Architecture #1](designs/images/nats_jetstream_1.png)
 
 ### Key Architectural Principles
-- **Microservices**: Each service has its own database and is independently deployable
-- **Service Isolation**: Internal services not exposed to public network (only API Gateway is public + Reverse Proxy to auth)
-- **Centralized Tooling**: Shared build tools, seeder, and scripts
-- **Scalable Services**: Structured to add more services if needed (in any language too)
-- **Container-First**: Docker-native development and deployment
-- **Observability**: Built-in monitoring with Prometheus and Grafana
-
-### Design Patterns Utilized
+- **Microservices**: Each service is independently deployable, scalable and follows the single responsibility principle (each service does one thing well)
 - **Backend-for-Frontend (BFF)**: Designed for tailored client experiences (this means the API Gateway is optimized for a singular frontend)
 - **API Gateway Pattern**: Single entry point for all client requests, routing to appropriate services
 - **Database per Service**: Each microservice manages its own database schema and data
+- **Event-Driven Architecture**: Asynchronous communication between services using NATS JetStream
+- **Service Isolation**: Internal services not exposed to public network (only API Gateway is public + Reverse Proxy to auth)
+- **Centralized Tooling**: Shared tests, tools, CLIs, and scripts for build and deployment automation
 
 ### Technology Stack
-- **Backend**: Go microservices with gRPC and/or REST communication
-- **API Gateway**: GraphQL unified endpoint using `gqlgen`
-- **Event Bus & Message Broker**: NATS for event based communication
+- **Backend**: Go microservices with gRPC or REST communication
+- **Custom API Gateway**: GraphQL unified endpoint using `gqlgen`
+- **Message Broker**: NATS for event based communication
 - **Database**: PostgreSQL with per-service databases
 - **Cache**: Redis cache used for core services in need of fast response times
 - **Containerization**: Docker with multi-stage builds
@@ -66,7 +63,7 @@ fafnir/
 ├── .gitignore
 ├── LICENSE
 ├── Makefile                 # Build automation
-├── README.md                # Project overview and documentation
+└── README.md                # Project overview and documentation
 ```
 
 ### Core Services
@@ -88,18 +85,17 @@ fafnir/
 | **prometheus**    | Metrics collection and monitoring                 | 9090 (dev only) | Observability              |
 | **grafana**       | Metrics visualization and dashboards              | 3000 (dev only) | Monitoring UI              |
 | **elasticsearch** | Centralized logging storage                       | 9200 (dev only) | Logging storage            |
-| **nats**          | Message broker for event-based communication      | 4222 (internal) | Event bus & message broker |
+| **nats jetstream**          | Persistent event streaming message broker      | 4222 (internal) | Async Communication |
 | **locust**        | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing UI            |
 
-### Data Flow
-Below is the ideal data flow for the application. It will be updated when NATS is implemented.
-1. Client → asks API Gateway for data
-2. API Gateway → routes request to appropriate service
-3. Services → interacts with their own Postgres database or Redis cache, and may publish events to NATS
-4. Services → processes data from database/cache and may subscribe to events from NATS
-5. Services → returns data to API Gateway
-6. API Gateway → aggregates data from multiple services if necessary
-7. API Gateway → sends data back to Client
+### Communication Patterns
+This architecture employs a combination of synchronous and asynchronous communication patterns:
+- **Synchronous Communication**: The API Gateway handles client requests and routes them to the appropriate microservices using REST or gRPC.
+- **Asynchronous Communication**: Microservices communicate with each other using NATS JetStream for event-driven interactions, allowing for decoupled and scalable service interactions.
+
+It is both event driven and request-response based, depending on the use case and service requirements.
+
+Feel free to take a look at the [designs](designs/images) folder for visual representations of architecture, network, and data flow designs.
 
 ### Helpful Resources and Readings
 - [Microservices](https://martinfowler.com/articles/microservices.html) by [Martin Fowler](https://martinfowler.com/)
