@@ -161,9 +161,12 @@ services:
         image: "nats:latest"
         container_name: fafnir-nats
         restart: always
+        command: "-js"
         ports:
             - "4222:4222"
             - "8222:8222"
+        volumes:
+            - natsdata:/data
         networks:
             - fafnir-network
 
@@ -178,7 +181,9 @@ services:
 
 volumes:
     pgdata:
+    natsdata:
 
 networks:
     fafnir-network:
+        name: fafnir-network # force the network name to be this not fafnir_fafnir-network
         driver: bridge

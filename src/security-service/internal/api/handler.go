@@ -92,25 +92,43 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 }
 
 func (h *SecurityHandler) RegisterSubscribeHandlers() {
-	_, err := h.natsClient.Subscribe("user.registered", h.registerUser)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = h.natsClient.Subscribe("user.deleted", h.deleteUser)
+	_, err := h.natsClient.QueueSubscribe("users.>", "security-service-main", "security-users-consumer", h.handleUserEvents)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (h *SecurityHandler) registerUser(msg *nats.Msg) {
+func (h *SecurityHandler) handleUserEvents(msg *nats.Msg) {
+	var err error
+
+	switch msg.Subject {
+	case "users.registered":
+		err = h.registerUser(msg)
+	case "users.deleted":
+		err = h.deleteUser(msg)
+	default:
+		// ignore events we don't care about
+		// we must ack them, otherwise they come back forever
+		msg.Ack()
+		return
+	}
+
+	if err != nil {
+		log.Printf("Failed to process %s: %v", msg.Subject, err)
+		msg.Nak() // retry later (negative ack)
+	} else {
+		msg.Ack() // success (acknowledge message)
+	}
+}
+
+func (h *SecurityHandler) registerUser(msg *nats.Msg) error {
 	var userData struct {
 		UserID string `json:"user_id"`
 	}
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
 		log.Printf("Error unmarshaling user registered event: %v", err)
-		return
+		return nil
 	}
 
 	uid := userData.UserID
@@ -123,20 +141,21 @@ func (h *SecurityHandler) registerUser(msg *nats.Msg) {
 	_, err := h.db.GetQueries().InsertUserRoleWithID(context.Background(), params)
 	if err != nil {
 		log.Printf("Error creating user profile: %v", err)
-		return
+		return err
 	}
 
 	log.Printf("User profile created for user ID: %s", uid)
+	return nil
 }
 
-func (h *SecurityHandler) deleteUser(msg *nats.Msg) {
+func (h *SecurityHandler) deleteUser(msg *nats.Msg) error {
 	var userData struct {
 		UserID string `json:"user_id"`
 	}
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
 		log.Printf("Error unmarshaling user deleted event: %v", err)
-		return
+		return nil
 	}
 
 	uid := userData.UserID
@@ -144,8 +163,9 @@ func (h *SecurityHandler) deleteUser(msg *nats.Msg) {
 	err := h.db.GetQueries().DeleteUserRoleWithID(context.Background(), uuid.MustParse(uid))
 	if err != nil {
 		log.Printf("Error deleting user roles: %v", err)
-		return
+		return err
 	}
 
 	log.Printf("User roles deleted for user ID: %s", uid)
+	return nil
 }

@@ -56,4 +56,14 @@ spec:
                 secretKeyRef:
                   name: fafnir-secrets
                   key: JWT_SECRET_KEY
+            - name: NATS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: NATS_HOST_MINIKUBE
+            - name: NATS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: fafnir-secrets
+                  key: NATS_PORT
       restartPolicy: Always

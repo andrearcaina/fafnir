@@ -66,6 +66,8 @@ These commands help you manage the development environment using Docker:
 | `make docker-run`        | Creates and run docker containers (`make run monitoring=true` to run with grafana/prometheus) |
 | `make docker-stop`       | Stops and deletes containers and volumes                                                      |
 | `make docker-status`     | Check status of currently running docker containers                                           |
+| `make docker-logs`       | Get logs of Docker services DB                                                                |
+| `make docker-nats`       | Go into NATS container with natsio/natsbox  DB                                                |
 | `make docker-rm-volumes` | Remove all volumes of Postgres DB                                                             |
 | `make docker-prune`      | Prune all images and cached builds                                                            |
 | `make docker-clean`      | Runs commands `docker-stop`, `docker-prune`, `docker-rm-volumes`                              |
@@ -92,12 +94,12 @@ These commands help you manage the development environment with Kubernetes (Mini
 
 You can also use the following commands to migrate the database:
 
-| Command                                                          | Description                   |
-|------------------------------------------------------------------|-------------------------------|
-| `make migrate-up`                                                | Run DB migrations             |
-| `make migrate-down`                                              | Remove all DB migrations      |
-| `make migrate-status`                                            | Check status of DB migrations |
-| `make migrate-create serviceDB=<db_name> name=<migration_name> ` | Create a migration sql file   |
+| Command                                                   | Description                   |
+|-----------------------------------------------------------|-------------------------------|
+| `make migrate-up`                                         | Run DB migrations             |
+| `make migrate-down`                                       | Remove all DB migrations      |
+| `make migrate-status`                                     | Check status of DB migrations |
+| `make migrate-create db=<db_name> name=<migration_name> ` | Create a migration sql file   |
 
 You can run the following commands to generate the GraphQL resolvers based on the schema:
 
@@ -120,6 +122,12 @@ You can also run certain microservices individually:
 | `make docker-security-service` | Start the security service    |
 | `make docker-stock-service`    | Start the stock service       |
 | `make docker-api-gateway`      | Start the GraphQL API Gateway |
+
+You can also run locust for testing concurrent user load:
+
+| Command                                                                                           | Description                                   |
+|---------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| `make locust users=<total_users> spawn_rate=<spawn_rate> run_time=<run_time> headless=<headless>` | Run the locust CLI with custom configurations |
 
 For more information on the commands, check out the `scripts/` folder.
 
