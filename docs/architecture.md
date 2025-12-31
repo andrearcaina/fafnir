@@ -17,17 +17,6 @@
 - **Service Isolation**: Internal services not exposed to public network (only API Gateway is public + Reverse Proxy to auth)
 - **Centralized Tooling**: Shared tests, tools, CLIs, and scripts for build and deployment automation
 
-### Technology Stack
-- **Backend**: Go microservices with gRPC or REST communication
-- **Custom API Gateway**: GraphQL unified endpoint using `gqlgen`
-- **Message Broker**: NATS for event based communication
-- **Database**: PostgreSQL with per-service databases
-- **Cache**: Redis cache used for core services in need of fast response times
-- **Containerization**: Docker with multi-stage builds
-- **Monitoring**: Prometheus, Grafana are configured
-- **Orchestration**: Both Docker Compose and Kubernetes are configured for local development
-- **Logging**: Centralized logging with Elasticsearch (via `logctl` CLI for Kubernetes only)
-
 ### Project Structure
 
 ```
@@ -85,7 +74,7 @@ fafnir/
 | **prometheus**    | Metrics collection and monitoring                 | 9090 (dev only) | Observability              |
 | **grafana**       | Metrics visualization and dashboards              | 3000 (dev only) | Monitoring UI              |
 | **elasticsearch** | Centralized logging storage                       | 9200 (dev only) | Logging storage            |
-| **nats jetstream**          | Persistent event streaming message broker      | 4222 (internal) | Async Communication |
+| **nats jetstream**| Persistent event streaming message broker         | 4222 (internal) | Async Communication        |
 | **locust**        | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing UI            |
 
 ### Communication Patterns
