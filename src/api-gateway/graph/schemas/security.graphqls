@@ -3,9 +3,13 @@ input HasPermissionRequest {
     permission: String!
 }
 
-type HasPermissionResponse {
+type SecurityPermission {
     hasPermission: Boolean!
-    permissionCode: String! # grpc permission code (e.g., "PERMISSION_DENIED")
+}
+
+type HasPermissionResponse {
+    data: SecurityPermission!
+    code: String! # grpc permission code (e.g., "PERMISSION_DENIED")
 }
 
 extend type Query {

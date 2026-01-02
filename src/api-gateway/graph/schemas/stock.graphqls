@@ -1,23 +1,23 @@
 scalar Int64
 
 type StockMetadataResponse {
-    code: Int!
-    data: StockData!
+    code: String!
+    data: StockData
 }
 
 type StockQuoteResponse {
-    code: Int!
-    data: StockPriceData!
+    code: String!
+    data: StockPriceData
 }
 
 type StockQuoteBatchResponse {
-    code: Int!
-    data: [StockPriceData!]!
+    code: String!
+    data: [StockPriceData]
 }
 
 type StockHistoricalDataResponse {
-    code: Int!
-    data: [StockHistoricalData!]!
+    code: String!
+    data: [StockHistoricalData]
 }
 
 type StockData {
@@ -36,8 +36,8 @@ type StockHistoricalData {
     low: Float!
     close: Float!
     volume: Int64!
-    change: Float!
-    changePercent: Float!
+    priceChange: Float!
+    priceChangePercent: Float!
 }
 
 type StockPriceData {
@@ -58,6 +58,9 @@ type StockPriceData {
 extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
-    getStockHistoricalData(symbol: String!, period: String): StockHistoricalDataResponse!
+    getStockHistoricalData(
+        symbol: String!
+        period: String
+    ): StockHistoricalDataResponse!
     getStockQuoteBatch(symbols: [String!]!): StockQuoteBatchResponse!
 }

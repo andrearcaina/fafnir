@@ -16,9 +16,9 @@ case "$codegen" in
     esac
     ;;
   proto)
-    [[ -z "$service" ]] && { echo "Service name required for Protobuf. Use: base, security, user"; exit 1; }
+    [[ -z "$service" ]] && { echo "Service name required for Protobuf. Use: base, security, user, stock"; exit 1; }
     case "$service" in
-      base|security|user)
+      base|security|user|stock)
         cd "src/shared"
         protoc -I=../../proto \
           --go_out=pb/$service --go_opt=paths=source_relative \

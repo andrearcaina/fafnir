@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fafnir/api-gateway/graph/model"
+	"fmt"
 	"strconv"
 	"sync/atomic"
 
@@ -27,8 +28,8 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _ProfileDataResponse_userId(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_userId(ctx, field)
+func (ec *executionContext) _ProfileData_userId(ctx context.Context, field graphql.CollectedField, obj *model.ProfileData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileData_userId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -58,9 +59,9 @@ func (ec *executionContext) _ProfileDataResponse_userId(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ProfileData_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
+		Object:     "ProfileData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -71,8 +72,8 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_userId(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _ProfileDataResponse_firstName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_firstName(ctx, field)
+func (ec *executionContext) _ProfileData_firstName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileData_firstName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -102,9 +103,9 @@ func (ec *executionContext) _ProfileDataResponse_firstName(ctx context.Context, 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_firstName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ProfileData_firstName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
+		Object:     "ProfileData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -115,8 +116,8 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_firstName(_ context
 	return fc, nil
 }
 
-func (ec *executionContext) _ProfileDataResponse_lastName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_lastName(ctx, field)
+func (ec *executionContext) _ProfileData_lastName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileData_lastName(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -146,9 +147,9 @@ func (ec *executionContext) _ProfileDataResponse_lastName(ctx context.Context, f
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_lastName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ProfileData_lastName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ProfileDataResponse",
+		Object:     "ProfileData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -159,8 +160,8 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_lastName(_ context.
 	return fc, nil
 }
 
-func (ec *executionContext) _ProfileDataResponse_permissionCode(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_permissionCode(ctx, field)
+func (ec *executionContext) _ProfileDataResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDataResponse_data(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -173,7 +174,56 @@ func (ec *executionContext) _ProfileDataResponse_permissionCode(ctx context.Cont
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PermissionCode, nil
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ProfileData)
+	fc.Result = res
+	return ec.marshalOProfileData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ProfileDataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileDataResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userId":
+				return ec.fieldContext_ProfileData_userId(ctx, field)
+			case "firstName":
+				return ec.fieldContext_ProfileData_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_ProfileData_lastName(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfileData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileDataResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ProfileDataResponse_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -190,7 +240,7 @@ func (ec *executionContext) _ProfileDataResponse_permissionCode(ctx context.Cont
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ProfileDataResponse_permissionCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ProfileDataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ProfileDataResponse",
 		Field:      field,
@@ -215,6 +265,55 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_permissionCode(_ co
 
 // region    **************************** object.gotpl ****************************
 
+var profileDataImplementors = []string{"ProfileData"}
+
+func (ec *executionContext) _ProfileData(ctx context.Context, sel ast.SelectionSet, obj *model.ProfileData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, profileDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProfileData")
+		case "userId":
+			out.Values[i] = ec._ProfileData_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "firstName":
+			out.Values[i] = ec._ProfileData_firstName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lastName":
+			out.Values[i] = ec._ProfileData_lastName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var profileDataResponseImplementors = []string{"ProfileDataResponse"}
 
 func (ec *executionContext) _ProfileDataResponse(ctx context.Context, sel ast.SelectionSet, obj *model.ProfileDataResponse) graphql.Marshaler {
@@ -226,23 +325,10 @@ func (ec *executionContext) _ProfileDataResponse(ctx context.Context, sel ast.Se
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProfileDataResponse")
-		case "userId":
-			out.Values[i] = ec._ProfileDataResponse_userId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "firstName":
-			out.Values[i] = ec._ProfileDataResponse_firstName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "lastName":
-			out.Values[i] = ec._ProfileDataResponse_lastName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "permissionCode":
-			out.Values[i] = ec._ProfileDataResponse_permissionCode(ctx, field, obj)
+		case "data":
+			out.Values[i] = ec._ProfileDataResponse_data(ctx, field, obj)
+		case "code":
+			out.Values[i] = ec._ProfileDataResponse_code(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -285,6 +371,13 @@ func (ec *executionContext) marshalNProfileDataResponse2ᚖfafnirᚋapiᚑgatewa
 		return graphql.Null
 	}
 	return ec._ProfileDataResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProfileData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileData(ctx context.Context, sel ast.SelectionSet, v *model.ProfileData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProfileData(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

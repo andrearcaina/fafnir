@@ -13,7 +13,6 @@ import (
 )
 
 type Server struct {
-	handler    *SecurityHandler
 	grpcServer *grpc.Server
 	config     *config.Config
 }
@@ -48,7 +47,6 @@ func NewServer() *Server {
 	pb.RegisterSecurityServiceServer(grpcServer, securityHandler)
 
 	return &Server{
-		handler:    securityHandler,
 		grpcServer: grpcServer,
 		config:     cfg,
 	}

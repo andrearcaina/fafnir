@@ -1,82 +1,173 @@
 package api
 
 import (
-	"fafnir/shared/pkg/utils"
-	"log"
-	"net/http"
-	"strings"
-
-	"github.com/go-chi/chi/v5"
+	"context"
+	basepb "fafnir/shared/pb/base"
+	pb "fafnir/shared/pb/stock"
+	"fafnir/shared/pkg/errors"
 )
 
-type Handler struct {
+type StockHandler struct {
 	stockService *Service
+	pb.UnimplementedStockServiceServer
 }
 
-func NewStockHandler(stockService *Service) *Handler {
-	return &Handler{
+func NewStockHandler(stockService *Service) *StockHandler {
+	return &StockHandler{
 		stockService: stockService,
 	}
 }
 
-func (h *Handler) ServeStockRoutes() http.Handler {
-	r := chi.NewRouter()
-
-	r.Get("/metadata/{symbol}", h.getStockMetadata)
-	r.Get("/quote/{symbol}", h.getStockQuote)
-	r.Get("/historical/{symbol}/{period}", h.getStockHistoricalData)
-	r.Get("/quote/batch", h.getStockQuoteBatch)
-
-	return r
-}
-
-func (h *Handler) getStockMetadata(w http.ResponseWriter, r *http.Request) {
-	symbol := chi.URLParam(r, "symbol")
-
-	metadata, err := h.stockService.GetStockMetadata(r.Context(), symbol)
+// GetStockMetadata implements the gRPC GetStockMetadata method
+func (h *StockHandler) GetStockMetadata(ctx context.Context, req *pb.GetStockMetadataRequest) (*pb.GetStockMetadataResponse, error) {
+	metadata, err := h.stockService.GetStockMetadata(ctx, req.Symbol)
 	if err != nil {
-		utils.HandleError(w, err)
-		return
+		// if err is an app error with code bad request, return INVALID_ARGUMENT without error
+		if errors.Is(err, errors.BadRequestError("")) {
+			return &pb.GetStockMetadataResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INVALID_ARGUMENT,
+			}, nil
+		} else if errors.Is(err, errors.InternalError("")) {
+			return &pb.GetStockMetadataResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INTERNAL,
+			}, nil
+		}
+
+		// for other errors, just return the error
+		return nil, err
 	}
 
-	utils.WriteJSON(w, http.StatusOK, metadata)
+	return &pb.GetStockMetadataResponse{
+		Data: &pb.StockMetadata{
+			Symbol:           metadata.Symbol,
+			Name:             metadata.Name,
+			Currency:         metadata.Currency,
+			Exchange:         metadata.Exchange,
+			ExchangeFullName: metadata.ExchangeFullName,
+		},
+		Code: basepb.ErrorCode_OK,
+	}, nil
 }
 
-func (h *Handler) getStockQuote(w http.ResponseWriter, r *http.Request) {
-	symbol := chi.URLParam(r, "symbol")
-
-	quote, err := h.stockService.GetStockQuote(r.Context(), symbol)
+// GetStockQuote implements the gRPC GetStockQuote method
+func (h *StockHandler) GetStockQuote(ctx context.Context, req *pb.GetStockQuoteRequest) (*pb.GetStockQuoteResponse, error) {
+	quote, err := h.stockService.GetStockQuote(ctx, req.Symbol)
 	if err != nil {
-		utils.HandleError(w, err)
-		return
+		if errors.Is(err, errors.BadRequestError("")) {
+			return &pb.GetStockQuoteResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INVALID_ARGUMENT,
+			}, nil
+		} else if errors.Is(err, errors.InternalError("")) {
+			return &pb.GetStockQuoteResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INTERNAL,
+			}, nil
+		}
+
+		return nil, err
 	}
 
-	utils.WriteJSON(w, http.StatusOK, quote)
+	return &pb.GetStockQuoteResponse{
+		Data: &pb.StockQuote{
+			Symbol:        quote.Symbol,
+			LastPrice:     quote.LastPrice,
+			OpenPrice:     quote.OpenPrice,
+			PreviousClose: quote.PreviousClose,
+			DayLow:        quote.DayLow,
+			DayHigh:       quote.DayHigh,
+			YearLow:       quote.YearLow,
+			YearHigh:      quote.YearHigh,
+			Volume:        quote.Volume,
+			MarketCap:     quote.MarketCap,
+			Change:        quote.Change,
+			ChangePct:     quote.ChangePct,
+		},
+		Code: basepb.ErrorCode_OK,
+	}, nil
 }
 
-func (h *Handler) getStockQuoteBatch(w http.ResponseWriter, r *http.Request) {
-	symbols := strings.Split(r.URL.Query().Get("symbols"), ",")
-
-	quotes, err := h.stockService.GetStockQuoteBatch(r.Context(), symbols)
+// GetStockQuoteBatch implements the gRPC GetStockQuoteBatch method
+func (h *StockHandler) GetStockQuoteBatch(ctx context.Context, req *pb.GetStockQuoteBatchRequest) (*pb.GetStockQuoteBatchResponse, error) {
+	quotes, err := h.stockService.GetStockQuoteBatch(ctx, req.Symbols)
 	if err != nil {
-		utils.HandleError(w, err)
-		return
+		if errors.Is(err, errors.BadRequestError("")) {
+			return &pb.GetStockQuoteBatchResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INVALID_ARGUMENT,
+			}, nil
+		} else if errors.Is(err, errors.InternalError("")) {
+			return &pb.GetStockQuoteBatchResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INTERNAL,
+			}, nil
+		}
+
+		return nil, err
 	}
 
-	log.Printf("quotes retrieved: %+v", quotes)
+	var pbQuotes []*pb.StockQuote
+	for _, quote := range quotes {
+		pbQuotes = append(pbQuotes, &pb.StockQuote{
+			Symbol:        quote.Symbol,
+			LastPrice:     quote.LastPrice,
+			OpenPrice:     quote.OpenPrice,
+			PreviousClose: quote.PreviousClose,
+			DayLow:        quote.DayLow,
+			DayHigh:       quote.DayHigh,
+			YearLow:       quote.YearLow,
+			YearHigh:      quote.YearHigh,
+			Volume:        quote.Volume,
+			MarketCap:     quote.MarketCap,
+			Change:        quote.Change,
+			ChangePct:     quote.ChangePct,
+		})
+	}
 
-	utils.WriteJSON(w, http.StatusOK, quotes)
+	return &pb.GetStockQuoteBatchResponse{
+		Data: pbQuotes,
+		Code: basepb.ErrorCode_OK,
+	}, nil
 }
 
-func (h *Handler) getStockHistoricalData(w http.ResponseWriter, r *http.Request) {
-	symbol := chi.URLParam(r, "symbol")
-	period := chi.URLParam(r, "period")
-
-	historicalData, err := h.stockService.GetStockHistoricalData(r.Context(), symbol, period)
+// getStockHistoricalData implements the gRPC GetStockHistoricalData method
+func (h *StockHandler) GetStockHistoricalData(ctx context.Context, req *pb.GetStockHistoricalDataRequest) (*pb.GetStockHistoricalDataResponse, error) {
+	historicalData, err := h.stockService.GetStockHistoricalData(ctx, req.Symbol, req.Period)
 	if err != nil {
-		utils.HandleError(w, err)
-		return
+		if errors.Is(err, errors.BadRequestError("")) {
+			return &pb.GetStockHistoricalDataResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INVALID_ARGUMENT,
+			}, nil
+		} else if errors.Is(err, errors.InternalError("")) {
+			return &pb.GetStockHistoricalDataResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_INTERNAL,
+			}, nil
+		}
+
+		return nil, err
 	}
 
-	utils.WriteJSON(w, http.StatusOK, historicalData)
+	var pbStockHistoricalData []*pb.StockHistoricalData
+	for _, stockData := range historicalData {
+		pbStockHistoricalData = append(pbStockHistoricalData, &pb.StockHistoricalData{
+			Symbol:     stockData.Symbol,
+			Date:       stockData.Date,
+			OpenPrice:  stockData.OpenPrice,
+			HighPrice:  stockData.HighPrice,
+			LowPrice:   stockData.LowPrice,
+			ClosePrice: stockData.ClosePrice,
+			Volume:     stockData.Volume,
+			Change:     stockData.Change,
+			ChangePct:  stockData.ChangePct,
+		})
+	}
+
+	return &pb.GetStockHistoricalDataResponse{
+		Data: pbStockHistoricalData,
+		Code: basepb.ErrorCode_OK,
+	}, nil
 }

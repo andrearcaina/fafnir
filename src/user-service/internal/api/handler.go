@@ -11,6 +11,7 @@ import (
 	"log"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/nats-io/nats.go"
 )
 
@@ -31,28 +32,30 @@ func (h *UserHandler) GetProfileData(ctx context.Context, req *pb.ProfileDataReq
 	userID, err := uuid.Parse(req.GetUserId())
 	if err != nil {
 		return &pb.ProfileDataResponse{
-			UserId:    "",
-			FirstName: "",
-			LastName:  "",
-			Code:      basepb.ErrorCode_INVALID_ARGUMENT,
-		}, err
+			Data: nil,
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, nil // return nil since this is not a server error (invalid input)
 	}
 
 	profileData, err := h.db.GetQueries().GetUserProfileById(ctx, userID)
 	if err != nil {
-		return &pb.ProfileDataResponse{
-			UserId:    userID.String(),
-			FirstName: "",
-			LastName:  "",
-			Code:      basepb.ErrorCode_NOT_FOUND,
-		}, err
+		if err == pgx.ErrNoRows {
+			return &pb.ProfileDataResponse{
+				Data: nil,
+				Code: basepb.ErrorCode_NOT_FOUND,
+			}, nil
+		}
+
+		return nil, err
 	}
 
 	return &pb.ProfileDataResponse{
-		UserId:    userID.String(),
-		FirstName: profileData.FirstName,
-		LastName:  profileData.LastName,
-		Code:      basepb.ErrorCode_OK,
+		Data: &pb.ProfileData{
+			UserId:    profileData.ID.String(),
+			FirstName: profileData.FirstName,
+			LastName:  profileData.LastName,
+		},
+		Code: basepb.ErrorCode_OK,
 	}, nil
 }
 

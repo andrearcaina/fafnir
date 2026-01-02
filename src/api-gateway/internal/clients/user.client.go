@@ -4,7 +4,8 @@ import (
 	"context"
 	"fafnir/api-gateway/graph/model"
 	basepb "fafnir/shared/pb/base"
-	"fafnir/shared/pb/user"
+	pb "fafnir/shared/pb/user"
+	"fmt"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -40,18 +41,22 @@ func (c *UserClient) GetProfileData(ctx context.Context, userId string) (*model.
 
 	resp, err := c.client.GetProfileData(ctx, req)
 	if err != nil {
+		return nil, fmt.Errorf("failed to get profile data: %w", err)
+	}
+
+	if resp.GetCode() != basepb.ErrorCode_OK {
 		return &model.ProfileDataResponse{
-			UserID:         "",
-			FirstName:      "",
-			LastName:       "",
-			PermissionCode: basepb.ErrorCode_NOT_FOUND.String(),
-		}, err
+			Data: nil,
+			Code: resp.GetCode().String(),
+		}, nil
 	}
 
 	return &model.ProfileDataResponse{
-		UserID:         resp.UserId,
-		FirstName:      resp.FirstName,
-		LastName:       resp.LastName,
-		PermissionCode: resp.Code.String(),
+		Data: &model.ProfileData{
+			UserID:    resp.Data.UserId,
+			FirstName: resp.Data.FirstName,
+			LastName:  resp.Data.LastName,
+		},
+		Code: resp.GetCode().String(),
 	}, nil
 }

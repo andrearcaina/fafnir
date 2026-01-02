@@ -8,18 +8,26 @@ type HasPermissionRequest struct {
 }
 
 type HasPermissionResponse struct {
-	HasPermission  bool   `json:"hasPermission"`
-	PermissionCode string `json:"permissionCode"`
+	Data *SecurityPermission `json:"data"`
+	Code string              `json:"code"`
+}
+
+type ProfileData struct {
+	UserID    string `json:"userId"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
 type ProfileDataResponse struct {
-	UserID         string `json:"userId"`
-	FirstName      string `json:"firstName"`
-	LastName       string `json:"lastName"`
-	PermissionCode string `json:"permissionCode"`
+	Data *ProfileData `json:"data,omitempty"`
+	Code string       `json:"code"`
 }
 
 type Query struct {
+}
+
+type SecurityPermission struct {
+	HasPermission bool `json:"hasPermission"`
 }
 
 type StockData struct {
@@ -31,25 +39,25 @@ type StockData struct {
 }
 
 type StockHistoricalData struct {
-	Symbol        string  `json:"symbol"`
-	Date          string  `json:"date"`
-	Open          float64 `json:"open"`
-	High          float64 `json:"high"`
-	Low           float64 `json:"low"`
-	Close         float64 `json:"close"`
-	Volume        int64   `json:"volume"`
-	Change        float64 `json:"change"`
-	ChangePercent float64 `json:"changePercent"`
+	Symbol             string  `json:"symbol"`
+	Date               string  `json:"date"`
+	Open               float64 `json:"open"`
+	High               float64 `json:"high"`
+	Low                float64 `json:"low"`
+	Close              float64 `json:"close"`
+	Volume             int64   `json:"volume"`
+	PriceChange        float64 `json:"priceChange"`
+	PriceChangePercent float64 `json:"priceChangePercent"`
 }
 
 type StockHistoricalDataResponse struct {
-	Code int32                  `json:"code"`
-	Data []*StockHistoricalData `json:"data"`
+	Code string                 `json:"code"`
+	Data []*StockHistoricalData `json:"data,omitempty"`
 }
 
 type StockMetadataResponse struct {
-	Code int32      `json:"code"`
-	Data *StockData `json:"data"`
+	Code string     `json:"code"`
+	Data *StockData `json:"data,omitempty"`
 }
 
 type StockPriceData struct {
@@ -68,11 +76,11 @@ type StockPriceData struct {
 }
 
 type StockQuoteBatchResponse struct {
-	Code int32             `json:"code"`
-	Data []*StockPriceData `json:"data"`
+	Code string            `json:"code"`
+	Data []*StockPriceData `json:"data,omitempty"`
 }
 
 type StockQuoteResponse struct {
-	Code int32           `json:"code"`
-	Data *StockPriceData `json:"data"`
+	Code string          `json:"code"`
+	Data *StockPriceData `json:"data,omitempty"`
 }

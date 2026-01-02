@@ -74,9 +74,53 @@ func (x *CheckPermissionRequest) GetPermission() string {
 	return ""
 }
 
-type CheckPermissionResponse struct {
+type SecurityPermission struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	HasPermission bool                   `protobuf:"varint,1,opt,name=has_permission,json=hasPermission,proto3" json:"has_permission,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SecurityPermission) Reset() {
+	*x = SecurityPermission{}
+	mi := &file_security_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SecurityPermission) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SecurityPermission) ProtoMessage() {}
+
+func (x *SecurityPermission) ProtoReflect() protoreflect.Message {
+	mi := &file_security_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SecurityPermission.ProtoReflect.Descriptor instead.
+func (*SecurityPermission) Descriptor() ([]byte, []int) {
+	return file_security_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SecurityPermission) GetHasPermission() bool {
+	if x != nil {
+		return x.HasPermission
+	}
+	return false
+}
+
+type CheckPermissionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Permission    *SecurityPermission    `protobuf:"bytes,1,opt,name=permission,proto3" json:"permission,omitempty"`
 	Code          base.ErrorCode         `protobuf:"varint,2,opt,name=code,proto3,enum=base.ErrorCode" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -84,7 +128,7 @@ type CheckPermissionResponse struct {
 
 func (x *CheckPermissionResponse) Reset() {
 	*x = CheckPermissionResponse{}
-	mi := &file_security_proto_msgTypes[1]
+	mi := &file_security_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -96,7 +140,7 @@ func (x *CheckPermissionResponse) String() string {
 func (*CheckPermissionResponse) ProtoMessage() {}
 
 func (x *CheckPermissionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_security_proto_msgTypes[1]
+	mi := &file_security_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -109,14 +153,14 @@ func (x *CheckPermissionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckPermissionResponse.ProtoReflect.Descriptor instead.
 func (*CheckPermissionResponse) Descriptor() ([]byte, []int) {
-	return file_security_proto_rawDescGZIP(), []int{1}
+	return file_security_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CheckPermissionResponse) GetHasPermission() bool {
+func (x *CheckPermissionResponse) GetPermission() *SecurityPermission {
 	if x != nil {
-		return x.HasPermission
+		return x.Permission
 	}
-	return false
+	return nil
 }
 
 func (x *CheckPermissionResponse) GetCode() base.ErrorCode {
@@ -136,9 +180,13 @@ const file_security_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1e\n" +
 	"\n" +
 	"permission\x18\x02 \x01(\tR\n" +
-	"permission\"e\n" +
-	"\x17CheckPermissionResponse\x12%\n" +
-	"\x0ehas_permission\x18\x01 \x01(\bR\rhasPermission\x12#\n" +
+	"permission\";\n" +
+	"\x12SecurityPermission\x12%\n" +
+	"\x0ehas_permission\x18\x01 \x01(\bR\rhasPermission\"|\n" +
+	"\x17CheckPermissionResponse\x12<\n" +
+	"\n" +
+	"permission\x18\x01 \x01(\v2\x1c.security.SecurityPermissionR\n" +
+	"permission\x12#\n" +
 	"\x04code\x18\x02 \x01(\x0e2\x0f.base.ErrorCodeR\x04code2i\n" +
 	"\x0fSecurityService\x12V\n" +
 	"\x0fCheckPermission\x12 .security.CheckPermissionRequest\x1a!.security.CheckPermissionResponseB\x1eZ\x1cfafnir/shared/pb/security;pbb\x06proto3"
@@ -155,21 +203,23 @@ func file_security_proto_rawDescGZIP() []byte {
 	return file_security_proto_rawDescData
 }
 
-var file_security_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_security_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_security_proto_goTypes = []any{
 	(*CheckPermissionRequest)(nil),  // 0: security.CheckPermissionRequest
-	(*CheckPermissionResponse)(nil), // 1: security.CheckPermissionResponse
-	(base.ErrorCode)(0),             // 2: base.ErrorCode
+	(*SecurityPermission)(nil),      // 1: security.SecurityPermission
+	(*CheckPermissionResponse)(nil), // 2: security.CheckPermissionResponse
+	(base.ErrorCode)(0),             // 3: base.ErrorCode
 }
 var file_security_proto_depIdxs = []int32{
-	2, // 0: security.CheckPermissionResponse.code:type_name -> base.ErrorCode
-	0, // 1: security.SecurityService.CheckPermission:input_type -> security.CheckPermissionRequest
-	1, // 2: security.SecurityService.CheckPermission:output_type -> security.CheckPermissionResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 0: security.CheckPermissionResponse.permission:type_name -> security.SecurityPermission
+	3, // 1: security.CheckPermissionResponse.code:type_name -> base.ErrorCode
+	0, // 2: security.SecurityService.CheckPermission:input_type -> security.CheckPermissionRequest
+	2, // 3: security.SecurityService.CheckPermission:output_type -> security.CheckPermissionResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_security_proto_init() }
@@ -183,7 +233,7 @@ func file_security_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_security_proto_rawDesc), len(file_security_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

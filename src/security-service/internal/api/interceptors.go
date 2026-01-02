@@ -37,7 +37,7 @@ func logCheckPermission(duration time.Duration, resp *pb.CheckPermissionResponse
 	log.Printf(
 		"gRPC Response - Duration: %v, Response: has_permission=%v, code=%s",
 		duration,
-		resp.GetHasPermission(),
+		resp.GetPermission().GetHasPermission(),
 		resp.GetCode().String(),
 	)
 }
