@@ -3,8 +3,7 @@ package clients
 import (
 	"context"
 	"fafnir/api-gateway/graph/model"
-	basepb "fafnir/shared/pb/base"
-	"fafnir/shared/pb/security"
+	pb "fafnir/shared/pb/security"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -42,13 +41,17 @@ func (c *SecurityClient) CheckPermission(ctx context.Context, userId string, per
 	resp, err := c.client.CheckPermission(ctx, req)
 	if err != nil {
 		return &model.HasPermissionResponse{
-			HasPermission:  false,
-			PermissionCode: basepb.ErrorCode_PERMISSION_DENIED.String(),
+			Data: &model.SecurityPermission{
+				HasPermission: resp.Permission.HasPermission,
+			},
+			Code: resp.GetCode().String(),
 		}, err
 	}
 
 	return &model.HasPermissionResponse{
-		HasPermission:  resp.HasPermission,
-		PermissionCode: resp.Code.String(),
+		Data: &model.SecurityPermission{
+			HasPermission: resp.Permission.HasPermission,
+		},
+		Code: resp.Code.String(),
 	}, nil
 }

@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package stock;
+
+import "base.proto";
+
+option go_package = "fafnir/shared/pb/stock;pb";
+
+message StockMetadata {
+    string symbol = 1;
+    string name = 2;
+    string currency = 3;
+    string exchange = 4;
+    string exchange_full_name = 5;
+}
+
+message StockQuote {
+    string symbol = 1;
+    double last_price = 2;
+    double open_price = 3;
+    double previous_close = 4;
+    double day_low = 5;
+    double day_high = 6;
+    double year_low = 7;
+    double year_high = 8;
+    int64 volume = 9;
+    double market_cap = 10;
+    double change = 11;
+    double change_pct = 12;
+}
+
+message StockHistoricalData {
+    string symbol = 1;
+    string date = 2;
+    double open_price = 3;
+    double high_price = 4;
+    double low_price = 5;
+    double close_price = 6;
+    int64 volume = 7;
+    double change = 8;
+    double change_pct = 9;
+}
+
+message GetStockMetadataRequest {
+    string symbol = 1;
+}
+
+message GetStockQuoteRequest {
+    string symbol = 1;
+}
+
+message GetStockHistoricalDataRequest {
+    string symbol = 1;
+    string period = 2; // e.g., "1D", "1W", "1M", "3M", "6M", "1Y", "2Y", "5Y", "MAX"
+}
+
+message GetStockQuoteBatchRequest {
+    repeated string symbols = 1;
+}
+
+message GetStockMetadataResponse {
+    StockMetadata data = 1;
+    base.ErrorCode code = 2;
+}
+
+message GetStockQuoteResponse {
+    StockQuote data = 1;
+    base.ErrorCode code = 2;
+}
+
+message GetStockHistoricalDataResponse {
+    repeated StockHistoricalData data = 1;
+    base.ErrorCode code = 2;
+}
+
+message GetStockQuoteBatchResponse {
+    repeated StockQuote data = 1;
+    base.ErrorCode code = 2;
+}
+
+service StockService {
+    rpc GetStockMetadata(GetStockMetadataRequest) returns (GetStockMetadataResponse);
+    rpc GetStockQuote(GetStockQuoteRequest) returns (GetStockQuoteResponse);
+    rpc GetStockHistoricalData(GetStockHistoricalDataRequest) returns (GetStockHistoricalDataResponse);
+    rpc GetStockQuoteBatch(GetStockQuoteBatchRequest) returns (GetStockQuoteBatchResponse);
+}

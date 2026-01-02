@@ -34,7 +34,7 @@ func NewConfig() *Config {
 		CLIENTS: ClientsConfig{
 			SecurityClient: clients.NewSecurityClient("security-service:8082"),
 			UserClient:     clients.NewUserClient("user-service:8083"),
-			StockClient:    clients.NewStockClient("http://stock-service:8084/stock"),
+			StockClient:    clients.NewStockClient("stock-service:8084"),
 		},
 		PROXY: ProxyConfig{
 			TargetURL: "http://auth-service:8081/",

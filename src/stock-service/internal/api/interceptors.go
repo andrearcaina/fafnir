@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	pb "fafnir/shared/pb/user"
 	"log"
 	"time"
 
@@ -25,20 +24,8 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 		return nil, err
 	}
 
-	// Log response
-	if info.FullMethod == "/user.UserService/GetProfileData" {
-		logGetProfileData(duration, resp.(*pb.ProfileDataResponse))
-	}
+	// log response (no need for different log handling based on method, unless needed later)
+	log.Printf("gRPC Response - Method: %s, Duration: %v, Response: %+v", info.FullMethod, duration, resp)
 
 	return resp, nil
-}
-
-func logGetProfileData(duration time.Duration, resp *pb.ProfileDataResponse) {
-	log.Printf("gRPC Response - Method: /user.UserService/GetProfileData, Duration: %v, UserId: %s, FirstName: %s, LastName: %s, Code: %s",
-		duration,
-		resp.GetData().GetUserId(),
-		resp.GetData().GetFirstName(),
-		resp.GetData().GetLastName(),
-		resp.GetCode().String(),
-	)
 }

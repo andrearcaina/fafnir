@@ -2,21 +2,25 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "fafnir/shared/pb/security;pb";
-
 import "base.proto";
 
+option go_package = "fafnir/shared/pb/user;pb";
+
+message ProfileData {
+    string user_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+}
+
 message ProfileDataRequest {
-  string user_id = 1;
+    string user_id = 1;
 }
 
 message ProfileDataResponse {
-  string user_id = 1;
-  string first_name = 2;
-  string last_name = 3;
-  base.ErrorCode code = 4;
+    ProfileData data = 1;
+    base.ErrorCode code = 2;
 }
 
 service UserService {
-  rpc GetProfileData(ProfileDataRequest) returns (ProfileDataResponse);
+    rpc GetProfileData(ProfileDataRequest) returns (ProfileDataResponse);
 }
