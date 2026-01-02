@@ -76,6 +76,15 @@ func Wrap(err error, code ErrorCode, message string) *AppError {
 	}
 }
 
+// Is checks if the given error is some AppError
+func Is(err error, target *AppError) bool {
+	appErr, ok := err.(*AppError)
+	if !ok {
+		return false
+	}
+	return appErr.Code == target.Code
+}
+
 // WithDetails adds additional details to an errors
 func (e *AppError) WithDetails(details string) *AppError {
 	e.Details = details

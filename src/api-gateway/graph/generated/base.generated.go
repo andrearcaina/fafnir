@@ -204,10 +204,10 @@ func (ec *executionContext) fieldContext_Query_checkPermission(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "hasPermission":
-				return ec.fieldContext_HasPermissionResponse_hasPermission(ctx, field)
-			case "permissionCode":
-				return ec.fieldContext_HasPermissionResponse_permissionCode(ctx, field)
+			case "data":
+				return ec.fieldContext_HasPermissionResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_HasPermissionResponse_code(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type HasPermissionResponse", field.Name)
 		},
@@ -509,14 +509,10 @@ func (ec *executionContext) fieldContext_Query_getProfileData(ctx context.Contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "userId":
-				return ec.fieldContext_ProfileDataResponse_userId(ctx, field)
-			case "firstName":
-				return ec.fieldContext_ProfileDataResponse_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_ProfileDataResponse_lastName(ctx, field)
-			case "permissionCode":
-				return ec.fieldContext_ProfileDataResponse_permissionCode(ctx, field)
+			case "data":
+				return ec.fieldContext_ProfileDataResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_ProfileDataResponse_code(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ProfileDataResponse", field.Name)
 		},

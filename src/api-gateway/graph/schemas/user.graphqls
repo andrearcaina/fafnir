@@ -1,8 +1,12 @@
-type ProfileDataResponse {
+type ProfileData {
     userId: String!
     firstName: String!
     lastName: String!
-    permissionCode: String! # grpc permission code
+}
+
+type ProfileDataResponse {
+    data: ProfileData
+    code: String! # grpc permission code
 }
 
 extend type Query {

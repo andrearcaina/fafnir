@@ -52,7 +52,7 @@ func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.Sto
 }
 
 func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
-	if symbol == "" {
+	if symbol == "" || !utils.GetValidStocks()[symbol] {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -65,7 +65,8 @@ func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (
 
 	fmpStockMetadata, err := s.getStockMetadataFromFMP(ctx, symbol)
 	if err != nil {
-		return nil, err
+		return nil, errors.InternalError("Could not fetch stock metadata from FMP API").
+			WithDetails("Error fetching stock metadata from FMP")
 	}
 
 	return fmpStockMetadata, nil
@@ -92,7 +93,7 @@ func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQ
 }
 
 func (s *Service) getStockQuoteInternal(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
-	if symbol == "" {
+	if symbol == "" || !utils.GetValidStocks()[symbol] {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -172,6 +173,14 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 	if len(symbols) == 0 {
 		return nil, errors.BadRequestError("Invalid symbols").
 			WithDetails("The provided symbols list is empty")
+	}
+
+	// check for invalid symbols
+	for _, symbol := range symbols {
+		if symbol == "" || !utils.GetValidStocks()[symbol] {
+			return nil, errors.BadRequestError("Invalid symbol").
+				WithDetails("The provided symbol " + symbol + " is invalid")
+		}
 	}
 
 	result := make(map[string]*dto.StockQuoteResponse)
@@ -282,7 +291,7 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 
 func (s *Service) GetStockHistoricalData(ctx context.Context, symbol string, period string) ([]dto.StockHistoricalDataResponse, error) {
 	// check if symbol exists
-	if symbol == "" {
+	if symbol == "" || !utils.GetValidStocks()[symbol] {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}

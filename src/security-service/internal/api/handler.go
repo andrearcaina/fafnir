@@ -51,8 +51,10 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 	if hasPermission, found := h.permissionCache.Get(cachedKey); found {
 		log.Printf("Permission cache hit for key: %s", cachedKey)
 		return &pb.CheckPermissionResponse{
-			HasPermission: hasPermission,
-			Code:          basepb.ErrorCode_OK,
+			Permission: &pb.SecurityPermission{
+				HasPermission: hasPermission,
+			},
+			Code: basepb.ErrorCode_OK,
 		}, nil
 	}
 
@@ -60,8 +62,10 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 	userId, err := uuid.Parse(req.UserId)
 	if err != nil {
 		return &pb.CheckPermissionResponse{
-			HasPermission: false,
-			Code:          basepb.ErrorCode_INVALID_ARGUMENT,
+			Permission: &pb.SecurityPermission{
+				HasPermission: false,
+			},
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
 		}, err
 	}
 
@@ -77,8 +81,10 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 
 	if !hasPermission {
 		return &pb.CheckPermissionResponse{
-			HasPermission: false,
-			Code:          basepb.ErrorCode_PERMISSION_DENIED,
+			Permission: &pb.SecurityPermission{
+				HasPermission: hasPermission,
+			},
+			Code: basepb.ErrorCode_PERMISSION_DENIED,
 		}, nil
 	}
 
@@ -86,8 +92,10 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 	h.permissionCache.Add(cachedKey, true)
 
 	return &pb.CheckPermissionResponse{
-		HasPermission: true,
-		Code:          basepb.ErrorCode_OK,
+		Permission: &pb.SecurityPermission{
+			HasPermission: hasPermission,
+		},
+		Code: basepb.ErrorCode_OK,
 	}, nil
 }
 

@@ -557,8 +557,8 @@ func (ec *executionContext) fieldContext_StockHistoricalData_volume(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _StockHistoricalData_change(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_change(ctx, field)
+func (ec *executionContext) _StockHistoricalData_priceChange(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockHistoricalData_priceChange(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -571,7 +571,7 @@ func (ec *executionContext) _StockHistoricalData_change(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Change, nil
+		return obj.PriceChange, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -588,7 +588,7 @@ func (ec *executionContext) _StockHistoricalData_change(ctx context.Context, fie
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_StockHistoricalData_change(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StockHistoricalData_priceChange(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "StockHistoricalData",
 		Field:      field,
@@ -601,8 +601,8 @@ func (ec *executionContext) fieldContext_StockHistoricalData_change(_ context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _StockHistoricalData_changePercent(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_changePercent(ctx, field)
+func (ec *executionContext) _StockHistoricalData_priceChangePercent(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StockHistoricalData_priceChangePercent(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -615,7 +615,7 @@ func (ec *executionContext) _StockHistoricalData_changePercent(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ChangePercent, nil
+		return obj.PriceChangePercent, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -632,7 +632,7 @@ func (ec *executionContext) _StockHistoricalData_changePercent(ctx context.Conte
 	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_StockHistoricalData_changePercent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_StockHistoricalData_priceChangePercent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "StockHistoricalData",
 		Field:      field,
@@ -671,9 +671,9 @@ func (ec *executionContext) _StockHistoricalDataResponse_code(ctx context.Contex
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalDataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -683,7 +683,7 @@ func (ec *executionContext) fieldContext_StockHistoricalDataResponse_code(_ cont
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -710,14 +710,11 @@ func (ec *executionContext) _StockHistoricalDataResponse_data(ctx context.Contex
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.StockHistoricalData)
 	fc.Result = res
-	return ec.marshalNStockHistoricalData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalDataᚄ(ctx, field.Selections, res)
+	return ec.marshalOStockHistoricalData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalDataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -742,10 +739,10 @@ func (ec *executionContext) fieldContext_StockHistoricalDataResponse_data(_ cont
 				return ec.fieldContext_StockHistoricalData_close(ctx, field)
 			case "volume":
 				return ec.fieldContext_StockHistoricalData_volume(ctx, field)
-			case "change":
-				return ec.fieldContext_StockHistoricalData_change(ctx, field)
-			case "changePercent":
-				return ec.fieldContext_StockHistoricalData_changePercent(ctx, field)
+			case "priceChange":
+				return ec.fieldContext_StockHistoricalData_priceChange(ctx, field)
+			case "priceChangePercent":
+				return ec.fieldContext_StockHistoricalData_priceChangePercent(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StockHistoricalData", field.Name)
 		},
@@ -779,9 +776,9 @@ func (ec *executionContext) _StockMetadataResponse_code(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockMetadataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -791,7 +788,7 @@ func (ec *executionContext) fieldContext_StockMetadataResponse_code(_ context.Co
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -818,14 +815,11 @@ func (ec *executionContext) _StockMetadataResponse_data(ctx context.Context, fie
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.StockData)
 	fc.Result = res
-	return ec.marshalNStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx, field.Selections, res)
+	return ec.marshalOStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockMetadataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1407,9 +1401,9 @@ func (ec *executionContext) _StockQuoteBatchResponse_code(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteBatchResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1419,7 +1413,7 @@ func (ec *executionContext) fieldContext_StockQuoteBatchResponse_code(_ context.
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1446,14 +1440,11 @@ func (ec *executionContext) _StockQuoteBatchResponse_data(ctx context.Context, f
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.StockPriceData)
 	fc.Result = res
-	return ec.marshalNStockPriceData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceDataᚄ(ctx, field.Selections, res)
+	return ec.marshalOStockPriceData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteBatchResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1521,9 +1512,9 @@ func (ec *executionContext) _StockQuoteResponse_code(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1533,7 +1524,7 @@ func (ec *executionContext) fieldContext_StockQuoteResponse_code(_ context.Conte
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1560,14 +1551,11 @@ func (ec *executionContext) _StockQuoteResponse_data(ctx context.Context, field 
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.StockPriceData)
 	fc.Result = res
-	return ec.marshalNStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, field.Selections, res)
+	return ec.marshalOStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1726,13 +1714,13 @@ func (ec *executionContext) _StockHistoricalData(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "change":
-			out.Values[i] = ec._StockHistoricalData_change(ctx, field, obj)
+		case "priceChange":
+			out.Values[i] = ec._StockHistoricalData_priceChange(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "changePercent":
-			out.Values[i] = ec._StockHistoricalData_changePercent(ctx, field, obj)
+		case "priceChangePercent":
+			out.Values[i] = ec._StockHistoricalData_priceChangePercent(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1777,9 +1765,6 @@ func (ec *executionContext) _StockHistoricalDataResponse(ctx context.Context, se
 			}
 		case "data":
 			out.Values[i] = ec._StockHistoricalDataResponse_data(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1821,9 +1806,6 @@ func (ec *executionContext) _StockMetadataResponse(ctx context.Context, sel ast.
 			}
 		case "data":
 			out.Values[i] = ec._StockMetadataResponse_data(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1959,9 +1941,6 @@ func (ec *executionContext) _StockQuoteBatchResponse(ctx context.Context, sel as
 			}
 		case "data":
 			out.Values[i] = ec._StockQuoteBatchResponse_data(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2003,9 +1982,6 @@ func (ec *executionContext) _StockQuoteResponse(ctx context.Context, sel ast.Sel
 			}
 		case "data":
 			out.Values[i] = ec._StockQuoteResponse_data(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2049,70 +2025,6 @@ func (ec *executionContext) marshalNInt642int64(ctx context.Context, sel ast.Sel
 	return res
 }
 
-func (ec *executionContext) marshalNStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx context.Context, sel ast.SelectionSet, v *model.StockData) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._StockData(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNStockHistoricalData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.StockHistoricalData) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNStockHistoricalData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNStockHistoricalData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx context.Context, sel ast.SelectionSet, v *model.StockHistoricalData) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._StockHistoricalData(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNStockHistoricalDataResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalDataResponse(ctx context.Context, sel ast.SelectionSet, v model.StockHistoricalDataResponse) graphql.Marshaler {
 	return ec._StockHistoricalDataResponse(ctx, sel, &v)
 }
@@ -2141,60 +2053,6 @@ func (ec *executionContext) marshalNStockMetadataResponse2ᚖfafnirᚋapiᚑgate
 	return ec._StockMetadataResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNStockPriceData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.StockPriceData) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx context.Context, sel ast.SelectionSet, v *model.StockPriceData) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._StockPriceData(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNStockQuoteBatchResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockQuoteBatchResponse(ctx context.Context, sel ast.SelectionSet, v model.StockQuoteBatchResponse) graphql.Marshaler {
 	return ec._StockQuoteBatchResponse(ctx, sel, &v)
 }
@@ -2221,6 +2079,109 @@ func (ec *executionContext) marshalNStockQuoteResponse2ᚖfafnirᚋapiᚑgateway
 		return graphql.Null
 	}
 	return ec._StockQuoteResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx context.Context, sel ast.SelectionSet, v *model.StockData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._StockData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOStockHistoricalData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx context.Context, sel ast.SelectionSet, v []*model.StockHistoricalData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOStockHistoricalData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOStockHistoricalData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx context.Context, sel ast.SelectionSet, v *model.StockHistoricalData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._StockHistoricalData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOStockPriceData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx context.Context, sel ast.SelectionSet, v []*model.StockPriceData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx context.Context, sel ast.SelectionSet, v *model.StockPriceData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._StockPriceData(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

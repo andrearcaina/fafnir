@@ -41,15 +41,19 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	HasPermissionResponse struct {
-		HasPermission  func(childComplexity int) int
-		PermissionCode func(childComplexity int) int
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	ProfileData struct {
+		FirstName func(childComplexity int) int
+		LastName  func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	ProfileDataResponse struct {
-		FirstName      func(childComplexity int) int
-		LastName       func(childComplexity int) int
-		PermissionCode func(childComplexity int) int
-		UserID         func(childComplexity int) int
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
 	}
 
 	Query struct {
@@ -62,6 +66,10 @@ type ComplexityRoot struct {
 		Health                 func(childComplexity int) int
 	}
 
+	SecurityPermission struct {
+		HasPermission func(childComplexity int) int
+	}
+
 	StockData struct {
 		Currency         func(childComplexity int) int
 		Exchange         func(childComplexity int) int
@@ -71,15 +79,15 @@ type ComplexityRoot struct {
 	}
 
 	StockHistoricalData struct {
-		Change        func(childComplexity int) int
-		ChangePercent func(childComplexity int) int
-		Close         func(childComplexity int) int
-		Date          func(childComplexity int) int
-		High          func(childComplexity int) int
-		Low           func(childComplexity int) int
-		Open          func(childComplexity int) int
-		Symbol        func(childComplexity int) int
-		Volume        func(childComplexity int) int
+		Close              func(childComplexity int) int
+		Date               func(childComplexity int) int
+		High               func(childComplexity int) int
+		Low                func(childComplexity int) int
+		Open               func(childComplexity int) int
+		PriceChange        func(childComplexity int) int
+		PriceChangePercent func(childComplexity int) int
+		Symbol             func(childComplexity int) int
+		Volume             func(childComplexity int) int
 	}
 
 	StockHistoricalDataResponse struct {
@@ -137,47 +145,54 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
-	case "HasPermissionResponse.hasPermission":
-		if e.complexity.HasPermissionResponse.HasPermission == nil {
+	case "HasPermissionResponse.code":
+		if e.complexity.HasPermissionResponse.Code == nil {
 			break
 		}
 
-		return e.complexity.HasPermissionResponse.HasPermission(childComplexity), true
+		return e.complexity.HasPermissionResponse.Code(childComplexity), true
 
-	case "HasPermissionResponse.permissionCode":
-		if e.complexity.HasPermissionResponse.PermissionCode == nil {
+	case "HasPermissionResponse.data":
+		if e.complexity.HasPermissionResponse.Data == nil {
 			break
 		}
 
-		return e.complexity.HasPermissionResponse.PermissionCode(childComplexity), true
+		return e.complexity.HasPermissionResponse.Data(childComplexity), true
 
-	case "ProfileDataResponse.firstName":
-		if e.complexity.ProfileDataResponse.FirstName == nil {
+	case "ProfileData.firstName":
+		if e.complexity.ProfileData.FirstName == nil {
 			break
 		}
 
-		return e.complexity.ProfileDataResponse.FirstName(childComplexity), true
+		return e.complexity.ProfileData.FirstName(childComplexity), true
 
-	case "ProfileDataResponse.lastName":
-		if e.complexity.ProfileDataResponse.LastName == nil {
+	case "ProfileData.lastName":
+		if e.complexity.ProfileData.LastName == nil {
 			break
 		}
 
-		return e.complexity.ProfileDataResponse.LastName(childComplexity), true
+		return e.complexity.ProfileData.LastName(childComplexity), true
 
-	case "ProfileDataResponse.permissionCode":
-		if e.complexity.ProfileDataResponse.PermissionCode == nil {
+	case "ProfileData.userId":
+		if e.complexity.ProfileData.UserID == nil {
 			break
 		}
 
-		return e.complexity.ProfileDataResponse.PermissionCode(childComplexity), true
+		return e.complexity.ProfileData.UserID(childComplexity), true
 
-	case "ProfileDataResponse.userId":
-		if e.complexity.ProfileDataResponse.UserID == nil {
+	case "ProfileDataResponse.code":
+		if e.complexity.ProfileDataResponse.Code == nil {
 			break
 		}
 
-		return e.complexity.ProfileDataResponse.UserID(childComplexity), true
+		return e.complexity.ProfileDataResponse.Code(childComplexity), true
+
+	case "ProfileDataResponse.data":
+		if e.complexity.ProfileDataResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.ProfileDataResponse.Data(childComplexity), true
 
 	case "Query.checkPermission":
 		if e.complexity.Query.CheckPermission == nil {
@@ -258,6 +273,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Health(childComplexity), true
 
+	case "SecurityPermission.hasPermission":
+		if e.complexity.SecurityPermission.HasPermission == nil {
+			break
+		}
+
+		return e.complexity.SecurityPermission.HasPermission(childComplexity), true
+
 	case "StockData.currency":
 		if e.complexity.StockData.Currency == nil {
 			break
@@ -293,20 +315,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StockData.Symbol(childComplexity), true
 
-	case "StockHistoricalData.change":
-		if e.complexity.StockHistoricalData.Change == nil {
-			break
-		}
-
-		return e.complexity.StockHistoricalData.Change(childComplexity), true
-
-	case "StockHistoricalData.changePercent":
-		if e.complexity.StockHistoricalData.ChangePercent == nil {
-			break
-		}
-
-		return e.complexity.StockHistoricalData.ChangePercent(childComplexity), true
-
 	case "StockHistoricalData.close":
 		if e.complexity.StockHistoricalData.Close == nil {
 			break
@@ -341,6 +349,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockHistoricalData.Open(childComplexity), true
+
+	case "StockHistoricalData.priceChange":
+		if e.complexity.StockHistoricalData.PriceChange == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.PriceChange(childComplexity), true
+
+	case "StockHistoricalData.priceChangePercent":
+		if e.complexity.StockHistoricalData.PriceChangePercent == nil {
+			break
+		}
+
+		return e.complexity.StockHistoricalData.PriceChangePercent(childComplexity), true
 
 	case "StockHistoricalData.symbol":
 		if e.complexity.StockHistoricalData.Symbol == nil {
@@ -601,34 +623,39 @@ type Query
     permission: String!
 }
 
-type HasPermissionResponse {
+type SecurityPermission {
     hasPermission: Boolean!
-    permissionCode: String! # grpc permission code (e.g., "PERMISSION_DENIED")
+}
+
+type HasPermissionResponse {
+    data: SecurityPermission!
+    code: String! # grpc permission code (e.g., "PERMISSION_DENIED")
 }
 
 extend type Query {
     checkPermission(request: HasPermissionRequest!): HasPermissionResponse!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "../schemas/stock.graphqls", Input: `scalar Int64
 
 type StockMetadataResponse {
-    code: Int!
-    data: StockData!
+    code: String!
+    data: StockData
 }
 
 type StockQuoteResponse {
-    code: Int!
-    data: StockPriceData!
+    code: String!
+    data: StockPriceData
 }
 
 type StockQuoteBatchResponse {
-    code: Int!
-    data: [StockPriceData!]!
+    code: String!
+    data: [StockPriceData]
 }
 
 type StockHistoricalDataResponse {
-    code: Int!
-    data: [StockHistoricalData!]!
+    code: String!
+    data: [StockHistoricalData]
 }
 
 type StockData {
@@ -647,8 +674,8 @@ type StockHistoricalData {
     low: Float!
     close: Float!
     volume: Int64!
-    change: Float!
-    changePercent: Float!
+    priceChange: Float!
+    priceChangePercent: Float!
 }
 
 type StockPriceData {
@@ -669,18 +696,27 @@ type StockPriceData {
 extend type Query {
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
-    getStockHistoricalData(symbol: String!, period: String): StockHistoricalDataResponse!
+    getStockHistoricalData(
+        symbol: String!
+        period: String
+    ): StockHistoricalDataResponse!
     getStockQuoteBatch(symbols: [String!]!): StockQuoteBatchResponse!
-}`, BuiltIn: false},
-	{Name: "../schemas/user.graphqls", Input: `type ProfileDataResponse {
+}
+`, BuiltIn: false},
+	{Name: "../schemas/user.graphqls", Input: `type ProfileData {
     userId: String!
     firstName: String!
     lastName: String!
-    permissionCode: String! # grpc permission code
+}
+
+type ProfileDataResponse {
+    data: ProfileData
+    code: String! # grpc permission code
 }
 
 extend type Query {
     getProfileData(userId: String!): ProfileDataResponse!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
