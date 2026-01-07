@@ -1,12 +1,9 @@
 # Project Architecture
 
-### Architecture Designs
-- [Initial Design #1](designs/images/dev_design_1.png)
-- [1st Revision of Initial Design](designs/images/revised_dev_design_1.png)
-- [2nd Revision of Initial Design](designs/images/revised_dev_design_1_1.png)
-- [K8s Node & Network Design #1](designs/images/k8s_node_network_design_1.png)
-- [1st Revision Of K8s Design](designs/images/revised_k8s_node_network_design_1.png)
-- [NATS JetStream Architecture #1](designs/images/nats_jetstream_1.png)
+### Latest Architecture Designs
+- [System High Level Design](designs/images/latest/system_hld.png)
+- [Kubernetes Infrastructure Design](designs/images/latest/k8s_infra.png)
+- [NATS JetStream Diagram](designs/images/latest/nats_js.png)
 
 ### Key Architectural Principles
 - **Microservices**: Each service is independently deployable, scalable and follows the single responsibility principle (each service does one thing well)
