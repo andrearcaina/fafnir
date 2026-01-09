@@ -9,10 +9,10 @@ case "$codegen" in
     cd "src/api-gateway" && go generate ./...
     ;;
   sqlc)
-    [[ -z "$service" ]] && { echo "Service name required for SQLC. Use: auth, security, user, stock"; exit 1; }
+    [[ -z "$service" ]] && { echo "Service name required for SQLC. Use: auth, security, user, stock, order, portfolio"; exit 1; }
     case "$service" in
-      auth|security|user|stock) cd "src/$service-service" && sqlc generate ;;
-      *) echo "Invalid service. Use: auth, security, user, stock"; exit 1 ;;
+      auth|security|user|stock|order|portfolio) cd "src/$service-service" && sqlc generate ;;
+      *) echo "Invalid service. Use: auth, security, user, stock, order, portfolio"; exit 1 ;;
     esac
     ;;
   proto)

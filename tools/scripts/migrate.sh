@@ -4,7 +4,7 @@ set -e
 source "infra/env/.env.dev"
 
 DB_BASE="$GOOSE_DRIVER://$POSTGRES_USER:$POSTGRES_PASSWORD@$DB_HOST_LOCAL:$DB_PORT"
-SERVICES=(auth security user stock)
+SERVICES=(auth security user stock order portfolio)
 
 goose_cmd() {
   local service=$1 action=$2
@@ -19,8 +19,8 @@ case "$1" in
   create)
     [[ $# -lt 3 ]] && { echo "Usage: $0 create <db> <name>"; exit 1; }
     case "$2" in
-      auth|security|user|stock) goose -dir "src/$2-service/internal/db/migrations" create "$3" sql ;;
-      *) echo "Invalid db. Use: auth, security, user, stock, infra"; exit 1 ;;
+      auth|security|user|stock|order|portfolio) goose -dir "src/$2-service/internal/db/migrations" create "$3" sql ;;
+      *) echo "Invalid db. Use: auth, security, user, stock, order, portfolio infra"; exit 1 ;;
     esac ;;
   *) echo "Usage: $0 {up|down|status|create <db> <name>}"; exit 1 ;;
 esac
