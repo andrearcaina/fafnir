@@ -157,6 +157,58 @@ services:
         networks:
             - fafnir-network
 
+    order-service:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: order-service
+        environment:
+            - SERVICE_NAME=order-service
+            - SERVICE_PORT=8085
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - ORDER_DB=${ORDER_DB}
+            - DB_HOST=${DB_HOST_DOCKER}
+            - DB_PORT=${DB_PORT}
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
+        volumes:
+            - ../../src/order-service:/app/src/order-service:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - fafnir-network
+
+    portfolio-service:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: portfolio-service
+        environment:
+            - SERVICE_NAME=portfolio-service
+            - SERVICE_PORT=8086
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - PORTFOLIO_DB=${PORTFOLIO_DB}
+            - DB_HOST=${DB_HOST_DOCKER}
+            - DB_PORT=${DB_PORT}
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
+        volumes:
+            - ../../src/portfolio-service:/app/src/portfolio-service:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            db:
+                condition: service_healthy
+        networks:
+            - fafnir-network
+
     nats:
         image: "nats:latest"
         container_name: fafnir-nats
