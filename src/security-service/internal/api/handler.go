@@ -117,15 +117,15 @@ func (h *SecurityHandler) handleUserEvents(msg *nats.Msg) {
 	default:
 		// ignore events we don't care about
 		// we must ack them, otherwise they come back forever
-		msg.Ack()
+		_ = msg.Ack()
 		return
 	}
 
 	if err != nil {
 		log.Printf("Failed to process %s: %v", msg.Subject, err)
-		msg.Nak() // retry later (negative ack)
+		_ = msg.Nak() // retry later (negative ack)
 	} else {
-		msg.Ack() // success (acknowledge message)
+		_ = msg.Ack() // success (acknowledge message)
 	}
 }
 
