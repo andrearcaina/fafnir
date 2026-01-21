@@ -55,7 +55,11 @@ func HandleError(w http.ResponseWriter, err error) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(appErr.HTTPStatus)
-		w.Write(appErr.ToJSON())
+		if err := json.NewEncoder(w).Encode(appErr.ToJSON()); err != nil {
+			log.Printf("Failed to write JSON response: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
+	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,8 +13,6 @@ import (
 type Cache struct {
 	client *redis.Client
 	ttl    time.Duration // time to live (expiration duration) for cached items
-	host   string
-	port   string
 }
 
 // New: initializes a new Redis client with retry logic
@@ -28,7 +26,7 @@ func New(host, port string) (*Cache, error) {
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", host, port),
-			Password: "", // Consider passing this as an arg too
+			Password: "",
 			DB:       0,
 		})
 
@@ -37,20 +35,19 @@ func New(host, port string) (*Cache, error) {
 		cancel()
 
 		if err == nil {
-			slog.Info("Successfully connected to Redis", "attempt", attempt, "addr", rdb.Options().Addr)
+			log.Println("Successfully connected to Redis", "attempt", attempt, "addr", rdb.Options().Addr)
 			return &Cache{
 				client: rdb,
 				ttl:    5 * time.Minute,
 			}, nil
 		}
 
-		slog.Warn("Failed to ping Redis",
-			"attempt", attempt,
-			"error", err,
-			"retry_in", retryInterval.String(),
-		)
+		log.Println("Failed to ping Redis", "attempt", attempt, "error", err, "retry_in", retryInterval.String())
 
-		rdb.Close()
+		err = rdb.Close()
+		if err != nil {
+			return nil, fmt.Errorf("failed to close Redis connection: %w", err)
+		}
 
 		if attempt < maxRetries {
 			time.Sleep(retryInterval)

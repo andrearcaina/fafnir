@@ -1,4 +1,4 @@
-.PHONY: default help \
+.PHONY: default help lint \
 		docker-run-auth-service docker-run-user-service docker-run-security-service docker-run-stock-service docker-run-api-gateway \
         docker-prod docker-stats docker-run docker-build docker-start docker-pause docker-stop docker-status \
         docker-logs docker-nats docker-rm-volumes docker-prune docker-clean docker-reset \
@@ -13,6 +13,21 @@ default: help
 
 help:
 	@echo "Usage: make <target> [options]"
+
+lint:
+	@echo "Running linter..."
+	@echo "Linting api-gateway..."
+	@cd src/api-gateway && golangci-lint run ./...
+	@echo "Linting auth-service..."
+	@cd src/auth-service && golangci-lint run ./...
+	@echo "Linting security-service..."
+	@cd src/security-service && golangci-lint run ./...
+	@echo "Linting user-service..."
+	@cd src/user-service && golangci-lint run ./...
+	@echo "Linting stock-service..."
+	@cd src/stock-service && golangci-lint run ./...
+	@echo "Linting shared..."
+	@cd src/shared && golangci-lint run ./...
 
 # ------------------------------
 # Docker Service Operations
