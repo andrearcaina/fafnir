@@ -259,3 +259,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Helm charts
+deployments/helm/fafnir/charts/*.tgz

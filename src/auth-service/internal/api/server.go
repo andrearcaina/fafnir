@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
@@ -67,6 +68,7 @@ func NewServer() *Server {
 
 	// mount the auth handler to the router at /auth path
 	router.Mount("/auth", authHandler.ServeAuthRoutes())
+	router.Handle("/metrics", promhttp.Handler())
 
 	// create a config instance for the server
 	return &Server{

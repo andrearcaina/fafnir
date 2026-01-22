@@ -9,7 +9,10 @@ import (
 	"fafnir/stock-service/internal/fmp"
 	"log"
 	"net"
+	"net/http"
 
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )
 
@@ -28,8 +31,7 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
-	// create a redis cache instance for caching stock data
-	redisCache, err := redis.New(cfg.Cache.Host, cfg.Cache.Port)
+	redisCache, err := redis.New(cfg.Cache)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,13 +46,24 @@ func NewServer() *Server {
 	stockService := NewStockService(dbInstance, redisCache, fmpClient)
 	stockHandler := NewStockHandler(stockService)
 
-	// create gRPC server with logging interceptor (interceptors are basically a middleware for gRPC)
+	// create gRPC server with logging interceptor and prometheus interceptor
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(loggingInterceptor),
+		grpc.ChainUnaryInterceptor(
+			loggingInterceptor,
+			grpc_prometheus.UnaryServerInterceptor,
+		),
+		grpc.ChainStreamInterceptor(
+			grpc_prometheus.StreamServerInterceptor,
+		),
 	)
 
 	// register the gRPC stock handler with the gRPC server
 	pb.RegisterStockServiceServer(grpcServer, stockHandler)
+
+	// register gRPC server metrics
+	grpc_prometheus.Register(grpcServer)
+	// enable handling of histogram metrics
+	grpc_prometheus.EnableHandlingTimeHistogram()
 
 	return &Server{
 		grpcServer: grpcServer,
@@ -59,6 +72,15 @@ func NewServer() *Server {
 }
 
 func (s *Server) Run() error {
+	// start metrics server
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		log.Printf("Starting metrics server on port :9090")
+		if err := http.ListenAndServe(":9090", nil); err != nil {
+			log.Printf("Metrics server error: %v", err)
+		}
+	}()
+
 	log.Printf("Starting gRPC stock service on port %s\n", s.config.PORT)
 
 	listener, err := net.Listen("tcp", s.config.PORT)

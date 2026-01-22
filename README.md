@@ -34,5 +34,7 @@ In no particular order:
 - [ ] Add unit, integration, end-to-end and load/stress tests.
   - [X] Perform load testing using Locust to simulate concurrent users ([issue #8](https://github.com/andrearcaina/fafnir/issues/8)).
 - [X] Explore Kubernetes local implementation ([issue #5](https://github.com/andrearcaina/fafnir/issues/5)).
-- [X] Explore centralized logging CLI with Elasticsearch for Minikube ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
+  - [X] Use Helm for Kubernetes package management and manifests ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
+- [X] Explore centralizing logging with Elasticsearch ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
+  - [X] Migrate to utilizing [Loki](https://grafana.com/oss/loki/) for both Minikube and docker-compose ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
 - [ ] Implement a CI/CD pipeline for automated testing and Docker builds.

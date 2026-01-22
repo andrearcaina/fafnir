@@ -15,8 +15,14 @@ type Cache struct {
 	ttl    time.Duration // time to live (expiration duration) for cached items
 }
 
+type CacheConfig struct {
+	Host     string
+	Port     string
+	Password string
+}
+
 // New: initializes a new Redis client with retry logic
-func New(host, port string) (*Cache, error) {
+func New(config CacheConfig) (*Cache, error) {
 	var rdb *redis.Client
 	var err error
 
@@ -25,8 +31,8 @@ func New(host, port string) (*Cache, error) {
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		rdb = redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", host, port),
-			Password: "",
+			Addr:     fmt.Sprintf("%s:%s", config.Host, config.Port),
+			Password: config.Password,
 			DB:       0,
 		})
 

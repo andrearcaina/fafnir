@@ -1,9 +1,9 @@
 services:
     db:
-        image: fafnir-postgres-db
         build:
             context: ../../
             dockerfile: build/docker/postgres.Dockerfile
+        container_name: fafnir-postgres-db
         restart: always
         ports:
             - "5432:5432"
@@ -145,8 +145,9 @@ services:
             - STOCK_DB=${STOCK_DB}
             - DB_HOST=${DB_HOST_DOCKER}
             - DB_PORT=${DB_PORT}
-            - REDIS_HOST=redis
-            - REDIS_PORT=6379
+            - REDIS_HOST=${REDIS_HOST_DOCKER}
+            - REDIS_PORT=${REDIS_PORT}
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
             - FMP_API_KEY=${FMP_API_KEY}
         volumes:
             - ../../src/stock-service:/app/src/stock-service:cached

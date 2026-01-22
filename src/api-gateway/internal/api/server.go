@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -61,6 +63,8 @@ func NewServer() *Server {
 	// graphql endpoints for core services (/ is the playground, which is like a UI to test queries)
 	// while /graphql is the actual endpoint to send queries and mutations
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	// prometheus endpoint for monitoring
+	router.Handle("/metrics", promhttp.Handler())
 	router.With(
 		m.ValidateAuth(cfg.ENV.JWT, true),
 	).Handle("/graphql", srv)
