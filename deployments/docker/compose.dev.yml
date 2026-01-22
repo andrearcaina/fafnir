@@ -1,9 +1,9 @@
 services:
     db:
-        image: fafnir-postgres-db
         build:
             context: ../../
             dockerfile: build/docker/postgres.Dockerfile
+        container_name: fafnir-postgres-db
         restart: always
         ports:
             - "5432:5432"

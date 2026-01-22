@@ -65,10 +65,10 @@ docker-stats:
 	./tools/scripts/docker.sh stats
 
 docker-run:
-	./tools/scripts/docker.sh run
+	./tools/scripts/docker.sh run $(monitoring)
 
 docker-build:
-	./tools/scripts/docker.sh build
+	./tools/scripts/docker.sh build $(monitoring)
 
 docker-start:
 	./tools/scripts/docker.sh start
