@@ -16,6 +16,8 @@ case "$1" in
   run)
     FILES=${2:+$MONITORING_FILES}
     $COMPOSE_CMD ${FILES:-$BASE_FILES} up -d ;;
+  build-prod)
+    $PROD_CMD $PROD_FILES build --pull --no-cache ;;
   prod)
     $PROD_CMD $PROD_FILES up -d ;;
   stats)

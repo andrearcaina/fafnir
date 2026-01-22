@@ -28,8 +28,7 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
-	// create a redis cache instance for caching stock data
-	redisCache, err := redis.New(cfg.Cache.Host, cfg.Cache.Port)
+	redisCache, err := redis.New(cfg.Cache)
 	if err != nil {
 		log.Fatal(err)
 	}

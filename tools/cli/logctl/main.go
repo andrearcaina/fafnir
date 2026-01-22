@@ -1,7 +1,7 @@
 package main
 
-import "fafnir/tools/logctl/cmd"
+import "fmt"
 
 func main() {
-	cmd.Execute()
+	fmt.Println("Hello World")
 }
