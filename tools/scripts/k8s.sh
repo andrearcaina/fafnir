@@ -65,12 +65,12 @@ case "$1" in
     done
     ;;
   deploy)
-    # deploy just deploys all the resources defined in the helm chart (instead of just a single service)
+    # installs the helm chart if not exists (for first time)
     echo "Deploying fafnir using helm chart..."
     helm upgrade --install dev deployments/helm/fafnir --namespace fafnir --create-namespace
     ;;
   upgrade)
-    # upgrade is like deploy, but it will not create the namespace if it doesn't exist
+    # upgrades the helm chart if it exists
     echo "Upgrading fafnir using helm chart..."
     helm upgrade dev deployments/helm/fafnir --namespace fafnir
     ;;

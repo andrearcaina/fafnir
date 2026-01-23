@@ -21,30 +21,33 @@ fafnir/
 ├── build/                   # Build configurations
 │   └── docker/              # Centralized Dockerfiles
 ├── deployments/             # Deployment configurations
+│   ├── archive/             # Archive folder containing old Kubernetes manifests
+│   │   └── k8s/             # Kubernetes Manifests
 │   ├── docker/              # Docker Compose files
-│   └── k8s/                 # Kubernetes Manifests
+│   └── helm/                # Helm charts
 ├── docs/                    # Documentation
 │   └── designs/             # Excalidraw designs and images
 ├── infra/                   # Infrastructure configurations
-│   ├── env/                 # Environment files
-│   ├── monitoring/          # Prometheus & Grafana configs
-│   └── postgres/            # Database initialization
+│   ├── db/                  # Database configurations (initialization scripts)
+│   ├── env/                 # Environment variables
+│   └── monitoring/          # Prometheus, Loki, and Grafana configurations
+├── proto/                   # Protocol buffer definitions
 ├── src/                     # Source code for microservices
 │   ├── api-gateway/         # GraphQL API Gateway
 │   ├── auth-service/        # Authentication service
 │   ├── security-service/    # Authorization service
 │   ├── user-service/        # User management service
 │   ├── stock-service/       # Stock service
+│   ├── order-service/       # Order service
+│   ├── portfolio-service/   # Portfolio service
 │   └── shared/              # Shared libraries and utilities
 ├── tests/                   # Testing suites
 │   ├── e2e/                 # End-to-end tests 
 │   └── locust/              # Load testing with Locust
 ├── tools/                   # Development tools
-│   ├── cli/                 # some dev CLIs 
-│   │   ├── logctl/          # Centralized Elasticsearch logging
+│   ├── cli/                 # some dev CLIs
 │   │   └── seedctl/         # Database seeder
 │   └── scripts/             # Build and deployment scripts
-├── tools/                   # Development tools
 ├── .gitattributes
 ├── .gitignore
 ├── LICENSE
@@ -56,11 +59,11 @@ fafnir/
 
 | Service              | Description                                                      | Tech Stack         | Ports           | Database        |
 |----------------------|------------------------------------------------------------------|--------------------|-----------------|-----------------|
-| **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi | 8080 (public)   | -               |
-| **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi   | 8081 (internal) | auth_db         |
-| **security-service** | Role-based access control and authorization                      | Go, sqlc, gRPC     | 8082 (internal) | security_db     |
-| **user-service**     | User profile management and CRUD operations                      | Go, sqlc, gRPC     | 8083 (internal) | user_db         |
-| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, go-chi   | 8084 (internal) | stock_db, redis |
+| **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi, promhttp | 8080 (public)   | -               |
+| **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi, promhttp   | 8081 (internal) | auth_db         |
+| **security-service** | Role-based access control and authorization                      | Go, sqlc, gRPC, promhttp     | 8082 (internal) | security_db     |
+| **user-service**     | User profile management and CRUD operations                      | Go, sqlc, gRPC, promhttp     | 8083 (internal) | user_db         |
+| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, gRPC, promhttp   | 8084 (internal) | stock_db, redis |
 
 ### Infrastructure Services
 
@@ -69,10 +72,10 @@ fafnir/
 | **postgres**      | Postgres database with per-service databases      | 5432 (internal) | Data persistence           |
 | **redis**         | Redis caching for quick look up                   | 6379 (internal) | Caching                    |
 | **prometheus**    | Metrics collection and monitoring                 | 9090 (dev only) | Observability              |
-| **grafana**       | Metrics visualization and dashboards              | 3000 (dev only) | Monitoring UI              |
-| **elasticsearch** | Centralized logging storage                       | 9200 (dev only) | Logging storage            |
-| **nats jetstream**| Persistent event streaming message broker         | 4222 (internal) | Async Communication        |
-| **locust**        | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing UI            |
+| **loki**          | Unified logging storage                           | 3100 (dev only) | Observability              |
+| **grafana**       | Dashboard and Observability UI                    | 3000 (dev only) | Observability              |
+| **nats jetstream**| Persistent event streaming message broker         | 4222 (internal) | Event Streaming            |
+| **locust**        | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing               |
 
 ### Communication Patterns
 This architecture employs a combination of synchronous and asynchronous communication patterns:
@@ -91,4 +94,7 @@ Feel free to take a look at the [designs](designs/images) folder for visual repr
 - [A Crash Course on Microservices Design Patterns](https://blog.bytebytego.com/p/a-crash-course-on-microservices-design) by [ByteByteGo](https://blog.bytebytego.com/about)
 - [NATS Documentation](https://docs.nats.io/) by [NATS](https://nats.io/about/)
 - [Kubernetes Documentation](https://kubernetes.io/docs/concepts/architecture/) by [Kubernetes](https://kubernetes.io/)
-- [Elasticsearch Go Client Documentation](https://www.elastic.co/guide/en/elasticsearch/client/go-api/8.19/getting-started-go.html) by [Elastic](https://www.elastic.co/about)
+- [Helm Documentation](https://helm.sh/docs/) by [Helm](https://helm.sh/)
+- [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/) by [Prometheus](https://prometheus.io/)
+- [Loki Documentation](https://grafana.com/oss/loki/) by [Grafana](https://grafana.com/)
+- [Grafana Documentation](https://grafana.com/docs/) by [Grafana](https://grafana.com/)

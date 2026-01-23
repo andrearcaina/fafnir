@@ -1,10 +1,11 @@
 # Development Guide
 
 ## Prerequisites before Starting
-- **Go 1.21+** - For microservices development
-- **Docker & Docker Compose** - For containerized development
-- **Minikube & kubectl** - For Kubernetes local cluster and container orchestration
-- **Make or Task** - For DevOps automation scripts (Task for cross-platform compatibility, and Make for Linux/Mac)
+- **Go 1.24.5+** - For microservices development
+- For local orchestration, there's two main ways to do it:
+    - **Docker & Docker Compose** - For containerized development
+    - **Minikube, kubectl & helm** - For local cluster and container orchestration (requires docker though)
+- **GNU Make** - For DevOps automation scripts
 
 ## Setup Development Environment
 
@@ -33,7 +34,7 @@
       make docker-build              # Build docker images
       make kube-start                # Start Minikube cluster
       make kube-deploy               # Deploy services to Minikube
-      make kube-forward pod=postgres # Port forward Postgres service
+      make kube-forward pod=ps       # Port forward Postgres service
       
       # Open a new terminal
       make migrate-up                # Run database migrations
@@ -47,7 +48,7 @@
    |-----------------|------------------------------------------------|------------------------------------|
    | **API Gateway** | [http://localhost:8080](http://localhost:8080) | Main entrypoint (GraphQL and REST) |
    | **Grafana**     | [http://localhost:3000](http://localhost:3000) | Monitoring dashboard               |
-   | **Prometheus**  | [http://localhost:9090](http://localhost:9090) | Metrics collection                 |
+   | **Prometheus**  | [http://localhost:9090/metrics](http://localhost:9090/metrics) | Metrics collection                 |
 
 ## Development Automation Guide
 
@@ -61,9 +62,11 @@ These commands help you manage the development environment using Docker:
 | Command                  | Description                                                                                   |
 |--------------------------|-----------------------------------------------------------------------------------------------|
 | `make docker-build`      | Build all docker containers                                                                   |
+| `make docker-build-prod`  | Build all docker containers for  production                                                    |
 | `make docker-start`      | Start all existing docker containers                                                          |
+| `make docker-prod`       | Creates and run docker containers for production                                              |
 | `make docker-pause`      | Stops running all existing docker containers                                                  |
-| `make docker-run`        | Creates and run docker containers (`make run monitoring=true` to run with grafana/prometheus) |
+| `make docker-run`        | Creates and run docker containers (`make run monitoring=true` to run with grafana/prometheus/loki) |
 | `make docker-stop`       | Stops and deletes containers and volumes                                                      |
 | `make docker-status`     | Check status of currently running docker containers                                           |
 | `make docker-logs`       | Get logs of Docker services DB                                                                |
@@ -78,18 +81,24 @@ These commands help you manage the development environment with Kubernetes (Mini
 | Command                 | Description                                     |
 |-------------------------|-------------------------------------------------|
 | `make kube-start`       | Start Minikube cluster with configurations      |
-| `make kube-deploy`      | Deploy all services to Minikube cluster         |
-| `make kube-delete`      | Delete all services from Minikube cluster       |
+| `make kube-stop`        | Stop Minikube cluster                           |
+| `make kube-delete`      | Delete Minikube cluster                         |
+| `make kube-uninstall`   | Uninstall Minikube cluster                      |
+| `make kube-secrets`     | Create/Update secrets for Minikube cluster      |
+| `make kube-docker`      | Load all docker images into Minikube cluster    |
+| `make kube-deploy`      | Install services to Minikube cluster            |
+| `make kube-upgrade`     | Upgrade all services in Minikube cluster        |
+| `make kube-delete-pod pod=<pod_name>` | Delete a specific pod in Minikube cluster |
 | `make kube-reset`       | Reset services in Minikube cluster              |
 | `make kube-status`      | Check status of deployed services in Minikube   |
 | `make kube-nodes`       | List all nodes in Minikube cluster              |
 | `make kube-pods`        | List all pods in Minikube cluster               |
 | `make kube-svc`         | List all services in Minikube cluster           |
 | `make kube-deployments` | List all deployments in Minikube cluster        |
-| `make kube-logs`        | View logs of a specific pod in Minikube cluster |
+| `make kube-logs pod=<pod_name>` | View logs of a specific pod in Minikube cluster |
 | `make kube-dashboard`   | Open Minikube dashboard in browser              |
 | `make kube-ssh`         | SSH into Minikube cluster                       |
-| `make kube-forward`     | Port forward a service from Minikube cluster    |
+| `make kube-forward pod=<pod_name>` | Port forward a service from Minikube cluster    |
 | `make kube-tunnel`      | Create a tunnel to access Minikube services     |
 
 You can also use the following commands to migrate the database:
@@ -129,6 +138,13 @@ You can also run locust for testing concurrent user load:
 |---------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | `make locust users=<total_users> spawn_rate=<spawn_rate> run_time=<run_time> headless=<headless>` | Run the locust CLI with custom configurations |
 
+Commands for linting and vet:
+
+| Command | Description |
+|---------|-------------|
+| `make lint` | Run linter on all services |
+| `make vet` | Run vet on all services |
+
 For more information on the commands, check out the `scripts/` folder.
 
 | Bash Script                  | Description                     |
@@ -137,6 +153,7 @@ For more information on the commands, check out the `scripts/` folder.
 | `./tools/scripts/docker.sh`  | All the docker command logic    |
 | `./tools/scripts/k8s.sh`     | All the kube command logic      |
 | `./tools/scripts/migrate.sh` | All the migration command logic |
+| `./tools/scripts/test.sh`    | All the test command logic      |
 
 ## Useful Links
 - [Architecture Overview](architecture.md)
