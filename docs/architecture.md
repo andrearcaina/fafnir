@@ -57,13 +57,13 @@ fafnir/
 
 ### Core Services
 
-| Service              | Description                                                      | Tech Stack         | Ports           | Database        |
-|----------------------|------------------------------------------------------------------|--------------------|-----------------|-----------------|
+| Service              | Description                                                      | Tech Stack                   | Ports           | Database        |
+|----------------------|------------------------------------------------------------------|------------------------------|-----------------|-----------------|
 | **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi, promhttp | 8080 (public)   | -               |
 | **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi, promhttp   | 8081 (internal) | auth_db         |
 | **security-service** | Role-based access control and authorization                      | Go, sqlc, gRPC, promhttp     | 8082 (internal) | security_db     |
 | **user-service**     | User profile management and CRUD operations                      | Go, sqlc, gRPC, promhttp     | 8083 (internal) | user_db         |
-| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, gRPC, promhttp   | 8084 (internal) | stock_db, redis |
+| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, gRPC, promhttp     | 8084 (internal) | stock_db, redis |
 
 ### Infrastructure Services
 

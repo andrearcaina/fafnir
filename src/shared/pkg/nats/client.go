@@ -34,16 +34,15 @@ func New(url string) (*NatsClient, error) {
 	}, nil
 }
 
-// CreateStream with the given name and subjects (creates a new stream if it doesn't exist already)
-// this makes sure the microservice is the one responsible for managing the stream
+// AddStream with the given name and subjects (creates a new stream if it doesn't exist already)
 func (c *NatsClient) AddStream(name string, subjects []string) (*nats.StreamInfo, error) {
 	streamConfig := &nats.StreamConfig{
 		Name:      name,
 		Subjects:  subjects,
 		Storage:   nats.FileStorage,
 		Retention: nats.LimitsPolicy,
-		MaxAge:    7 * 24 * time.Hour, // Keep for 7 days
-		MaxBytes:  100 * 1024 * 1024,  // Or until 100 MB is reached
+		MaxAge:    7 * 24 * time.Hour, // keep for 7 days
+		MaxBytes:  100 * 1024 * 1024,  // or until 100 MB is reached
 	}
 
 	streamInfo, err := c.js.AddStream(streamConfig)

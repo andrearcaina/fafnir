@@ -73,6 +73,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         ports:
             - "8081:8081"
         networks:
@@ -101,6 +103,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
@@ -126,6 +130,8 @@ services:
             - ../../src/shared:/app/src/shared:cached
         depends_on:
             db:
+                condition: service_healthy
+            nats:
                 condition: service_healthy
         networks:
             - fafnir-network
@@ -181,6 +187,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
@@ -207,19 +215,43 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
     nats:
-        image: "nats:latest"
+        image: "nats:alpine"
         container_name: fafnir-nats
         restart: always
-        command: "-js"
+        command: "-js -m 8222"
         ports:
             - "4222:4222"
             - "8222:8222"
         volumes:
             - natsdata:/data
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 60s
+        networks:
+            - fafnir-network
+
+    nats-setup:
+        image: "natsio/nats-box:latest"
+        container_name: fafnir-nats-setup
+        restart: "no"
+        volumes:
+            - ../../tools/scripts/nats.sh:/nats.sh
+        environment:
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
+        command: ["/bin/sh", "/nats.sh"]
+        depends_on:
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 

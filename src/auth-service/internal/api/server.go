@@ -54,10 +54,10 @@ func NewServer() *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = natsClient.AddStream("users", []string{"users.>"})
-	if err != nil {
-		log.Fatal(err)
-	}
+	// _, err = natsClient.AddStream("users", []string{"users.>"})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	// create a custom validator instance for request payload validation
 	validator := validator.New()

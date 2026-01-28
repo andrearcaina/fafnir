@@ -32,7 +32,7 @@ case "$1" in
   logs)
     $COMPOSE_CMD $BASE_FILES logs --tail=100 -f ${2:+"$2"} ;;
   nats)
-    docker run --network fafnir_fafnir-network --rm -it natsio/nats-box ;;
+    docker run --network fafnir-network --rm -it natsio/nats-box ;;
   rm-volumes)
     docker volume rm fafnir_pgdata fafnir_prom_data 2>/dev/null || true ;;
   prune)
