@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: {{ .Release.Namespace }}
+data:
+  init-dbs.sql: |
+    CREATE DATABASE auth_db;
+    CREATE DATABASE user_db;
+    CREATE DATABASE security_db;
+    CREATE DATABASE stock_db;
+    CREATE DATABASE order_db;
+    CREATE DATABASE portfolio_db;
+

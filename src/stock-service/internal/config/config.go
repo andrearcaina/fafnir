@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fafnir/shared/pkg/redis"
 	"fmt"
 	"os"
 )
@@ -9,7 +10,7 @@ type Config struct {
 	PORT  string
 	DB    PostgresConfig
 	FMP   FMPConfig
-	Cache RedisConfig
+	Cache redis.CacheConfig
 }
 
 type PostgresConfig struct {
@@ -23,11 +24,6 @@ type PostgresConfig struct {
 
 type FMPConfig struct {
 	APIKey string
-}
-
-type RedisConfig struct {
-	Host string
-	Port string
 }
 
 func NewConfig() *Config {
@@ -70,12 +66,14 @@ func newFMPConfig() FMPConfig {
 	}
 }
 
-func newRedisConfig() RedisConfig {
+func newRedisConfig() redis.CacheConfig {
 	host := os.Getenv("REDIS_HOST")
 	port := os.Getenv("REDIS_PORT")
+	password := os.Getenv("REDIS_PASSWORD")
 
-	return RedisConfig{
-		Host: host,
-		Port: port,
+	return redis.CacheConfig{
+		Host:     host,
+		Port:     port,
+		Password: password,
 	}
 }

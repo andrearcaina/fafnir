@@ -118,7 +118,9 @@ func seedAuthService(config *Config) error {
 	if err != nil {
 		return errors.New("failed to connect to auth database")
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	var seed AuthSeedFile
 	if err := tryReadAndUnmarshalFile(config.DataPath, &seed); err != nil {
@@ -160,7 +162,9 @@ func seedUserService(config *Config) error {
 	if err != nil {
 		return errors.New("failed to connect to user database")
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	var seed UserSeedFile
 	if err := tryReadAndUnmarshalFile(config.DataPath, &seed); err != nil {
@@ -197,7 +201,9 @@ func seedSecurityService(config *Config) error {
 	if err != nil {
 		return errors.New("failed to connect to security database")
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	var seed SecuritySeedFile
 	if err := tryReadAndUnmarshalFile(config.DataPath, &seed); err != nil {

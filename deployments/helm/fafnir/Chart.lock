@@ -1,0 +1,18 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.2.0
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 20.2.0
+- name: nats
+  repository: https://nats-io.github.io/k8s/helm/charts/
+  version: 1.2.4
+- name: loki
+  repository: https://grafana.github.io/helm-charts
+  version: 6.2.0
+- name: promtail
+  repository: https://grafana.github.io/helm-charts
+  version: 6.15.3
+digest: sha256:2234ab09828598f9ab1bf3c902230331a0743a507b697dd6c9ab214f271e2199
+generated: "2026-01-21T22:28:01.017425098-05:00"

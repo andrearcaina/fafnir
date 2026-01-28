@@ -1,0 +1,310 @@
+# Global settings
+nameOverride: ""
+fullnameOverride: ""
+
+externalSecretName: "fafnir-secrets"
+
+global:
+  security:
+    allowInsecureImages: true
+
+# stateless microservices
+services:
+  api-gateway:
+    image: fafnir-api-gateway:latest
+    containerPort: 8080
+    servicePort: 8080
+    replicas: 1
+    type: LoadBalancer
+    env:
+      - name: SERVICE_NAME
+        value: "api-gateway"
+      - name: SERVICE_PORT
+        value: "8080"
+      - name: JWT_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: JWT_SECRET_KEY
+
+  auth-service:
+    image: fafnir-auth-service:latest
+    containerPort: 8081
+    servicePort: 8081
+    replicas: 1
+    type: ClusterIP
+    env:
+      - name: SERVICE_NAME
+        value: "auth-service"
+      - name: SERVICE_PORT
+        value: "8081"
+      - name: POSTGRES_USER
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_USER
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_PASSWORD
+      - name: AUTH_DB
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: AUTH_DB
+      - name: DB_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_HOST_MINIKUBE
+      - name: DB_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_PORT_MINIKUBE
+      - name: JWT_SECRET_KEY
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: JWT_SECRET_KEY
+      - name: NATS_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: NATS_HOST_MINIKUBE
+      - name: NATS_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: NATS_PORT
+
+  security-service:
+    image: fafnir-security-service:latest
+    containerPort: 8082
+    servicePort: 8082
+    replicas: 1
+    type: ClusterIP
+    env:
+      - name: SERVICE_NAME
+        value: "security-service"
+      - name: SERVICE_PORT
+        value: "8082"
+      - name: POSTGRES_USER
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_USER
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_PASSWORD
+      - name: SECURITY_DB
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: SECURITY_DB
+      - name: DB_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_HOST_MINIKUBE
+      - name: DB_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_PORT
+      - name: NATS_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: NATS_HOST_MINIKUBE
+      - name: NATS_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: NATS_PORT
+
+  user-service:
+    image: fafnir-user-service:latest
+    containerPort: 8083
+    servicePort: 8083
+    replicas: 1
+    type: ClusterIP
+    env:
+      - name: SERVICE_NAME
+        value: "user-service"
+      - name: SERVICE_PORT
+        value: "8083"
+      - name: POSTGRES_USER
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_USER
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_PASSWORD
+      - name: USER_DB
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: USER_DB
+      - name: DB_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_HOST_MINIKUBE
+      - name: DB_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_PORT
+      - name: NATS_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: NATS_HOST_MINIKUBE
+      - name: NATS_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: NATS_PORT
+
+  stock-service:
+    image: fafnir-stock-service:latest
+    containerPort: 8084
+    servicePort: 8084
+    replicas: 1
+    type: ClusterIP
+    env:
+      - name: SERVICE_NAME
+        value: "stock-service"
+      - name: SERVICE_PORT
+        value: "8084"
+      - name: POSTGRES_USER
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_USER
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: POSTGRES_PASSWORD
+      - name: STOCK_DB
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: STOCK_DB
+      - name: DB_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_HOST_MINIKUBE
+      - name: DB_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: DB_PORT
+      - name: REDIS_HOST
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: REDIS_HOST_MINIKUBE
+      - name: REDIS_PORT
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: REDIS_PORT
+      - name: REDIS_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: REDIS_PASSWORD
+      - name: FMP_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: fafnir-secrets
+            key: FMP_API_KEY
+
+# infrastructure
+# infrastructure configuration (upstream charts)
+
+postgresql:
+  fullnameOverride: "postgres"
+  image:
+    tag: "latest"
+  auth:
+    existingSecret: "fafnir-secrets"
+    username: "fafnir_user"
+    secretKeys:
+      adminPasswordKey: "POSTGRES_PASSWORD"
+      userPasswordKey: "POSTGRES_PASSWORD"
+  primary:
+    persistence:
+      enabled: false
+    initdb:
+      scriptsConfigMap: "postgres-init"
+
+redis:
+  fullnameOverride: "redis"
+  architecture: "standalone"
+  image:
+    tag: "latest"
+  auth:
+    existingSecret: "fafnir-secrets"
+    existingSecretPasswordKey: "REDIS_PASSWORD"
+  master:
+    persistence:
+      enabled: false
+
+nats:
+  fullnameOverride: "nats"
+  config:
+    authorization:
+      timeout: 5
+    jetstream:
+      enabled: true
+      store_dir: "memory"
+      max_memory_store: 1073741824
+
+
+loki:
+  fullnameOverride: "loki"
+  deploymentMode: SingleBinary
+  loki:
+    auth_enabled: false
+    useTestSchema: true
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: 'filesystem'
+    rulerConfig:
+      storage:
+        type: local
+        local:
+          directory: /tmp/loki/rules
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  backend:
+    replicas: 0
+  singleBinary:
+    replicas: 1
+  monitoring:
+    selfMonitoring:
+      enabled: false
+      grafanaAgent:
+        installOperator: false
+  test:
+    enabled: false
+
+promtail:
+  fullnameOverride: "promtail"
+  config:
+    clients:
+      - url: http://loki:3100/loki/api/v1/push

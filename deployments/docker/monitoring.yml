@@ -33,6 +33,29 @@ services:
     depends_on:
       - prometheus
 
+
+  loki:
+    image: grafana/loki:latest
+    container_name: fafnir-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - fafnir-network
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: fafnir-promtail
+    volumes:
+      - ../../infra/monitoring/promtail-config.yml:/etc/promtail/config.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - fafnir-network
+    depends_on:
+      - loki
+
 volumes:
   prom_data:
     driver: local

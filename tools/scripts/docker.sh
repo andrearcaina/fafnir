@@ -12,10 +12,13 @@ case "$1" in
   auth-service|user-service|security-service|stock-service|api-gateway)
     $COMPOSE_CMD $BASE_FILES up -d "$1" ;;
   build)
-    $COMPOSE_CMD $BASE_FILES build --pull --no-cache ;;
+    FILES=${2:+$MONITORING_FILES}
+    $COMPOSE_CMD ${FILES:-$BASE_FILES} build --pull --no-cache ;;
   run)
     FILES=${2:+$MONITORING_FILES}
     $COMPOSE_CMD ${FILES:-$BASE_FILES} up -d ;;
+  build-prod)
+    $PROD_CMD $PROD_FILES build --pull --no-cache ;;
   prod)
     $PROD_CMD $PROD_FILES up -d ;;
   stats)
@@ -29,7 +32,7 @@ case "$1" in
   logs)
     $COMPOSE_CMD $BASE_FILES logs --tail=100 -f ${2:+"$2"} ;;
   nats)
-    docker run --network fafnir_fafnir-network --rm -it natsio/nats-box ;;
+    docker run --network fafnir-network --rm -it natsio/nats-box ;;
   rm-volumes)
     docker volume rm fafnir_pgdata fafnir_prom_data 2>/dev/null || true ;;
   prune)

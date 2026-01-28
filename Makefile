@@ -1,10 +1,10 @@
-.PHONY: default help lint \
+.PHONY: default help lint vet \
 		docker-run-auth-service docker-run-user-service docker-run-security-service docker-run-stock-service docker-run-api-gateway \
-        docker-prod docker-stats docker-run docker-build docker-start docker-pause docker-stop docker-status \
+        docker-prod docker-prod-build docker-stats docker-run docker-build docker-start docker-pause docker-stop docker-status \
         docker-logs docker-nats docker-rm-volumes docker-prune docker-clean docker-reset \
         migrate-up migrate-down migrate-status migrate-create \
         generate seed \
-        kube-start kube-stop kube-deploy kube-delete kube-reset \
+        kube-start kube-stop kube-delete kube-delete-pod kube-deploy kube-reset \
         kube-status kube-nodes kube-pods kube-svc kube-deployments kube-logs \
         kube-forward kube-tunnel \
         locust
@@ -16,18 +16,25 @@ help:
 
 lint:
 	@echo "Running linter..."
-	@echo "Linting api-gateway..."
-	@cd src/api-gateway && golangci-lint run ./...
-	@echo "Linting auth-service..."
-	@cd src/auth-service && golangci-lint run ./...
-	@echo "Linting security-service..."
-	@cd src/security-service && golangci-lint run ./...
-	@echo "Linting user-service..."
-	@cd src/user-service && golangci-lint run ./...
-	@echo "Linting stock-service..."
-	@cd src/stock-service && golangci-lint run ./...
-	@echo "Linting shared..."
-	@cd src/shared && golangci-lint run ./...
+	@echo "Linting api-gateway:" && golangci-lint run ./src/api-gateway/...
+	@echo "Linting auth-service:" && golangci-lint run ./src/auth-service/...
+	@echo "Linting security-service:" && golangci-lint run ./src/security-service/...
+	@echo "Linting user-service:" && golangci-lint run ./src/user-service/...
+	@echo "Linting stock-service:" && golangci-lint run ./src/stock-service/...
+	@echo "Linting shared:" && golangci-lint run ./src/shared/...
+	@echo "Linting CLI tools:" && golangci-lint run ./tools/cli/seedctl/...
+	@echo "Lint completed successfully."
+
+vet:
+	@echo "Running vet..."
+	@go vet ./src/api-gateway/...
+	@go vet ./src/auth-service/...
+	@go vet ./src/security-service/...
+	@go vet ./src/user-service/...
+	@go vet ./src/stock-service/...
+	@go vet ./src/shared/...
+	@go vet ./tools/cli/seedctl/...
+	@echo "Vet completed successfully."
 
 # ------------------------------
 # Docker Service Operations
@@ -55,6 +62,9 @@ docker-api-gateway:
 docker-prod: docker-clean
 	./tools/scripts/docker.sh prod
 
+docker-prod-build:
+	./tools/scripts/docker.sh build-prod
+
 docker-stats:
 	./tools/scripts/docker.sh stats
 
@@ -62,7 +72,7 @@ docker-run:
 	./tools/scripts/docker.sh run $(monitoring)
 
 docker-build:
-	./tools/scripts/docker.sh build
+	./tools/scripts/docker.sh build $(monitoring)
 
 docker-start:
 	./tools/scripts/docker.sh start
@@ -137,11 +147,26 @@ kube-start:
 kube-stop:
 	minikube stop -p fafnir-cluster
 
-kube-deploy:
-	./tools/scripts/k8s.sh deploy $(pod)
-
 kube-delete:
-	./tools/scripts/k8s.sh delete
+	minikube delete -p fafnir-cluster
+
+kube-uninstall:
+	./tools/scripts/k8s.sh uninstall
+
+kube-secrets:
+	./tools/scripts/k8s.sh secrets
+
+kube-docker:
+	./tools/scripts/k8s.sh docker
+
+kube-deploy:
+	./tools/scripts/k8s.sh deploy
+
+kube-upgrade:
+	./tools/scripts/k8s.sh upgrade
+
+kube-delete-pod:
+	./tools/scripts/k8s.sh delete $(pod)
 
 kube-reset:
 	./tools/scripts/k8s.sh reset $(pod)

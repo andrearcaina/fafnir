@@ -1,9 +1,9 @@
 services:
     db:
-        image: fafnir-postgres-db
         build:
             context: ../../
             dockerfile: build/docker/postgres.Dockerfile
+        container_name: fafnir-postgres-db
         restart: always
         ports:
             - "5432:5432"
@@ -73,6 +73,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         ports:
             - "8081:8081"
         networks:
@@ -101,6 +103,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
@@ -127,6 +131,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
@@ -145,8 +151,9 @@ services:
             - STOCK_DB=${STOCK_DB}
             - DB_HOST=${DB_HOST_DOCKER}
             - DB_PORT=${DB_PORT}
-            - REDIS_HOST=redis
-            - REDIS_PORT=6379
+            - REDIS_HOST=${REDIS_HOST_DOCKER}
+            - REDIS_PORT=${REDIS_PORT}
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
             - FMP_API_KEY=${FMP_API_KEY}
         volumes:
             - ../../src/stock-service:/app/src/stock-service:cached
@@ -180,6 +187,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
@@ -206,19 +215,43 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
     nats:
-        image: "nats:latest"
+        image: "nats:alpine"
         container_name: fafnir-nats
         restart: always
-        command: "-js"
+        command: "-js -m 8222"
         ports:
             - "4222:4222"
             - "8222:8222"
         volumes:
             - natsdata:/data
+        healthcheck:
+            test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 60s
+        networks:
+            - fafnir-network
+
+    nats-setup:
+        image: "natsio/nats-box:latest"
+        container_name: fafnir-nats-setup
+        restart: "no"
+        volumes:
+            - ../../tools/scripts/nats.sh:/nats.sh
+        environment:
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
+        command: ["/bin/sh", "/nats.sh"]
+        depends_on:
+            nats:
+                condition: service_healthy
         networks:
             - fafnir-network
 
