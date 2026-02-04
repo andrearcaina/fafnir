@@ -6,21 +6,21 @@ import "base.proto";
 
 option go_package = "fafnir/shared/pb/user;pb";
 
+service UserService {
+  rpc GetProfileData(ProfileDataRequest) returns (ProfileDataResponse);
+}
+
 message ProfileData {
-    string user_id = 1;
-    string first_name = 2;
-    string last_name = 3;
+  string user_id = 1;
+  string first_name = 2;
+  string last_name = 3;
 }
 
 message ProfileDataRequest {
-    string user_id = 1;
+  string user_id = 1;
 }
 
 message ProfileDataResponse {
-    ProfileData data = 1;
-    base.ErrorCode code = 2;
-}
-
-service UserService {
-    rpc GetProfileData(ProfileDataRequest) returns (ProfileDataResponse);
+  ProfileData data = 1;
+  base.ErrorCode code = 2;
 }

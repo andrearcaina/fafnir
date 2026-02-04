@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	pb "fafnir/shared/pb/security"
 	"log"
 	"time"
 
@@ -25,19 +24,8 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 		return nil, err
 	}
 
-	// log response
-	if info.FullMethod == "/security.SecurityService/CheckPermission" {
-		logCheckPermission(duration, resp.(*pb.CheckPermissionResponse))
-	}
+	// log response (no need for different log handling based on method, unless needed later)
+	log.Printf("gRPC Response - Method: %s, Duration: %v, Response: %+v", info.FullMethod, duration, resp)
 
 	return resp, nil
-}
-
-func logCheckPermission(duration time.Duration, resp *pb.CheckPermissionResponse) {
-	log.Printf(
-		"gRPC Response - Duration: %v, Response: has_permission=%v, code=%s",
-		duration,
-		resp.GetPermission().GetHasPermission(),
-		resp.GetCode().String(),
-	)
 }
