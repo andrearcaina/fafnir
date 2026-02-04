@@ -6,14 +6,15 @@ import (
 )
 
 type Config struct {
-	NAME         string
 	PORT         string
 	NATS         NatsConfig
 	StockService StockServiceConfig
 }
 
 type NatsConfig struct {
-	URL string
+	Host string
+	Port string
+	URL  string
 }
 
 type StockServiceConfig struct {
@@ -22,7 +23,6 @@ type StockServiceConfig struct {
 
 func New() *Config {
 	return &Config{
-		NAME:         os.Getenv("SERVICE_NAME"),
 		PORT:         fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
 		NATS:         newNatsConfig(),
 		StockService: newStockServiceConfig(),
@@ -34,7 +34,9 @@ func newNatsConfig() NatsConfig {
 	port := os.Getenv("NATS_PORT")
 
 	return NatsConfig{
-		URL: fmt.Sprintf("nats://%s:%s", host, port),
+		Host: host,
+		Port: port,
+		URL:  fmt.Sprintf("nats://%s:%s", host, port),
 	}
 }
 

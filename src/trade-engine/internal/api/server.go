@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"fafnir/trade-engine/internal/config"
-	// "fafnir/shared/pkg/middleware" // Assuming we might add auth later
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -20,7 +20,7 @@ func NewServer(cfg *config.Config) *Server {
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Heartbeat("/health"))
+	r.Use(middleware.Heartbeat("/health")) // health check endpoint given by chi middleware
 
 	return &Server{
 		HTTP: &http.Server{
