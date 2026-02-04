@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"time"
 
 	"fafnir/order-service/internal/db"
 	"fafnir/order-service/internal/db/generated"
@@ -14,6 +16,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
 )
@@ -34,37 +37,10 @@ func NewOrderHandler(db *db.Database, natsClient *natsC.NatsClient, stockClient 
 }
 
 func (h *OrderHandler) ConsumeFilledEvents() {
-	_, err := h.natsClient.QueueSubscribe("orders.filled", "order-service", "order-service-durable", func(msg *nats.Msg) {
-		var event orderpb.OrderFilledEvent
-		if err := proto.Unmarshal(msg.Data, &event); err != nil {
-			fmt.Printf("Error unmarshalling order filled event: %v\n", err)
-			return
-		}
-
-		orderId, err := uuid.Parse(event.OrderId)
-		if err != nil {
-			fmt.Printf("Invalid order ID in filled event: %v\n", err)
-			return
-		}
-
-		params := generated.UpdateOrderStatusParams{
-			ID:             orderId,
-			FilledQuantity: floatToNumeric(event.FillQuantity),
-			AvgFillPrice:   floatToNumeric(event.FillPrice),
-			Status:         generated.OrderStatusFilled,
-		}
-
-		_, err = h.db.GetQueries().UpdateOrderStatus(context.Background(), params)
-		if err != nil {
-			fmt.Printf("Failed to update order status for order %s: %v\n", event.OrderId, err)
-			return
-		}
-
-		fmt.Printf("Order %s updated to FILLED via NATS event\n", event.OrderId)
-	})
+	_, err := h.natsClient.QueueSubscribe("orders.filled", "order-service", "order-service-durable", h.handleOrderFilled)
 
 	if err != nil {
-		fmt.Printf("Failed to subscribe to orders.filled: %v\n", err)
+		log.Printf("Failed to subscribe to orders.filled: %v\n", err)
 	}
 }
 
@@ -147,12 +123,12 @@ func (h *OrderHandler) InsertOrder(ctx context.Context, req *orderpb.InsertOrder
 	params := generated.InsertOrderParams{
 		UserID:    uuid.MustParse(req.UserId),
 		Symbol:    req.Symbol,
-		Side:      generated.OrderSide(req.Side),
-		Type:      generated.OrderType(req.Type),
-		Status:    generated.OrderStatus(status),
+		Side:      convertOrderSideToDB(req.Side),
+		Type:      convertOrderTypeToDB(req.Type),
+		Status:    convertOrderStatusToDB(status),
 		Quantity:  floatToNumeric(req.Quantity),
-		Price:     floatToNumeric(req.Price),
-		StopPrice: floatToNumeric(req.StopPrice),
+		Price:     floatToNumericNullIfZero(req.Price),
+		StopPrice: floatToNumericNullIfZero(req.StopPrice),
 	}
 
 	order, err := h.db.GetQueries().InsertOrder(ctx, params)
@@ -234,4 +210,50 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 		Code:  basepb.ErrorCode_OK,
 		Order: convertOrderToProto(order),
 	}, nil
+}
+
+func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) {
+	var event orderpb.OrderFilledEvent
+	if err := proto.Unmarshal(msg.Data, &event); err != nil {
+		fmt.Printf("Error unmarshalling order filled event: %v\n", err)
+		return
+	}
+
+	orderId, err := uuid.Parse(event.OrderId)
+	if err != nil {
+		fmt.Printf("Invalid order ID in filled event: %v\n", err)
+		return
+	}
+
+	// insert into orders_fill table
+	fillParams := generated.InsertOrderFilledParams{
+		OrderID:      orderId,
+		FillQuantity: floatToNumeric(event.FillQuantity),
+		FillPrice:    floatToNumeric(event.FillPrice),
+		FilledAt:     pgtype.Timestamptz{Time: time.Now(), Valid: true},
+	}
+	if _, err := h.db.GetQueries().InsertOrderFilled(context.Background(), fillParams); err != nil {
+		log.Printf("Failed to insert order fill: %v\n", err)
+		// for now just log the error and continue
+	}
+
+	// update parent order status
+	params := generated.UpdateOrderStatusParams{
+		ID:             orderId,
+		FilledQuantity: floatToNumeric(event.FillQuantity),
+		AvgFillPrice:   floatToNumeric(event.FillPrice),
+		Status:         generated.OrderStatusFilled,
+	}
+
+	_, err = h.db.GetQueries().UpdateOrderStatus(context.Background(), params)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Printf("Order %s not found during fill update (possibly deleted or inconsistent state)\n", event.OrderId)
+			return
+		}
+		log.Printf("Failed to update order status for order %s: %v\n", event.OrderId, err)
+		return
+	}
+
+	log.Printf("Order %s updated to FILLED via NATS event\n", event.OrderId)
 }

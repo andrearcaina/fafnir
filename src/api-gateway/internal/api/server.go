@@ -34,6 +34,7 @@ func NewServer() *Server {
 				SecurityClient: cfg.CLIENTS.SecurityClient,
 				UserClient:     cfg.CLIENTS.UserClient,
 				StockClient:    cfg.CLIENTS.StockClient,
+				OrderClient:    cfg.CLIENTS.OrderClient,
 			},
 		},
 	))

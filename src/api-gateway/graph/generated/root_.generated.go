@@ -33,6 +33,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 }
 
@@ -40,9 +41,46 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	CancelOrderResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	CreateOrderResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
 	HasPermissionResponse struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
+	}
+
+	Mutation struct {
+		CancelOrder func(childComplexity int, orderID string) int
+		CreateOrder func(childComplexity int, request model.CreateOrderRequest) int
+	}
+
+	Order struct {
+		AvgFillPrice   func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		FilledQuantity func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Price          func(childComplexity int) int
+		Quantity       func(childComplexity int) int
+		Side           func(childComplexity int) int
+		Status         func(childComplexity int) int
+		StopPrice      func(childComplexity int) int
+		Symbol         func(childComplexity int) int
+		Type           func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+		UserID         func(childComplexity int) int
+	}
+
+	OrdersResponse struct {
+		Code  func(childComplexity int) int
+		Count func(childComplexity int) int
+		Data  func(childComplexity int) int
 	}
 
 	ProfileData struct {
@@ -58,7 +96,8 @@ type ComplexityRoot struct {
 
 	Query struct {
 		CheckPermission        func(childComplexity int, request model.HasPermissionRequest) int
-		GetProfileData         func(childComplexity int, userID string) int
+		GetOrders              func(childComplexity int) int
+		GetProfileData         func(childComplexity int) int
 		GetStockHistoricalData func(childComplexity int, symbol string, period *string) int
 		GetStockMetadata       func(childComplexity int, symbol string) int
 		GetStockQuote          func(childComplexity int, symbol string) int
@@ -145,6 +184,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "CancelOrderResponse.code":
+		if e.complexity.CancelOrderResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.CancelOrderResponse.Code(childComplexity), true
+
+	case "CancelOrderResponse.data":
+		if e.complexity.CancelOrderResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.CancelOrderResponse.Data(childComplexity), true
+
+	case "CreateOrderResponse.code":
+		if e.complexity.CreateOrderResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.CreateOrderResponse.Code(childComplexity), true
+
+	case "CreateOrderResponse.data":
+		if e.complexity.CreateOrderResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.CreateOrderResponse.Data(childComplexity), true
+
 	case "HasPermissionResponse.code":
 		if e.complexity.HasPermissionResponse.Code == nil {
 			break
@@ -158,6 +225,142 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.HasPermissionResponse.Data(childComplexity), true
+
+	case "Mutation.cancelOrder":
+		if e.complexity.Mutation.CancelOrder == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_cancelOrder_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CancelOrder(childComplexity, args["orderId"].(string)), true
+
+	case "Mutation.createOrder":
+		if e.complexity.Mutation.CreateOrder == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createOrder_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateOrder(childComplexity, args["request"].(model.CreateOrderRequest)), true
+
+	case "Order.avgFillPrice":
+		if e.complexity.Order.AvgFillPrice == nil {
+			break
+		}
+
+		return e.complexity.Order.AvgFillPrice(childComplexity), true
+
+	case "Order.createdAt":
+		if e.complexity.Order.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Order.CreatedAt(childComplexity), true
+
+	case "Order.filledQuantity":
+		if e.complexity.Order.FilledQuantity == nil {
+			break
+		}
+
+		return e.complexity.Order.FilledQuantity(childComplexity), true
+
+	case "Order.id":
+		if e.complexity.Order.ID == nil {
+			break
+		}
+
+		return e.complexity.Order.ID(childComplexity), true
+
+	case "Order.price":
+		if e.complexity.Order.Price == nil {
+			break
+		}
+
+		return e.complexity.Order.Price(childComplexity), true
+
+	case "Order.quantity":
+		if e.complexity.Order.Quantity == nil {
+			break
+		}
+
+		return e.complexity.Order.Quantity(childComplexity), true
+
+	case "Order.side":
+		if e.complexity.Order.Side == nil {
+			break
+		}
+
+		return e.complexity.Order.Side(childComplexity), true
+
+	case "Order.status":
+		if e.complexity.Order.Status == nil {
+			break
+		}
+
+		return e.complexity.Order.Status(childComplexity), true
+
+	case "Order.stopPrice":
+		if e.complexity.Order.StopPrice == nil {
+			break
+		}
+
+		return e.complexity.Order.StopPrice(childComplexity), true
+
+	case "Order.symbol":
+		if e.complexity.Order.Symbol == nil {
+			break
+		}
+
+		return e.complexity.Order.Symbol(childComplexity), true
+
+	case "Order.type":
+		if e.complexity.Order.Type == nil {
+			break
+		}
+
+		return e.complexity.Order.Type(childComplexity), true
+
+	case "Order.updatedAt":
+		if e.complexity.Order.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Order.UpdatedAt(childComplexity), true
+
+	case "Order.userId":
+		if e.complexity.Order.UserID == nil {
+			break
+		}
+
+		return e.complexity.Order.UserID(childComplexity), true
+
+	case "OrdersResponse.code":
+		if e.complexity.OrdersResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.OrdersResponse.Code(childComplexity), true
+
+	case "OrdersResponse.count":
+		if e.complexity.OrdersResponse.Count == nil {
+			break
+		}
+
+		return e.complexity.OrdersResponse.Count(childComplexity), true
+
+	case "OrdersResponse.data":
+		if e.complexity.OrdersResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.OrdersResponse.Data(childComplexity), true
 
 	case "ProfileData.firstName":
 		if e.complexity.ProfileData.FirstName == nil {
@@ -206,17 +409,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.CheckPermission(childComplexity, args["request"].(model.HasPermissionRequest)), true
 
+	case "Query.getOrders":
+		if e.complexity.Query.GetOrders == nil {
+			break
+		}
+
+		return e.complexity.Query.GetOrders(childComplexity), true
+
 	case "Query.getProfileData":
 		if e.complexity.Query.GetProfileData == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getProfileData_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetProfileData(childComplexity, args["userId"].(string)), true
+		return e.complexity.Query.GetProfileData(childComplexity), true
 
 	case "Query.getStockHistoricalData":
 		if e.complexity.Query.GetStockHistoricalData == nil {
@@ -526,6 +731,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputCreateOrderRequest,
 		ec.unmarshalInputHasPermissionRequest,
 	)
 	first := true
@@ -560,6 +766,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 
 			return &response
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
 		}
 
 	default:
@@ -611,15 +832,67 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../schemas/base.graphqls", Input: `schema {
     query: Query
+    mutation: Mutation
 }
 
 type Query
+type Mutation
 `, BuiltIn: false},
 	{Name: "../schemas/health.graphqls", Input: `extend type Query {
     health: String!
 }`, BuiltIn: false},
-	{Name: "../schemas/security.graphqls", Input: `input HasPermissionRequest {
+	{Name: "../schemas/order.graphqls", Input: `type Order {
+    id: String!
     userId: String!
+    symbol: String!
+    side: String!
+    type: String!
+    status: String!
+    quantity: Float!
+    price: Float!
+    stopPrice: Float!
+    filledQuantity: Float!
+    avgFillPrice: Float!
+    createdAt: String!
+    updatedAt: String!
+}
+
+input CreateOrderRequest {
+    symbol: String!
+    side: String! 
+    type: String!
+    quantity: Float!
+    price: Float
+    stopPrice: Float
+    status: String # optional, defaults to PENDING
+}
+
+type CreateOrderResponse {
+    data: Order
+    code: String!
+}
+
+type CancelOrderResponse {
+    data: Order
+    code: String!
+}
+
+type OrdersResponse {
+    data: [Order!]
+    count: Int!
+    code: String!
+}
+
+extend type Query {
+    getOrders: OrdersResponse!
+}
+
+extend type Mutation {
+    createOrder(request: CreateOrderRequest!): CreateOrderResponse!
+    cancelOrder(orderId: String!): CancelOrderResponse!
+}
+`, BuiltIn: false},
+	{Name: "../schemas/security.graphqls", Input: `input HasPermissionRequest {
     permission: String!
 }
 
@@ -715,7 +988,7 @@ type ProfileDataResponse {
 }
 
 extend type Query {
-    getProfileData(userId: String!): ProfileDataResponse!
+    getProfileData: ProfileDataResponse!
 }
 `, BuiltIn: false},
 }

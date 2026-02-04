@@ -29,34 +29,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _ProfileData_userId(ctx context.Context, field graphql.CollectedField, obj *model.ProfileData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileData_userId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileData_userId,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_ProfileData_userId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -73,34 +58,19 @@ func (ec *executionContext) fieldContext_ProfileData_userId(_ context.Context, f
 }
 
 func (ec *executionContext) _ProfileData_firstName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileData_firstName(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FirstName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileData_firstName,
+		func(ctx context.Context) (any, error) {
+			return obj.FirstName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_ProfileData_firstName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -117,34 +87,19 @@ func (ec *executionContext) fieldContext_ProfileData_firstName(_ context.Context
 }
 
 func (ec *executionContext) _ProfileData_lastName(ctx context.Context, field graphql.CollectedField, obj *model.ProfileData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileData_lastName(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.LastName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileData_lastName,
+		func(ctx context.Context) (any, error) {
+			return obj.LastName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_ProfileData_lastName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -161,31 +116,19 @@ func (ec *executionContext) fieldContext_ProfileData_lastName(_ context.Context,
 }
 
 func (ec *executionContext) _ProfileDataResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_data(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.ProfileData)
-	fc.Result = res
-	return ec.marshalOProfileData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileData(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileDataResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalOProfileData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileData,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_ProfileDataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -210,34 +153,19 @@ func (ec *executionContext) fieldContext_ProfileDataResponse_data(_ context.Cont
 }
 
 func (ec *executionContext) _ProfileDataResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.ProfileDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ProfileDataResponse_code(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileDataResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_ProfileDataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -366,7 +294,7 @@ func (ec *executionContext) marshalNProfileDataResponse2fafnirᚋapiᚑgateway�
 func (ec *executionContext) marshalNProfileDataResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐProfileDataResponse(ctx context.Context, sel ast.SelectionSet, v *model.ProfileDataResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

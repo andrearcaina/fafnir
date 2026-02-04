@@ -29,34 +29,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _HasPermissionResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.HasPermissionResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasPermissionResponse_data(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.SecurityPermission)
-	fc.Result = res
-	return ec.marshalNSecurityPermission2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐSecurityPermission(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasPermissionResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalNSecurityPermission2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐSecurityPermission,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasPermissionResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -77,34 +62,19 @@ func (ec *executionContext) fieldContext_HasPermissionResponse_data(_ context.Co
 }
 
 func (ec *executionContext) _HasPermissionResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.HasPermissionResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_HasPermissionResponse_code(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_HasPermissionResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_HasPermissionResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -121,34 +91,19 @@ func (ec *executionContext) fieldContext_HasPermissionResponse_code(_ context.Co
 }
 
 func (ec *executionContext) _SecurityPermission_hasPermission(ctx context.Context, field graphql.CollectedField, obj *model.SecurityPermission) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_SecurityPermission_hasPermission(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.HasPermission, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SecurityPermission_hasPermission,
+		func(ctx context.Context) (any, error) {
+			return obj.HasPermission, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_SecurityPermission_hasPermission(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -175,20 +130,13 @@ func (ec *executionContext) unmarshalInputHasPermissionRequest(ctx context.Conte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"userId", "permission"}
+	fieldsInOrder := [...]string{"permission"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "userId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.UserID = data
 		case "permission":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("permission"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -309,7 +257,7 @@ func (ec *executionContext) marshalNHasPermissionResponse2fafnirᚋapiᚑgateway
 func (ec *executionContext) marshalNHasPermissionResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐHasPermissionResponse(ctx context.Context, sel ast.SelectionSet, v *model.HasPermissionResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -319,7 +267,7 @@ func (ec *executionContext) marshalNHasPermissionResponse2ᚖfafnirᚋapiᚑgate
 func (ec *executionContext) marshalNSecurityPermission2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐSecurityPermission(ctx context.Context, sel ast.SelectionSet, v *model.SecurityPermission) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

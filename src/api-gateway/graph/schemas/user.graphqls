@@ -10,5 +10,5 @@ type ProfileDataResponse {
 }
 
 extend type Query {
-    getProfileData(userId: String!): ProfileDataResponse!
+    getProfileData: ProfileDataResponse!
 }

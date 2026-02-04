@@ -30,7 +30,7 @@ In no particular order:
   - [X] Swapped from Pub/Sub to Worker Queues for message persistence with NATS JetStream ([issue #20](https://github.com/andrearcaina/fafnir/issues/20)).
   - [ ] Implement more events across services than just user creation.
 - [X] Create system architecture, network and data diagrams (upkeep as much as possible).
-- [ ] Build a simulation/orchestration engine for app events.
+- [ ] Build a simulation engine for orchestrating trading events.
 - [ ] Add unit, integration, end-to-end and load/stress tests.
   - [X] Perform load testing using Locust to simulate concurrent users ([issue #8](https://github.com/andrearcaina/fafnir/issues/8)).
 - [X] Explore Kubernetes local implementation ([issue #5](https://github.com/andrearcaina/fafnir/issues/5)).

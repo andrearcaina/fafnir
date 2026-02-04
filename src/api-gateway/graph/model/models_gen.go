@@ -2,14 +2,58 @@
 
 package model
 
+type CancelOrderResponse struct {
+	Data *Order `json:"data,omitempty"`
+	Code string `json:"code"`
+}
+
+type CreateOrderRequest struct {
+	Symbol    string   `json:"symbol"`
+	Side      string   `json:"side"`
+	Type      string   `json:"type"`
+	Quantity  float64  `json:"quantity"`
+	Price     *float64 `json:"price,omitempty"`
+	StopPrice *float64 `json:"stopPrice,omitempty"`
+	Status    *string  `json:"status,omitempty"`
+}
+
+type CreateOrderResponse struct {
+	Data *Order `json:"data,omitempty"`
+	Code string `json:"code"`
+}
+
 type HasPermissionRequest struct {
-	UserID     string `json:"userId"`
 	Permission string `json:"permission"`
 }
 
 type HasPermissionResponse struct {
 	Data *SecurityPermission `json:"data"`
 	Code string              `json:"code"`
+}
+
+type Mutation struct {
+}
+
+type Order struct {
+	ID             string  `json:"id"`
+	UserID         string  `json:"userId"`
+	Symbol         string  `json:"symbol"`
+	Side           string  `json:"side"`
+	Type           string  `json:"type"`
+	Status         string  `json:"status"`
+	Quantity       float64 `json:"quantity"`
+	Price          float64 `json:"price"`
+	StopPrice      float64 `json:"stopPrice"`
+	FilledQuantity float64 `json:"filledQuantity"`
+	AvgFillPrice   float64 `json:"avgFillPrice"`
+	CreatedAt      string  `json:"createdAt"`
+	UpdatedAt      string  `json:"updatedAt"`
+}
+
+type OrdersResponse struct {
+	Data  []*Order `json:"data,omitempty"`
+	Count int32    `json:"count"`
+	Code  string   `json:"code"`
 }
 
 type ProfileData struct {

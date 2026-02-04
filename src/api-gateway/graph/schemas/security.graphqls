@@ -1,5 +1,4 @@
 input HasPermissionRequest {
-    userId: String!
     permission: String!
 }
 

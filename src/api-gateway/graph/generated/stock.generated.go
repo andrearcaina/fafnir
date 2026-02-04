@@ -30,34 +30,19 @@ import (
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _StockData_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockData_symbol(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Symbol, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockData_symbol,
+		func(ctx context.Context) (any, error) {
+			return obj.Symbol, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockData_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -74,34 +59,19 @@ func (ec *executionContext) fieldContext_StockData_symbol(_ context.Context, fie
 }
 
 func (ec *executionContext) _StockData_name(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockData_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockData_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockData_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -118,34 +88,19 @@ func (ec *executionContext) fieldContext_StockData_name(_ context.Context, field
 }
 
 func (ec *executionContext) _StockData_exchange(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockData_exchange(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Exchange, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockData_exchange,
+		func(ctx context.Context) (any, error) {
+			return obj.Exchange, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockData_exchange(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -162,34 +117,19 @@ func (ec *executionContext) fieldContext_StockData_exchange(_ context.Context, f
 }
 
 func (ec *executionContext) _StockData_exchangeFullName(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockData_exchangeFullName(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ExchangeFullName, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockData_exchangeFullName,
+		func(ctx context.Context) (any, error) {
+			return obj.ExchangeFullName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockData_exchangeFullName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -206,34 +146,19 @@ func (ec *executionContext) fieldContext_StockData_exchangeFullName(_ context.Co
 }
 
 func (ec *executionContext) _StockData_currency(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockData_currency(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Currency, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockData_currency,
+		func(ctx context.Context) (any, error) {
+			return obj.Currency, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockData_currency(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -250,34 +175,19 @@ func (ec *executionContext) fieldContext_StockData_currency(_ context.Context, f
 }
 
 func (ec *executionContext) _StockHistoricalData_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_symbol(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Symbol, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_symbol,
+		func(ctx context.Context) (any, error) {
+			return obj.Symbol, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -294,34 +204,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_symbol(_ context.Co
 }
 
 func (ec *executionContext) _StockHistoricalData_date(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_date(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Date, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_date,
+		func(ctx context.Context) (any, error) {
+			return obj.Date, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_date(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -338,34 +233,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_date(_ context.Cont
 }
 
 func (ec *executionContext) _StockHistoricalData_open(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_open(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Open, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_open,
+		func(ctx context.Context) (any, error) {
+			return obj.Open, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_open(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -382,34 +262,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_open(_ context.Cont
 }
 
 func (ec *executionContext) _StockHistoricalData_high(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_high(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.High, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_high,
+		func(ctx context.Context) (any, error) {
+			return obj.High, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_high(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -426,34 +291,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_high(_ context.Cont
 }
 
 func (ec *executionContext) _StockHistoricalData_low(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_low(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Low, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_low,
+		func(ctx context.Context) (any, error) {
+			return obj.Low, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_low(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -470,34 +320,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_low(_ context.Conte
 }
 
 func (ec *executionContext) _StockHistoricalData_close(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_close(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Close, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_close,
+		func(ctx context.Context) (any, error) {
+			return obj.Close, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_close(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -514,34 +349,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_close(_ context.Con
 }
 
 func (ec *executionContext) _StockHistoricalData_volume(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_volume(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Volume, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt642int64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_volume,
+		func(ctx context.Context) (any, error) {
+			return obj.Volume, nil
+		},
+		nil,
+		ec.marshalNInt642int64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_volume(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -558,34 +378,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_volume(_ context.Co
 }
 
 func (ec *executionContext) _StockHistoricalData_priceChange(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_priceChange(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PriceChange, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_priceChange,
+		func(ctx context.Context) (any, error) {
+			return obj.PriceChange, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_priceChange(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -602,34 +407,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_priceChange(_ conte
 }
 
 func (ec *executionContext) _StockHistoricalData_priceChangePercent(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalData_priceChangePercent(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PriceChangePercent, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalData_priceChangePercent,
+		func(ctx context.Context) (any, error) {
+			return obj.PriceChangePercent, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalData_priceChangePercent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -646,34 +436,19 @@ func (ec *executionContext) fieldContext_StockHistoricalData_priceChangePercent(
 }
 
 func (ec *executionContext) _StockHistoricalDataResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalDataResponse_code(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalDataResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalDataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -690,31 +465,19 @@ func (ec *executionContext) fieldContext_StockHistoricalDataResponse_code(_ cont
 }
 
 func (ec *executionContext) _StockHistoricalDataResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalDataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockHistoricalDataResponse_data(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.StockHistoricalData)
-	fc.Result = res
-	return ec.marshalOStockHistoricalData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockHistoricalDataResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalOStockHistoricalData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalData,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockHistoricalDataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -751,34 +514,19 @@ func (ec *executionContext) fieldContext_StockHistoricalDataResponse_data(_ cont
 }
 
 func (ec *executionContext) _StockMetadataResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockMetadataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockMetadataResponse_code(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockMetadataResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockMetadataResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -795,31 +543,19 @@ func (ec *executionContext) fieldContext_StockMetadataResponse_code(_ context.Co
 }
 
 func (ec *executionContext) _StockMetadataResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.StockMetadataResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockMetadataResponse_data(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.StockData)
-	fc.Result = res
-	return ec.marshalOStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockMetadataResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalOStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockMetadataResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -848,34 +584,19 @@ func (ec *executionContext) fieldContext_StockMetadataResponse_data(_ context.Co
 }
 
 func (ec *executionContext) _StockPriceData_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_symbol(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Symbol, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_symbol,
+		func(ctx context.Context) (any, error) {
+			return obj.Symbol, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -892,34 +613,19 @@ func (ec *executionContext) fieldContext_StockPriceData_symbol(_ context.Context
 }
 
 func (ec *executionContext) _StockPriceData_price(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_price(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Price, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_price,
+		func(ctx context.Context) (any, error) {
+			return obj.Price, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_price(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -936,34 +642,19 @@ func (ec *executionContext) fieldContext_StockPriceData_price(_ context.Context,
 }
 
 func (ec *executionContext) _StockPriceData_open(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_open(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Open, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_open,
+		func(ctx context.Context) (any, error) {
+			return obj.Open, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_open(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -980,34 +671,19 @@ func (ec *executionContext) fieldContext_StockPriceData_open(_ context.Context, 
 }
 
 func (ec *executionContext) _StockPriceData_previousClose(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_previousClose(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PreviousClose, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_previousClose,
+		func(ctx context.Context) (any, error) {
+			return obj.PreviousClose, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_previousClose(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1024,34 +700,19 @@ func (ec *executionContext) fieldContext_StockPriceData_previousClose(_ context.
 }
 
 func (ec *executionContext) _StockPriceData_priceChange(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_priceChange(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PriceChange, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_priceChange,
+		func(ctx context.Context) (any, error) {
+			return obj.PriceChange, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_priceChange(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1068,34 +729,19 @@ func (ec *executionContext) fieldContext_StockPriceData_priceChange(_ context.Co
 }
 
 func (ec *executionContext) _StockPriceData_priceChangePercent(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_priceChangePercent(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.PriceChangePercent, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_priceChangePercent,
+		func(ctx context.Context) (any, error) {
+			return obj.PriceChangePercent, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_priceChangePercent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1112,34 +758,19 @@ func (ec *executionContext) fieldContext_StockPriceData_priceChangePercent(_ con
 }
 
 func (ec *executionContext) _StockPriceData_volume(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_volume(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Volume, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt642int64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_volume,
+		func(ctx context.Context) (any, error) {
+			return obj.Volume, nil
+		},
+		nil,
+		ec.marshalNInt642int64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_volume(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1156,34 +787,19 @@ func (ec *executionContext) fieldContext_StockPriceData_volume(_ context.Context
 }
 
 func (ec *executionContext) _StockPriceData_marketCap(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_marketCap(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MarketCap, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_marketCap,
+		func(ctx context.Context) (any, error) {
+			return obj.MarketCap, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_marketCap(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1200,34 +816,19 @@ func (ec *executionContext) fieldContext_StockPriceData_marketCap(_ context.Cont
 }
 
 func (ec *executionContext) _StockPriceData_dayLow(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_dayLow(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DayLow, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_dayLow,
+		func(ctx context.Context) (any, error) {
+			return obj.DayLow, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_dayLow(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1244,34 +845,19 @@ func (ec *executionContext) fieldContext_StockPriceData_dayLow(_ context.Context
 }
 
 func (ec *executionContext) _StockPriceData_dayHigh(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_dayHigh(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.DayHigh, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_dayHigh,
+		func(ctx context.Context) (any, error) {
+			return obj.DayHigh, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_dayHigh(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1288,34 +874,19 @@ func (ec *executionContext) fieldContext_StockPriceData_dayHigh(_ context.Contex
 }
 
 func (ec *executionContext) _StockPriceData_yearHigh(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_yearHigh(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.YearHigh, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_yearHigh,
+		func(ctx context.Context) (any, error) {
+			return obj.YearHigh, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_yearHigh(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1332,34 +903,19 @@ func (ec *executionContext) fieldContext_StockPriceData_yearHigh(_ context.Conte
 }
 
 func (ec *executionContext) _StockPriceData_yearLow(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockPriceData_yearLow(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.YearLow, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_yearLow,
+		func(ctx context.Context) (any, error) {
+			return obj.YearLow, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_yearLow(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1376,34 +932,19 @@ func (ec *executionContext) fieldContext_StockPriceData_yearLow(_ context.Contex
 }
 
 func (ec *executionContext) _StockQuoteBatchResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteBatchResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockQuoteBatchResponse_code(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockQuoteBatchResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteBatchResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1420,31 +961,19 @@ func (ec *executionContext) fieldContext_StockQuoteBatchResponse_code(_ context.
 }
 
 func (ec *executionContext) _StockQuoteBatchResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteBatchResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockQuoteBatchResponse_data(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.StockPriceData)
-	fc.Result = res
-	return ec.marshalOStockPriceData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockQuoteBatchResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalOStockPriceData2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteBatchResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1487,34 +1016,19 @@ func (ec *executionContext) fieldContext_StockQuoteBatchResponse_data(_ context.
 }
 
 func (ec *executionContext) _StockQuoteResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockQuoteResponse_code(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Code, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockQuoteResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1531,31 +1045,19 @@ func (ec *executionContext) fieldContext_StockQuoteResponse_code(_ context.Conte
 }
 
 func (ec *executionContext) _StockQuoteResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteResponse) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_StockQuoteResponse_data(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.StockPriceData)
-	fc.Result = res
-	return ec.marshalOStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockQuoteResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalOStockPriceData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockPriceData,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_StockQuoteResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2019,7 +1521,7 @@ func (ec *executionContext) marshalNInt642int64(ctx context.Context, sel ast.Sel
 	res := graphql.MarshalInt64(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
 	return res
@@ -2032,7 +1534,7 @@ func (ec *executionContext) marshalNStockHistoricalDataResponse2fafnirᚋapiᚑg
 func (ec *executionContext) marshalNStockHistoricalDataResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockHistoricalDataResponse(ctx context.Context, sel ast.SelectionSet, v *model.StockHistoricalDataResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -2046,7 +1548,7 @@ func (ec *executionContext) marshalNStockMetadataResponse2fafnirᚋapiᚑgateway
 func (ec *executionContext) marshalNStockMetadataResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockMetadataResponse(ctx context.Context, sel ast.SelectionSet, v *model.StockMetadataResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -2060,7 +1562,7 @@ func (ec *executionContext) marshalNStockQuoteBatchResponse2fafnirᚋapiᚑgatew
 func (ec *executionContext) marshalNStockQuoteBatchResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockQuoteBatchResponse(ctx context.Context, sel ast.SelectionSet, v *model.StockQuoteBatchResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
@@ -2074,7 +1576,7 @@ func (ec *executionContext) marshalNStockQuoteResponse2fafnirᚋapiᚑgatewayᚋ
 func (ec *executionContext) marshalNStockQuoteResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockQuoteResponse(ctx context.Context, sel ast.SelectionSet, v *model.StockQuoteResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}

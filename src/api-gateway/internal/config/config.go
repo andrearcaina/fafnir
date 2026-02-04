@@ -18,6 +18,7 @@ type ClientsConfig struct {
 	SecurityClient *clients.SecurityClient
 	UserClient     *clients.UserClient
 	StockClient    *clients.StockClient
+	OrderClient    *clients.OrderClient
 }
 
 type ProxyConfig struct {
@@ -35,6 +36,7 @@ func NewConfig() *Config {
 			SecurityClient: clients.NewSecurityClient("security-service:8082"),
 			UserClient:     clients.NewUserClient("user-service:8083"),
 			StockClient:    clients.NewStockClient("stock-service:8084"),
+			OrderClient:    clients.NewOrderClient("order-service:8085"),
 		},
 		PROXY: ProxyConfig{
 			TargetURL: "http://auth-service:8081/",
