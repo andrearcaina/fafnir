@@ -6,8 +6,10 @@ import (
 )
 
 type Config struct {
-	PORT string
-	DB   PostgresConfig
+	PORT         string
+	DB           PostgresConfig
+	NATS         NatsConfig
+	StockService StockServiceConfig
 }
 
 type PostgresConfig struct {
@@ -21,8 +23,44 @@ type PostgresConfig struct {
 
 func NewConfig() *Config {
 	return &Config{
-		PORT: fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
-		DB:   newPostgresConfig(),
+		PORT:         fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
+		DB:           newPostgresConfig(),
+		NATS:         newNatsConfig(),
+		StockService: newStockServiceConfig(),
+	}
+}
+
+type NatsConfig struct {
+	Host string
+	Port string
+	URL  string
+}
+
+type StockServiceConfig struct {
+	Host string
+	Port string
+	URL  string
+}
+
+func newNatsConfig() NatsConfig {
+	host := os.Getenv("NATS_HOST")
+	port := os.Getenv("NATS_PORT")
+
+	return NatsConfig{
+		Host: host,
+		Port: port,
+		URL:  fmt.Sprintf("nats://%s:%s", host, port),
+	}
+}
+
+func newStockServiceConfig() StockServiceConfig {
+	host := os.Getenv("STOCK_SERVICE_HOST")
+	port := os.Getenv("STOCK_SERVICE_PORT")
+
+	return StockServiceConfig{
+		Host: host,
+		Port: port,
+		URL:  fmt.Sprintf("%s:%s", host, port),
 	}
 }
 

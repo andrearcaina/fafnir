@@ -1,0 +1,139 @@
+type Account {
+    id: String!
+    userId: String!
+    accountNumber: String!
+    type: String!
+    currency: String!
+    balance: Float!
+    createdAt: String!
+    updatedAt: String!
+}
+
+type Holding {
+    id: String!
+    accountId: String!
+    symbol: String!
+    quantity: Float!
+    avgCost: Float!
+    createdAt: String!
+    updatedAt: String!
+}
+
+type WatchlistItem {
+    symbol: String!
+    addedAt: String!
+}
+
+type Transaction {
+    id: String!
+    accountId: String!
+    type: String!
+    amount: Float!
+    description: String!
+    referenceId: String
+    createdAt: String!
+}
+
+input CreateAccountRequest {
+    type: String! # either SAVINGS, INVESTMENT, or CHEQUING
+    currency: String! # either USD or CAD
+}
+
+type CreateAccountResponse {
+    data: Account
+    code: String!
+}
+
+type GetPortfolioSummaryResponse {
+    accounts: [Account!]
+    totalBalance: Float!
+    code: String!
+}
+
+input GetHoldingsRequest {
+    accountId: String!
+}
+
+type GetHoldingsResponse {
+    data: [Holding!]
+    code: String!
+}
+
+input GetHoldingRequest {
+    accountId: String!
+    symbol: String!
+}
+
+type GetHoldingResponse {
+    data: Holding
+    code: String!
+}
+
+type GetWatchlistResponse {
+    data: [WatchlistItem!]
+    code: String!
+}
+
+input AddToWatchlistRequest {
+    symbol: String!
+}
+
+type AddToWatchlistResponse {
+    code: String!
+}
+
+input RemoveFromWatchlistRequest {
+    symbol: String!
+}
+
+type RemoveFromWatchlistResponse {
+    code: String!
+}
+
+input GetTransactionsRequest {
+    accountId: String!
+}
+
+type GetTransactionsResponse {
+    code: String!
+    data: [Transaction!]
+}
+
+input DepositRequest {
+    accountId: String!
+    amount: Float!
+    currency: String! # either USD or CAD
+}
+
+type DepositResponse {
+    code: String!
+    newBalance: Float!
+}
+
+input TransferRequest {
+    fromAccountId: String!
+    toAccountId: String!
+    amount: Float!
+    currency: String! # either USD or CAD
+}
+
+type TransferResponse {
+    code: String!
+}
+
+extend type Query {
+    getPortfolioSummary: GetPortfolioSummaryResponse!
+    getHoldings(request: GetHoldingsRequest!): GetHoldingsResponse!
+    getHolding(request: GetHoldingRequest!): GetHoldingResponse!
+    getWatchlist: GetWatchlistResponse!
+    getTransactions(request: GetTransactionsRequest!): GetTransactionsResponse!
+}
+
+extend type Mutation {
+    createAccount(request: CreateAccountRequest!): CreateAccountResponse!
+    addToWatchlist(request: AddToWatchlistRequest!): AddToWatchlistResponse!
+    removeFromWatchlist(request: RemoveFromWatchlistRequest!): RemoveFromWatchlistResponse!
+    deleteAccount(accountId: String!): Boolean!
+    deposit(request: DepositRequest!): DepositResponse!
+    transfer(request: TransferRequest!): TransferResponse!
+}

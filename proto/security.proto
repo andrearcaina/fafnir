@@ -6,20 +6,20 @@ import "base.proto";
 
 option go_package = "fafnir/shared/pb/security;pb";
 
+service SecurityService {
+  rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+}
+
 message CheckPermissionRequest {
-    string user_id = 1;
-    string permission = 2;
+  string user_id = 1;
+  string permission = 2;
 }
 
 message SecurityPermission {
-    bool has_permission = 1;
+  bool has_permission = 1;
 }
 
 message CheckPermissionResponse {
-    SecurityPermission permission = 1;
-    base.ErrorCode code = 2;
-}
-
-service SecurityService {
-    rpc CheckPermission(CheckPermissionRequest) returns (CheckPermissionResponse);
+  SecurityPermission permission = 1;
+  base.ErrorCode code = 2;
 }

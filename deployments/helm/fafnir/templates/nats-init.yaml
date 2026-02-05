@@ -13,12 +13,16 @@ data:
 
     set -e
 
-    until nats system_account_stats > /dev/null 2>&1; do
-        sleep 1
-    done
-
     nats stream add users \
         --subjects "users.>" \
+        --storage file \
+        --retention limits \
+        --max-age 7d \
+        --max-bytes 100MB \
+        --defaults
+
+    nats stream add orders \
+        --subjects "orders.>" \
         --storage file \
         --retention limits \
         --max-age 7d \

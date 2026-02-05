@@ -12,11 +12,11 @@ import (
 func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	start := time.Now()
 
-	// Log request
+	// log request
 	log.Printf("gRPC Request - Method: %s", info.FullMethod)
 	log.Printf("gRPC Request - Payload: %+v", req)
 
-	// Call the handler
+	// call the handler
 	resp, err := handler(ctx, req)
 	duration := time.Since(start)
 
@@ -25,7 +25,7 @@ func loggingInterceptor(ctx context.Context, req interface{}, info *grpc.UnarySe
 		return nil, err
 	}
 
-	// Log response
+	// log response
 	if info.FullMethod == "/security.SecurityService/CheckPermission" {
 		logCheckPermission(duration, resp.(*pb.CheckPermissionResponse))
 	}

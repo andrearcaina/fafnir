@@ -1,6 +1,10 @@
--- name: GetHolding :one
+-- name: GetHoldingByAccountIdAndSymbol :one
 SELECT * FROM holdings
 WHERE account_id = $1 AND symbol = $2;
+
+-- name: GetHoldingsByAccountId :many
+SELECT * FROM holdings
+WHERE account_id = $1;
 
 -- name: InsertHolding :one
 -- Used when buying for the FIRST time

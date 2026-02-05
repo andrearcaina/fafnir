@@ -174,6 +174,8 @@ services:
         environment:
             - SERVICE_NAME=order-service
             - SERVICE_PORT=8085
+            - STOCK_SERVICE_HOST=stock-service
+            - STOCK_SERVICE_PORT=8084
             - POSTGRES_USER=${POSTGRES_USER}
             - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
             - ORDER_DB=${ORDER_DB}
@@ -220,6 +222,35 @@ services:
         networks:
             - fafnir-network
 
+    trade-engine:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: trade-engine
+        environment:
+            - SERVICE_NAME=trade-engine
+            - SERVICE_PORT=8087
+            - STOCK_SERVICE_HOST=stock-service
+            - STOCK_SERVICE_PORT=8084
+            - PORTFOLIO_SERVICE_HOST=portfolio-service
+            - PORTFOLIO_SERVICE_PORT=8086
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
+        volumes:
+            - ../../src/trade-engine:/app/src/trade-engine:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            nats:
+                condition: service_healthy
+            stock-service:
+                condition: service_started
+            order-service:
+                condition: service_started
+        networks:
+            - fafnir-network
+
     nats:
         image: "nats:alpine"
         container_name: fafnir-nats
@@ -244,7 +275,7 @@ services:
         container_name: fafnir-nats-setup
         restart: "no"
         volumes:
-            - ../../tools/scripts/nats.sh:/nats.sh
+            - ../../infra/broker/init/nats.sh:/nats.sh
         environment:
             - NATS_HOST=${NATS_HOST_DOCKER}
             - NATS_PORT=${NATS_PORT}

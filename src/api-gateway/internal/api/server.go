@@ -31,9 +31,11 @@ func NewServer() *Server {
 	srv := handler.New(generated.NewExecutableSchema(
 		generated.Config{
 			Resolvers: &resolvers.Resolver{
-				SecurityClient: cfg.CLIENTS.SecurityClient,
-				UserClient:     cfg.CLIENTS.UserClient,
-				StockClient:    cfg.CLIENTS.StockClient,
+				SecurityClient:  cfg.CLIENTS.SecurityClient,
+				UserClient:      cfg.CLIENTS.UserClient,
+				StockClient:     cfg.CLIENTS.StockClient,
+				OrderClient:     cfg.CLIENTS.OrderClient,
+				PortfolioClient: cfg.CLIENTS.PortfolioClient,
 			},
 		},
 	))

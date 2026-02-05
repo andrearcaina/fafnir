@@ -24,3 +24,9 @@ UPDATE orders
 SET status = 'canceled', updated_at = NOW()
 WHERE id = $1 AND status = 'pending'
 RETURNING *;
+
+-- name: RejectOrder :one
+UPDATE orders
+SET status = 'rejected', updated_at = NOW()
+WHERE id = $1
+RETURNING *;

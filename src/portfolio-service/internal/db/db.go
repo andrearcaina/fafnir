@@ -73,3 +73,23 @@ func (db *Database) Close() {
 func (db *Database) GetPool() *pgxpool.Pool {
 	return db.pool
 }
+
+// ExecMultiTx executes a function as a database transaction (it handles multiple queries)
+// This is used for operations that require multiple database operations to be performed as a single unit
+func (db *Database) ExecMultiTx(ctx context.Context, fn func(*generated.Queries) error) error {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	q := generated.New(tx)
+	err = fn(q)
+	if err != nil {
+		if rbErr := tx.Rollback(ctx); rbErr != nil {
+			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
+		}
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

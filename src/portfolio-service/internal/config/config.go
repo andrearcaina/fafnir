@@ -8,6 +8,13 @@ import (
 type Config struct {
 	PORT string
 	DB   PostgresConfig
+	NATS NatsConfig
+}
+
+type NatsConfig struct {
+	Host string
+	Port string
+	URL  string
 }
 
 type PostgresConfig struct {
@@ -23,6 +30,18 @@ func NewConfig() *Config {
 	return &Config{
 		PORT: fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
 		DB:   newPostgresConfig(),
+		NATS: newNatsConfig(),
+	}
+}
+
+func newNatsConfig() NatsConfig {
+	host := os.Getenv("NATS_HOST")
+	port := os.Getenv("NATS_PORT")
+
+	return NatsConfig{
+		Host: host,
+		Port: port,
+		URL:  fmt.Sprintf("nats://%s:%s", host, port),
 	}
 }
 

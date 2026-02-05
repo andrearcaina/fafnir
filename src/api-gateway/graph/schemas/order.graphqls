@@ -1,0 +1,60 @@
+type Order {
+    id: String!
+    userId: String!
+    symbol: String!
+    side: String!
+    type: String!
+    status: String!
+    quantity: Float!
+    price: Float!
+    stopPrice: Float!
+    filledQuantity: Float!
+    avgFillPrice: Float!
+    createdAt: String!
+    updatedAt: String!
+}
+
+input CreateOrderRequest {
+    symbol: String!
+    side: String! 
+    type: String!
+    quantity: Float!
+    price: Float
+    stopPrice: Float
+    status: String # optional, defaults to PENDING
+}
+
+input GetOrderByIDRequest {
+    orderId: String!
+}
+
+type GetOrderByIDResponse {
+    data: Order
+    code: String!
+}
+
+type CreateOrderResponse {
+    data: Order
+    code: String!
+}
+
+type CancelOrderResponse {
+    data: Order
+    code: String!
+}
+
+type OrdersResponse {
+    data: [Order!]
+    count: Int!
+    code: String!
+}
+
+extend type Query {
+    getOrders: OrdersResponse!
+    getOrderByOrderID(request: GetOrderByIDRequest!): GetOrderByIDResponse!
+}
+
+extend type Mutation {
+    createOrder(request: CreateOrderRequest!): CreateOrderResponse!
+    cancelOrder(orderId: String!): CancelOrderResponse!
+}

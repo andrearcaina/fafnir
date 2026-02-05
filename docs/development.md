@@ -154,7 +154,6 @@ For more information on the commands, check out the `scripts/` folder.
 | `./tools/scripts/k8s.sh`     | All the kube command logic      |
 | `./tools/scripts/migrate.sh` | All the migration command logic |
 | `./tools/scripts/test.sh`    | All the test command logic      |
-| `./tools/scripts/nats.sh`    | All the nats command logic      |
 
 ## Useful Links
 - [Architecture Overview](architecture.md)

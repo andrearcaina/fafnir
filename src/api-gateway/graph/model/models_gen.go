@@ -2,14 +2,156 @@
 
 package model
 
+type Account struct {
+	ID            string  `json:"id"`
+	UserID        string  `json:"userId"`
+	AccountNumber string  `json:"accountNumber"`
+	Type          string  `json:"type"`
+	Currency      string  `json:"currency"`
+	Balance       float64 `json:"balance"`
+	CreatedAt     string  `json:"createdAt"`
+	UpdatedAt     string  `json:"updatedAt"`
+}
+
+type AddToWatchlistRequest struct {
+	Symbol string `json:"symbol"`
+}
+
+type AddToWatchlistResponse struct {
+	Code string `json:"code"`
+}
+
+type CancelOrderResponse struct {
+	Data *Order `json:"data,omitempty"`
+	Code string `json:"code"`
+}
+
+type CreateAccountRequest struct {
+	Type     string `json:"type"`
+	Currency string `json:"currency"`
+}
+
+type CreateAccountResponse struct {
+	Data *Account `json:"data,omitempty"`
+	Code string   `json:"code"`
+}
+
+type CreateOrderRequest struct {
+	Symbol    string   `json:"symbol"`
+	Side      string   `json:"side"`
+	Type      string   `json:"type"`
+	Quantity  float64  `json:"quantity"`
+	Price     *float64 `json:"price,omitempty"`
+	StopPrice *float64 `json:"stopPrice,omitempty"`
+	Status    *string  `json:"status,omitempty"`
+}
+
+type CreateOrderResponse struct {
+	Data *Order `json:"data,omitempty"`
+	Code string `json:"code"`
+}
+
+type DepositRequest struct {
+	AccountID string  `json:"accountId"`
+	Amount    float64 `json:"amount"`
+	Currency  string  `json:"currency"`
+}
+
+type DepositResponse struct {
+	Code       string  `json:"code"`
+	NewBalance float64 `json:"newBalance"`
+}
+
+type GetHoldingRequest struct {
+	AccountID string `json:"accountId"`
+	Symbol    string `json:"symbol"`
+}
+
+type GetHoldingResponse struct {
+	Data *Holding `json:"data,omitempty"`
+	Code string   `json:"code"`
+}
+
+type GetHoldingsRequest struct {
+	AccountID string `json:"accountId"`
+}
+
+type GetHoldingsResponse struct {
+	Data []*Holding `json:"data,omitempty"`
+	Code string     `json:"code"`
+}
+
+type GetOrderByIDRequest struct {
+	OrderID string `json:"orderId"`
+}
+
+type GetOrderByIDResponse struct {
+	Data *Order `json:"data,omitempty"`
+	Code string `json:"code"`
+}
+
+type GetPortfolioSummaryResponse struct {
+	Accounts     []*Account `json:"accounts,omitempty"`
+	TotalBalance float64    `json:"totalBalance"`
+	Code         string     `json:"code"`
+}
+
+type GetTransactionsRequest struct {
+	AccountID string `json:"accountId"`
+}
+
+type GetTransactionsResponse struct {
+	Code string         `json:"code"`
+	Data []*Transaction `json:"data,omitempty"`
+}
+
+type GetWatchlistResponse struct {
+	Data []*WatchlistItem `json:"data,omitempty"`
+	Code string           `json:"code"`
+}
+
 type HasPermissionRequest struct {
-	UserID     string `json:"userId"`
 	Permission string `json:"permission"`
 }
 
 type HasPermissionResponse struct {
 	Data *SecurityPermission `json:"data"`
 	Code string              `json:"code"`
+}
+
+type Holding struct {
+	ID        string  `json:"id"`
+	AccountID string  `json:"accountId"`
+	Symbol    string  `json:"symbol"`
+	Quantity  float64 `json:"quantity"`
+	AvgCost   float64 `json:"avgCost"`
+	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
+}
+
+type Mutation struct {
+}
+
+type Order struct {
+	ID             string  `json:"id"`
+	UserID         string  `json:"userId"`
+	Symbol         string  `json:"symbol"`
+	Side           string  `json:"side"`
+	Type           string  `json:"type"`
+	Status         string  `json:"status"`
+	Quantity       float64 `json:"quantity"`
+	Price          float64 `json:"price"`
+	StopPrice      float64 `json:"stopPrice"`
+	FilledQuantity float64 `json:"filledQuantity"`
+	AvgFillPrice   float64 `json:"avgFillPrice"`
+	CreatedAt      string  `json:"createdAt"`
+	UpdatedAt      string  `json:"updatedAt"`
+}
+
+type OrdersResponse struct {
+	Data  []*Order `json:"data,omitempty"`
+	Count int32    `json:"count"`
+	Code  string   `json:"code"`
 }
 
 type ProfileData struct {
@@ -24,6 +166,14 @@ type ProfileDataResponse struct {
 }
 
 type Query struct {
+}
+
+type RemoveFromWatchlistRequest struct {
+	Symbol string `json:"symbol"`
+}
+
+type RemoveFromWatchlistResponse struct {
+	Code string `json:"code"`
 }
 
 type SecurityPermission struct {
@@ -83,4 +233,30 @@ type StockQuoteBatchResponse struct {
 type StockQuoteResponse struct {
 	Code string          `json:"code"`
 	Data *StockPriceData `json:"data,omitempty"`
+}
+
+type Transaction struct {
+	ID          string  `json:"id"`
+	AccountID   string  `json:"accountId"`
+	Type        string  `json:"type"`
+	Amount      float64 `json:"amount"`
+	Description string  `json:"description"`
+	ReferenceID *string `json:"referenceId,omitempty"`
+	CreatedAt   string  `json:"createdAt"`
+}
+
+type TransferRequest struct {
+	FromAccountID string  `json:"fromAccountId"`
+	ToAccountID   string  `json:"toAccountId"`
+	Amount        float64 `json:"amount"`
+	Currency      string  `json:"currency"`
+}
+
+type TransferResponse struct {
+	Code string `json:"code"`
+}
+
+type WatchlistItem struct {
+	Symbol  string `json:"symbol"`
+	AddedAt string `json:"addedAt"`
 }

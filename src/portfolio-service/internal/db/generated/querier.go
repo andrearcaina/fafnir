@@ -12,9 +12,13 @@ import (
 
 type Querier interface {
 	AddToWatchlist(ctx context.Context, arg AddToWatchlistParams) error
+	DecreaseHolding(ctx context.Context, arg DecreaseHoldingParams) (Holding, error)
 	DeleteAccount(ctx context.Context, id uuid.UUID) error
-	GetAccountByUserId(ctx context.Context, userID uuid.UUID) (Account, error)
-	GetHolding(ctx context.Context, arg GetHoldingParams) (Holding, error)
+	GetAccountById(ctx context.Context, id uuid.UUID) (Account, error)
+	GetAccountByUserId(ctx context.Context, userID uuid.UUID) ([]Account, error)
+	GetHoldingByAccountIdAndSymbol(ctx context.Context, arg GetHoldingByAccountIdAndSymbolParams) (Holding, error)
+	GetHoldingsByAccountId(ctx context.Context, accountID uuid.UUID) ([]Holding, error)
+	GetTransactionsByAccountId(ctx context.Context, accountID uuid.UUID) ([]Transaction, error)
 	GetWatchlist(ctx context.Context, userID uuid.UUID) ([]GetWatchlistRow, error)
 	InsertAccount(ctx context.Context, arg InsertAccountParams) (Account, error)
 	InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) (Transaction, error)
@@ -24,6 +28,7 @@ type Querier interface {
 	UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (Account, error)
 	// Used when buying MORE or selling some
 	UpdateHolding(ctx context.Context, arg UpdateHoldingParams) (Holding, error)
+	UpsertHolding(ctx context.Context, arg UpsertHoldingParams) (Holding, error)
 }
 
 var _ Querier = (*Queries)(nil)

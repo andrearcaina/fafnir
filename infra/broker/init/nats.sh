@@ -17,4 +17,16 @@ nats stream add users \
     --defaults
 
 echo "Successfully added 'users' stream."
+
+echo "Attempting to add 'orders' stream..."
+nats stream add orders \
+    -s "$NATS_URL" \
+    --subjects "orders.>" \
+    --storage file \
+    --retention limits \
+    --max-age 7d \
+    --max-bytes 100MB \
+    --defaults
+
+echo "Successfully added 'orders' stream."
 echo "NATS setup complete."
