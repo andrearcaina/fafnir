@@ -41,7 +41,27 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Account struct {
+		AccountNumber func(childComplexity int) int
+		Balance       func(childComplexity int) int
+		CreatedAt     func(childComplexity int) int
+		Currency      func(childComplexity int) int
+		ID            func(childComplexity int) int
+		Type          func(childComplexity int) int
+		UpdatedAt     func(childComplexity int) int
+		UserID        func(childComplexity int) int
+	}
+
+	AddToWatchlistResponse struct {
+		Code func(childComplexity int) int
+	}
+
 	CancelOrderResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	CreateAccountResponse struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
 	}
@@ -51,14 +71,59 @@ type ComplexityRoot struct {
 		Data func(childComplexity int) int
 	}
 
+	GetHoldingResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	GetHoldingsResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	GetOrderByIDResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	GetPortfolioSummaryResponse struct {
+		Accounts     func(childComplexity int) int
+		Code         func(childComplexity int) int
+		TotalBalance func(childComplexity int) int
+	}
+
+	GetTransactionsResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
+	GetWatchlistResponse struct {
+		Code func(childComplexity int) int
+		Data func(childComplexity int) int
+	}
+
 	HasPermissionResponse struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
 	}
 
+	Holding struct {
+		AccountID func(childComplexity int) int
+		AvgCost   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Quantity  func(childComplexity int) int
+		Symbol    func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+	}
+
 	Mutation struct {
-		CancelOrder func(childComplexity int, orderID string) int
-		CreateOrder func(childComplexity int, request model.CreateOrderRequest) int
+		AddToWatchlist      func(childComplexity int, request model.AddToWatchlistRequest) int
+		CancelOrder         func(childComplexity int, orderID string) int
+		CreateAccount       func(childComplexity int, request model.CreateAccountRequest) int
+		CreateOrder         func(childComplexity int, request model.CreateOrderRequest) int
+		DeleteAccount       func(childComplexity int, accountID string) int
+		RemoveFromWatchlist func(childComplexity int, request model.RemoveFromWatchlistRequest) int
 	}
 
 	Order struct {
@@ -96,13 +161,23 @@ type ComplexityRoot struct {
 
 	Query struct {
 		CheckPermission        func(childComplexity int, request model.HasPermissionRequest) int
+		GetHolding             func(childComplexity int, request model.GetHoldingRequest) int
+		GetHoldings            func(childComplexity int, request model.GetHoldingsRequest) int
+		GetOrderByOrderID      func(childComplexity int, request model.GetOrderByIDRequest) int
 		GetOrders              func(childComplexity int) int
+		GetPortfolioSummary    func(childComplexity int) int
 		GetProfileData         func(childComplexity int) int
 		GetStockHistoricalData func(childComplexity int, symbol string, period *string) int
 		GetStockMetadata       func(childComplexity int, symbol string) int
 		GetStockQuote          func(childComplexity int, symbol string) int
 		GetStockQuoteBatch     func(childComplexity int, symbols []string) int
+		GetTransactions        func(childComplexity int, request model.GetTransactionsRequest) int
+		GetWatchlist           func(childComplexity int) int
 		Health                 func(childComplexity int) int
+	}
+
+	RemoveFromWatchlistResponse struct {
+		Code func(childComplexity int) int
 	}
 
 	SecurityPermission struct {
@@ -163,6 +238,21 @@ type ComplexityRoot struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
 	}
+
+	Transaction struct {
+		AccountID   func(childComplexity int) int
+		Amount      func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		ReferenceID func(childComplexity int) int
+		Type        func(childComplexity int) int
+	}
+
+	WatchlistItem struct {
+		AddedAt func(childComplexity int) int
+		Symbol  func(childComplexity int) int
+	}
 }
 
 type executableSchema struct {
@@ -184,6 +274,69 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Account.accountNumber":
+		if e.complexity.Account.AccountNumber == nil {
+			break
+		}
+
+		return e.complexity.Account.AccountNumber(childComplexity), true
+
+	case "Account.balance":
+		if e.complexity.Account.Balance == nil {
+			break
+		}
+
+		return e.complexity.Account.Balance(childComplexity), true
+
+	case "Account.createdAt":
+		if e.complexity.Account.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Account.CreatedAt(childComplexity), true
+
+	case "Account.currency":
+		if e.complexity.Account.Currency == nil {
+			break
+		}
+
+		return e.complexity.Account.Currency(childComplexity), true
+
+	case "Account.id":
+		if e.complexity.Account.ID == nil {
+			break
+		}
+
+		return e.complexity.Account.ID(childComplexity), true
+
+	case "Account.type":
+		if e.complexity.Account.Type == nil {
+			break
+		}
+
+		return e.complexity.Account.Type(childComplexity), true
+
+	case "Account.updatedAt":
+		if e.complexity.Account.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Account.UpdatedAt(childComplexity), true
+
+	case "Account.userId":
+		if e.complexity.Account.UserID == nil {
+			break
+		}
+
+		return e.complexity.Account.UserID(childComplexity), true
+
+	case "AddToWatchlistResponse.code":
+		if e.complexity.AddToWatchlistResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.AddToWatchlistResponse.Code(childComplexity), true
+
 	case "CancelOrderResponse.code":
 		if e.complexity.CancelOrderResponse.Code == nil {
 			break
@@ -197,6 +350,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.CancelOrderResponse.Data(childComplexity), true
+
+	case "CreateAccountResponse.code":
+		if e.complexity.CreateAccountResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.CreateAccountResponse.Code(childComplexity), true
+
+	case "CreateAccountResponse.data":
+		if e.complexity.CreateAccountResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.CreateAccountResponse.Data(childComplexity), true
 
 	case "CreateOrderResponse.code":
 		if e.complexity.CreateOrderResponse.Code == nil {
@@ -212,6 +379,97 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.CreateOrderResponse.Data(childComplexity), true
 
+	case "GetHoldingResponse.code":
+		if e.complexity.GetHoldingResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.GetHoldingResponse.Code(childComplexity), true
+
+	case "GetHoldingResponse.data":
+		if e.complexity.GetHoldingResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.GetHoldingResponse.Data(childComplexity), true
+
+	case "GetHoldingsResponse.code":
+		if e.complexity.GetHoldingsResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.GetHoldingsResponse.Code(childComplexity), true
+
+	case "GetHoldingsResponse.data":
+		if e.complexity.GetHoldingsResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.GetHoldingsResponse.Data(childComplexity), true
+
+	case "GetOrderByIDResponse.code":
+		if e.complexity.GetOrderByIDResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.GetOrderByIDResponse.Code(childComplexity), true
+
+	case "GetOrderByIDResponse.data":
+		if e.complexity.GetOrderByIDResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.GetOrderByIDResponse.Data(childComplexity), true
+
+	case "GetPortfolioSummaryResponse.accounts":
+		if e.complexity.GetPortfolioSummaryResponse.Accounts == nil {
+			break
+		}
+
+		return e.complexity.GetPortfolioSummaryResponse.Accounts(childComplexity), true
+
+	case "GetPortfolioSummaryResponse.code":
+		if e.complexity.GetPortfolioSummaryResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.GetPortfolioSummaryResponse.Code(childComplexity), true
+
+	case "GetPortfolioSummaryResponse.totalBalance":
+		if e.complexity.GetPortfolioSummaryResponse.TotalBalance == nil {
+			break
+		}
+
+		return e.complexity.GetPortfolioSummaryResponse.TotalBalance(childComplexity), true
+
+	case "GetTransactionsResponse.code":
+		if e.complexity.GetTransactionsResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionsResponse.Code(childComplexity), true
+
+	case "GetTransactionsResponse.data":
+		if e.complexity.GetTransactionsResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.GetTransactionsResponse.Data(childComplexity), true
+
+	case "GetWatchlistResponse.code":
+		if e.complexity.GetWatchlistResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.GetWatchlistResponse.Code(childComplexity), true
+
+	case "GetWatchlistResponse.data":
+		if e.complexity.GetWatchlistResponse.Data == nil {
+			break
+		}
+
+		return e.complexity.GetWatchlistResponse.Data(childComplexity), true
+
 	case "HasPermissionResponse.code":
 		if e.complexity.HasPermissionResponse.Code == nil {
 			break
@@ -226,6 +484,67 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.HasPermissionResponse.Data(childComplexity), true
 
+	case "Holding.accountId":
+		if e.complexity.Holding.AccountID == nil {
+			break
+		}
+
+		return e.complexity.Holding.AccountID(childComplexity), true
+
+	case "Holding.avgCost":
+		if e.complexity.Holding.AvgCost == nil {
+			break
+		}
+
+		return e.complexity.Holding.AvgCost(childComplexity), true
+
+	case "Holding.createdAt":
+		if e.complexity.Holding.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Holding.CreatedAt(childComplexity), true
+
+	case "Holding.id":
+		if e.complexity.Holding.ID == nil {
+			break
+		}
+
+		return e.complexity.Holding.ID(childComplexity), true
+
+	case "Holding.quantity":
+		if e.complexity.Holding.Quantity == nil {
+			break
+		}
+
+		return e.complexity.Holding.Quantity(childComplexity), true
+
+	case "Holding.symbol":
+		if e.complexity.Holding.Symbol == nil {
+			break
+		}
+
+		return e.complexity.Holding.Symbol(childComplexity), true
+
+	case "Holding.updatedAt":
+		if e.complexity.Holding.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Holding.UpdatedAt(childComplexity), true
+
+	case "Mutation.addToWatchlist":
+		if e.complexity.Mutation.AddToWatchlist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addToWatchlist_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddToWatchlist(childComplexity, args["request"].(model.AddToWatchlistRequest)), true
+
 	case "Mutation.cancelOrder":
 		if e.complexity.Mutation.CancelOrder == nil {
 			break
@@ -238,6 +557,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.CancelOrder(childComplexity, args["orderId"].(string)), true
 
+	case "Mutation.createAccount":
+		if e.complexity.Mutation.CreateAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateAccount(childComplexity, args["request"].(model.CreateAccountRequest)), true
+
 	case "Mutation.createOrder":
 		if e.complexity.Mutation.CreateOrder == nil {
 			break
@@ -249,6 +580,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.CreateOrder(childComplexity, args["request"].(model.CreateOrderRequest)), true
+
+	case "Mutation.deleteAccount":
+		if e.complexity.Mutation.DeleteAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteAccount(childComplexity, args["accountId"].(string)), true
+
+	case "Mutation.removeFromWatchlist":
+		if e.complexity.Mutation.RemoveFromWatchlist == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeFromWatchlist_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveFromWatchlist(childComplexity, args["request"].(model.RemoveFromWatchlistRequest)), true
 
 	case "Order.avgFillPrice":
 		if e.complexity.Order.AvgFillPrice == nil {
@@ -409,12 +764,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.CheckPermission(childComplexity, args["request"].(model.HasPermissionRequest)), true
 
+	case "Query.getHolding":
+		if e.complexity.Query.GetHolding == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getHolding_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetHolding(childComplexity, args["request"].(model.GetHoldingRequest)), true
+
+	case "Query.getHoldings":
+		if e.complexity.Query.GetHoldings == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getHoldings_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetHoldings(childComplexity, args["request"].(model.GetHoldingsRequest)), true
+
+	case "Query.getOrderByOrderID":
+		if e.complexity.Query.GetOrderByOrderID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getOrderByOrderID_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetOrderByOrderID(childComplexity, args["request"].(model.GetOrderByIDRequest)), true
+
 	case "Query.getOrders":
 		if e.complexity.Query.GetOrders == nil {
 			break
 		}
 
 		return e.complexity.Query.GetOrders(childComplexity), true
+
+	case "Query.getPortfolioSummary":
+		if e.complexity.Query.GetPortfolioSummary == nil {
+			break
+		}
+
+		return e.complexity.Query.GetPortfolioSummary(childComplexity), true
 
 	case "Query.getProfileData":
 		if e.complexity.Query.GetProfileData == nil {
@@ -471,12 +869,38 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.GetStockQuoteBatch(childComplexity, args["symbols"].([]string)), true
 
+	case "Query.getTransactions":
+		if e.complexity.Query.GetTransactions == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getTransactions_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTransactions(childComplexity, args["request"].(model.GetTransactionsRequest)), true
+
+	case "Query.getWatchlist":
+		if e.complexity.Query.GetWatchlist == nil {
+			break
+		}
+
+		return e.complexity.Query.GetWatchlist(childComplexity), true
+
 	case "Query.health":
 		if e.complexity.Query.Health == nil {
 			break
 		}
 
 		return e.complexity.Query.Health(childComplexity), true
+
+	case "RemoveFromWatchlistResponse.code":
+		if e.complexity.RemoveFromWatchlistResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.RemoveFromWatchlistResponse.Code(childComplexity), true
 
 	case "SecurityPermission.hasPermission":
 		if e.complexity.SecurityPermission.HasPermission == nil {
@@ -723,6 +1147,69 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StockQuoteResponse.Data(childComplexity), true
 
+	case "Transaction.accountId":
+		if e.complexity.Transaction.AccountID == nil {
+			break
+		}
+
+		return e.complexity.Transaction.AccountID(childComplexity), true
+
+	case "Transaction.amount":
+		if e.complexity.Transaction.Amount == nil {
+			break
+		}
+
+		return e.complexity.Transaction.Amount(childComplexity), true
+
+	case "Transaction.createdAt":
+		if e.complexity.Transaction.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Transaction.CreatedAt(childComplexity), true
+
+	case "Transaction.description":
+		if e.complexity.Transaction.Description == nil {
+			break
+		}
+
+		return e.complexity.Transaction.Description(childComplexity), true
+
+	case "Transaction.id":
+		if e.complexity.Transaction.ID == nil {
+			break
+		}
+
+		return e.complexity.Transaction.ID(childComplexity), true
+
+	case "Transaction.referenceId":
+		if e.complexity.Transaction.ReferenceID == nil {
+			break
+		}
+
+		return e.complexity.Transaction.ReferenceID(childComplexity), true
+
+	case "Transaction.type":
+		if e.complexity.Transaction.Type == nil {
+			break
+		}
+
+		return e.complexity.Transaction.Type(childComplexity), true
+
+	case "WatchlistItem.addedAt":
+		if e.complexity.WatchlistItem.AddedAt == nil {
+			break
+		}
+
+		return e.complexity.WatchlistItem.AddedAt(childComplexity), true
+
+	case "WatchlistItem.symbol":
+		if e.complexity.WatchlistItem.Symbol == nil {
+			break
+		}
+
+		return e.complexity.WatchlistItem.Symbol(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -731,8 +1218,15 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAddToWatchlistRequest,
+		ec.unmarshalInputCreateAccountRequest,
 		ec.unmarshalInputCreateOrderRequest,
+		ec.unmarshalInputGetHoldingRequest,
+		ec.unmarshalInputGetHoldingsRequest,
+		ec.unmarshalInputGetOrderByIDRequest,
+		ec.unmarshalInputGetTransactionsRequest,
 		ec.unmarshalInputHasPermissionRequest,
+		ec.unmarshalInputRemoveFromWatchlistRequest,
 	)
 	first := true
 
@@ -867,6 +1361,15 @@ input CreateOrderRequest {
     status: String # optional, defaults to PENDING
 }
 
+input GetOrderByIDRequest {
+    orderId: String!
+}
+
+type GetOrderByIDResponse {
+    data: Order
+    code: String!
+}
+
 type CreateOrderResponse {
     data: Order
     code: String!
@@ -885,11 +1388,128 @@ type OrdersResponse {
 
 extend type Query {
     getOrders: OrdersResponse!
+    getOrderByOrderID(request: GetOrderByIDRequest!): GetOrderByIDResponse!
 }
 
 extend type Mutation {
     createOrder(request: CreateOrderRequest!): CreateOrderResponse!
     cancelOrder(orderId: String!): CancelOrderResponse!
+}
+`, BuiltIn: false},
+	{Name: "../schemas/portfolio.graphqls", Input: `type Account {
+    id: String!
+    userId: String!
+    accountNumber: String!
+    type: String!
+    currency: String!
+    balance: Float!
+    createdAt: String!
+    updatedAt: String!
+}
+
+type Holding {
+    id: String!
+    accountId: String!
+    symbol: String!
+    quantity: Float!
+    avgCost: Float!
+    createdAt: String!
+    updatedAt: String!
+}
+
+type WatchlistItem {
+    symbol: String!
+    addedAt: String!
+}
+
+type Transaction {
+    id: String!
+    accountId: String!
+    type: String!
+    amount: Float!
+    description: String!
+    referenceId: String
+    createdAt: String!
+}
+
+input CreateAccountRequest {
+    type: String! # either SAVINGS, INVESTMENT, or CHEQUING
+    currency: String! # either USD or CAD
+}
+
+type CreateAccountResponse {
+    data: Account
+    code: String!
+}
+
+type GetPortfolioSummaryResponse {
+    accounts: [Account!]
+    totalBalance: Float!
+    code: String!
+}
+
+input GetHoldingsRequest {
+    accountId: String!
+}
+
+type GetHoldingsResponse {
+    data: [Holding!]
+    code: String!
+}
+
+input GetHoldingRequest {
+    accountId: String!
+    symbol: String!
+}
+
+type GetHoldingResponse {
+    data: Holding
+    code: String!
+}
+
+type GetWatchlistResponse {
+    data: [WatchlistItem!]
+    code: String!
+}
+
+input AddToWatchlistRequest {
+    symbol: String!
+}
+
+type AddToWatchlistResponse {
+    code: String!
+}
+
+input RemoveFromWatchlistRequest {
+    symbol: String!
+}
+
+type RemoveFromWatchlistResponse {
+    code: String!
+}
+
+input GetTransactionsRequest {
+    accountId: String!
+}
+
+type GetTransactionsResponse {
+    code: String!
+    data: [Transaction!]
+}
+
+extend type Query {
+    getPortfolioSummary: GetPortfolioSummaryResponse!
+    getHoldings(request: GetHoldingsRequest!): GetHoldingsResponse!
+    getHolding(request: GetHoldingRequest!): GetHoldingResponse!
+    getWatchlist: GetWatchlistResponse!
+    getTransactions(request: GetTransactionsRequest!): GetTransactionsResponse!
+}
+
+extend type Mutation {
+    createAccount(request: CreateAccountRequest!): CreateAccountResponse!
+    addToWatchlist(request: AddToWatchlistRequest!): AddToWatchlistResponse!
+    removeFromWatchlist(request: RemoveFromWatchlistRequest!): RemoveFromWatchlistResponse!
+    deleteAccount(accountId: String!): Boolean!
 }
 `, BuiltIn: false},
 	{Name: "../schemas/security.graphqls", Input: `input HasPermissionRequest {

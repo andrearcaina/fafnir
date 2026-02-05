@@ -12,6 +12,40 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getTransactionsByAccountId = `-- name: GetTransactionsByAccountId :many
+SELECT id, account_id, transaction_type, amount, description, reference_id, created_at FROM transactions
+WHERE account_id = $1
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetTransactionsByAccountId(ctx context.Context, accountID uuid.UUID) ([]Transaction, error) {
+	rows, err := q.db.Query(ctx, getTransactionsByAccountId, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Transaction{}
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.TransactionType,
+			&i.Amount,
+			&i.Description,
+			&i.ReferenceID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertAuditLog = `-- name: InsertAuditLog :one
 INSERT INTO transactions ( account_id, transaction_type, amount, description, reference_id
 ) VALUES ( $1, $2, $3, $4, $5)

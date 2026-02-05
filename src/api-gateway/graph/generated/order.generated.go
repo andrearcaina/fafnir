@@ -201,6 +201,92 @@ func (ec *executionContext) fieldContext_CreateOrderResponse_code(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _GetOrderByIDResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.GetOrderByIDResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetOrderByIDResponse_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalOOrder2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐOrder,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetOrderByIDResponse_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetOrderByIDResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Order_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Order_userId(ctx, field)
+			case "symbol":
+				return ec.fieldContext_Order_symbol(ctx, field)
+			case "side":
+				return ec.fieldContext_Order_side(ctx, field)
+			case "type":
+				return ec.fieldContext_Order_type(ctx, field)
+			case "status":
+				return ec.fieldContext_Order_status(ctx, field)
+			case "quantity":
+				return ec.fieldContext_Order_quantity(ctx, field)
+			case "price":
+				return ec.fieldContext_Order_price(ctx, field)
+			case "stopPrice":
+				return ec.fieldContext_Order_stopPrice(ctx, field)
+			case "filledQuantity":
+				return ec.fieldContext_Order_filledQuantity(ctx, field)
+			case "avgFillPrice":
+				return ec.fieldContext_Order_avgFillPrice(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Order_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Order_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Order", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GetOrderByIDResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.GetOrderByIDResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GetOrderByIDResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GetOrderByIDResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GetOrderByIDResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Order_id(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -766,6 +852,33 @@ func (ec *executionContext) unmarshalInputCreateOrderRequest(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGetOrderByIDRequest(ctx context.Context, obj any) (model.GetOrderByIDRequest, error) {
+	var it model.GetOrderByIDRequest
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"orderId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "orderId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("orderId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OrderID = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -830,6 +943,47 @@ func (ec *executionContext) _CreateOrderResponse(ctx context.Context, sel ast.Se
 			out.Values[i] = ec._CreateOrderResponse_data(ctx, field, obj)
 		case "code":
 			out.Values[i] = ec._CreateOrderResponse_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var getOrderByIDResponseImplementors = []string{"GetOrderByIDResponse"}
+
+func (ec *executionContext) _GetOrderByIDResponse(ctx context.Context, sel ast.SelectionSet, obj *model.GetOrderByIDResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getOrderByIDResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetOrderByIDResponse")
+		case "data":
+			out.Values[i] = ec._GetOrderByIDResponse_data(ctx, field, obj)
+		case "code":
+			out.Values[i] = ec._GetOrderByIDResponse_code(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1036,6 +1190,25 @@ func (ec *executionContext) marshalNCreateOrderResponse2ᚖfafnirᚋapiᚑgatewa
 		return graphql.Null
 	}
 	return ec._CreateOrderResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNGetOrderByIDRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetOrderByIDRequest(ctx context.Context, v any) (model.GetOrderByIDRequest, error) {
+	res, err := ec.unmarshalInputGetOrderByIDRequest(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNGetOrderByIDResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetOrderByIDResponse(ctx context.Context, sel ast.SelectionSet, v model.GetOrderByIDResponse) graphql.Marshaler {
+	return ec._GetOrderByIDResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGetOrderByIDResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetOrderByIDResponse(ctx context.Context, sel ast.SelectionSet, v *model.GetOrderByIDResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GetOrderByIDResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNOrder2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v *model.Order) graphql.Marshaler {

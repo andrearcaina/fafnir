@@ -194,33 +194,6 @@ services:
         networks:
             - fafnir-network
 
-    trade-engine:
-        build:
-            context: ../../
-            dockerfile: build/docker/go-services.Dockerfile
-            target: ${BUILD_TARGET:-development}
-            args:
-                SERVICE_NAME: trade-engine
-        environment:
-            - SERVICE_NAME=trade-engine
-            - SERVICE_PORT=8087
-            - STOCK_SERVICE_HOST=stock-service
-            - STOCK_SERVICE_PORT=8084
-            - NATS_HOST=${NATS_HOST_DOCKER}
-            - NATS_PORT=${NATS_PORT}
-        volumes:
-            - ../../src/trade-engine:/app/src/trade-engine:cached
-            - ../../src/shared:/app/src/shared:cached
-        depends_on:
-            nats:
-                condition: service_healthy
-            stock-service:
-                condition: service_started
-            order-service:
-                condition: service_started
-        networks:
-            - fafnir-network
-
     portfolio-service:
         build:
             context: ../../
@@ -246,6 +219,35 @@ services:
                 condition: service_healthy
             nats:
                 condition: service_healthy
+        networks:
+            - fafnir-network
+
+    trade-engine:
+        build:
+            context: ../../
+            dockerfile: build/docker/go-services.Dockerfile
+            target: ${BUILD_TARGET:-development}
+            args:
+                SERVICE_NAME: trade-engine
+        environment:
+            - SERVICE_NAME=trade-engine
+            - SERVICE_PORT=8087
+            - STOCK_SERVICE_HOST=stock-service
+            - STOCK_SERVICE_PORT=8084
+            - PORTFOLIO_SERVICE_HOST=portfolio-service
+            - PORTFOLIO_SERVICE_PORT=8086
+            - NATS_HOST=${NATS_HOST_DOCKER}
+            - NATS_PORT=${NATS_PORT}
+        volumes:
+            - ../../src/trade-engine:/app/src/trade-engine:cached
+            - ../../src/shared:/app/src/shared:cached
+        depends_on:
+            nats:
+                condition: service_healthy
+            stock-service:
+                condition: service_started
+            order-service:
+                condition: service_started
         networks:
             - fafnir-network
 

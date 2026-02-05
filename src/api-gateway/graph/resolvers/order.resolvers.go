@@ -52,3 +52,12 @@ func (r *queryResolver) GetOrders(ctx context.Context) (*model.OrdersResponse, e
 	}
 	return &resp, nil
 }
+
+// GetOrderByOrderID is the resolver for the getOrderByOrderID field.
+func (r *queryResolver) GetOrderByOrderID(ctx context.Context, request model.GetOrderByIDRequest) (*model.GetOrderByIDResponse, error) {
+	resp, err := r.OrderClient.GetOrderByOrderID(ctx, request.OrderID)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}

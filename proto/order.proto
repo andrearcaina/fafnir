@@ -125,9 +125,10 @@ message OrderFilledEvent {
   string order_id = 1;
   string user_id = 2;
   string symbol = 3;
-  double fill_quantity = 4;
-  double fill_price = 5;
-  google.protobuf.Timestamp filled_at = 6;
+  OrderSide side = 4;
+  double fill_quantity = 5;
+  double fill_price = 6;
+  google.protobuf.Timestamp filled_at = 7;
 }
 
 message OrderCancelledEvent {
@@ -137,4 +138,12 @@ message OrderCancelledEvent {
   OrderSide side = 4;
   OrderStatus status = 5;
   google.protobuf.Timestamp cancelled_at = 6;
+}
+
+message OrderRejectedEvent {
+  string order_id = 1;
+  string user_id = 2;
+  string symbol = 3;
+  string reason = 4;
+  google.protobuf.Timestamp rejected_at = 5;
 }

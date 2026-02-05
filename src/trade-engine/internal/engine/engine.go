@@ -7,6 +7,7 @@ import (
 	"time"
 
 	orderpb "fafnir/shared/pb/order"
+	portfoliopb "fafnir/shared/pb/portfolio"
 	stockpb "fafnir/shared/pb/stock"
 	natsC "fafnir/shared/pkg/nats"
 	"fafnir/trade-engine/internal/config"
@@ -19,11 +20,12 @@ import (
 )
 
 type Engine struct {
-	cfg         *config.Config
-	natsClient  *natsC.NatsClient
-	stockClient stockpb.StockServiceClient
-	orderBook   *OrderBook // basically a "cache" of pending limit orders
-	stopCh      chan struct{}
+	cfg             *config.Config
+	natsClient      *natsC.NatsClient
+	stockClient     stockpb.StockServiceClient
+	portfolioClient portfoliopb.PortfolioServiceClient
+	orderBook       *OrderBook // basically a "cache" of pending limit orders
+	stopCh          chan struct{}
 }
 
 func NewEngine(cfg *config.Config) (*Engine, error) {
@@ -40,12 +42,20 @@ func NewEngine(cfg *config.Config) (*Engine, error) {
 	}
 	stockClient := stockpb.NewStockServiceClient(conn)
 
+	log.Printf("Engine connecting to Portfolio Service at %s", cfg.Portfolio.URL)
+	pConn, err := grpc.NewClient(cfg.Portfolio.URL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to portfolio service: %w", err)
+	}
+	portfolioClient := portfoliopb.NewPortfolioServiceClient(pConn)
+
 	return &Engine{
-		cfg:         cfg,
-		natsClient:  nc,
-		stockClient: stockClient,
-		orderBook:   NewOrderBook(),
-		stopCh:      make(chan struct{}),
+		cfg:             cfg,
+		natsClient:      nc,
+		stockClient:     stockClient,
+		portfolioClient: portfolioClient,
+		orderBook:       NewOrderBook(),
+		stopCh:          make(chan struct{}),
 	}, nil
 }
 
@@ -81,6 +91,7 @@ func (e *Engine) subscribeToOrders() error {
 
 		log.Printf("Received Order: ID=%s Symbol=%s Type=%v", event.OrderId, event.Symbol, event.Type)
 		e.processOrder(&event)
+		_ = msg.Ack()
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -119,7 +130,32 @@ func (e *Engine) pollOrders() {
 			for _, quote := range resp.Data {
 				filledOrders := e.orderBook.Evaluate(quote.Symbol, quote.LastPrice)
 				for _, order := range filledOrders {
-					e.publishFilledEvent(order, quote.LastPrice)
+					hasSufficientResources := false
+					if order.Side == orderpb.OrderSide_ORDER_SIDE_BUY {
+						// buy
+						requiredAmount := quote.LastPrice * order.Quantity
+						if e.checkFunds(ctx, order.UserId, requiredAmount) {
+							hasSufficientResources = true
+						} else {
+							log.Printf("Limit Order %s matched but insufficient funds (Required: %f). Rejecting.", order.OrderId, requiredAmount)
+							e.publishRejectedEvent(order, "Insufficient funds")
+						}
+					} else {
+						// sell
+						if e.checkHoldings(ctx, order.UserId, order.Symbol, order.Quantity) {
+							hasSufficientResources = true
+						} else {
+							log.Printf("Limit Order %s matched but insufficient holdings. Rejecting.", order.OrderId)
+							e.publishRejectedEvent(order, "Insufficient holdings")
+						}
+					}
+
+					if hasSufficientResources {
+						e.publishFilledEvent(order, quote.LastPrice)
+					} else {
+						// put it back in the book so it can be retried later
+						e.orderBook.Add(order)
+					}
 				}
 			}
 		}
@@ -138,43 +174,132 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		log.Printf("Failed to get stock quote for %s: %v", order.Symbol, err)
 		return
 	}
-
 	currentPrice := resp.Data.LastPrice
-	shouldFill := false
 
-	// evaluate match
+	// check funds/holdings before evaluating match
+	hasSufficientResources := false
+	if order.Side == orderpb.OrderSide_ORDER_SIDE_BUY {
+		requiredAmount := currentPrice * order.Quantity
+		if e.checkFunds(ctx, order.UserId, requiredAmount) {
+			hasSufficientResources = true
+		} else {
+			log.Printf("Order %s rejected: Insufficient funds (Required: %f)", order.OrderId, requiredAmount)
+			e.publishRejectedEvent(order, fmt.Sprintf("Insufficient funds. Required: %f", requiredAmount))
+			return
+		}
+	} else { // order side is sell
+		if e.checkHoldings(ctx, order.UserId, order.Symbol, order.Quantity) {
+			hasSufficientResources = true
+		} else {
+			log.Printf("Order %s rejected: Insufficient holdings", order.OrderId)
+			e.publishRejectedEvent(order, "Insufficient holdings")
+			return
+		}
+	}
+
+	if !hasSufficientResources {
+		return
+	}
+
+	// market check: does the order price match the current market price?
+	shouldExecute := false
 	switch order.Type {
 	case orderpb.OrderType_ORDER_TYPE_MARKET:
-		shouldFill = true
+		shouldExecute = true
 	case orderpb.OrderType_ORDER_TYPE_LIMIT:
 		switch order.Side {
 		case orderpb.OrderSide_ORDER_SIDE_BUY:
-			// buy limit: valid if current price is <= limit price
+			// buy limit: execute if current price is cheaper or equal to limit
 			if currentPrice <= order.Price {
-				shouldFill = true
+				shouldExecute = true
 			}
 		case orderpb.OrderSide_ORDER_SIDE_SELL:
-			// sell limit: valid if current price is >= limit price
+			// sell limit: execute if current price is higher or equal to limit
 			if currentPrice >= order.Price {
-				shouldFill = true
+				shouldExecute = true
 			}
 		}
 	}
 
-	if shouldFill {
+	// execute or queue (in order book)
+	if shouldExecute {
 		e.publishFilledEvent(order, currentPrice)
 	} else {
-		// if not filled, add to order book
+		// no match yet (limit order waiting for price target)
 		if order.Type == orderpb.OrderType_ORDER_TYPE_LIMIT {
 			log.Printf("Order %s not immediately filled. Adding to Order Book. Limit: %f, Current: %f",
 				order.OrderId, order.Price, currentPrice)
 			e.orderBook.Add(order)
 		} else {
-			// log market order not filled (unexpected)
-			// this should never happen and honestly, it's not a big deal (as it's a simulator)
 			log.Printf("Market Order %s not filled (unexpected).", order.OrderId)
 		}
 	}
+}
+
+func (e *Engine) publishRejectedEvent(order *orderpb.OrderCreatedEvent, reason string) {
+	rejectedEvent := &orderpb.OrderRejectedEvent{
+		OrderId:    order.OrderId,
+		UserId:     order.UserId,
+		Symbol:     order.Symbol,
+		Reason:     reason,
+		RejectedAt: timestamppb.Now(),
+	}
+
+	data, err := proto.Marshal(rejectedEvent)
+	if err != nil {
+		log.Printf("Failed to marshal rejected event: %v", err)
+		return
+	}
+
+	_, err = e.natsClient.Publish("orders.rejected", data)
+	if err != nil {
+		log.Printf("Failed to publish orders.rejected for order %s: %v", order.OrderId, err)
+		return
+	}
+
+	log.Printf("Order %s REJECTED: %s", order.OrderId, reason)
+}
+
+func (e *Engine) checkFunds(ctx context.Context, userId string, requiredAmount float64) bool {
+	resp, err := e.portfolioClient.GetPortfolioSummary(ctx, &portfoliopb.GetPortfolioSummaryRequest{UserId: userId})
+	if err != nil {
+		log.Printf("Error checking funds for user %s: %v", userId, err)
+		return false
+	}
+
+	for _, acc := range resp.Accounts {
+		if acc.Type == portfoliopb.AccountType_ACCOUNT_TYPE_INVESTMENT {
+			if acc.Balance >= requiredAmount {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (e *Engine) checkHoldings(ctx context.Context, userId string, symbol string, requiredQty float64) bool {
+	// first get accounts of current user
+	resp, err := e.portfolioClient.GetPortfolioSummary(ctx, &portfoliopb.GetPortfolioSummaryRequest{UserId: userId})
+	if err != nil {
+		log.Printf("Error getting accounts for holding check for user %s: %v", userId, err)
+		return false
+	}
+
+	// check each account for holdings
+	for _, acc := range resp.Accounts {
+		if acc.Type == portfoliopb.AccountType_ACCOUNT_TYPE_INVESTMENT {
+			hResp, err := e.portfolioClient.GetHolding(ctx, &portfoliopb.GetHoldingRequest{
+				AccountId: acc.Id,
+				Symbol:    symbol,
+			})
+			if err == nil && hResp.Holding != nil {
+				if hResp.Holding.Quantity >= requiredQty {
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice float64) {
@@ -182,6 +307,7 @@ func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice 
 		OrderId:      order.OrderId,
 		UserId:       order.UserId,
 		Symbol:       order.Symbol,
+		Side:         order.Side,
 		FillQuantity: order.Quantity,
 		FillPrice:    fillPrice,
 		FilledAt:     timestamppb.Now(),

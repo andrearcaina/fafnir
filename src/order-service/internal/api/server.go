@@ -45,7 +45,7 @@ func NewServer() *Server {
 	stockClient := stockpb.NewStockServiceClient(stockConn)
 
 	orderHandler := NewOrderHandler(dbInstance, natsClient, stockClient)
-	orderHandler.ConsumeFilledEvents()
+	orderHandler.RegisterSubscribeHandlers()
 
 	// create gRPC server with logging interceptor and prometheus interceptor
 	grpcServer := grpc.NewServer(

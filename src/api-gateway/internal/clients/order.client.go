@@ -139,7 +139,23 @@ func (c *OrderClient) GetOrders(ctx context.Context, userID string) (model.Order
 	}, nil
 }
 
-// Helpers
+func (c *OrderClient) GetOrderByOrderID(ctx context.Context, orderID string) (model.GetOrderByIDResponse, error) {
+	req := &pb.GetOrderByIdRequest{
+		OrderId: orderID,
+	}
+
+	resp, err := c.client.GetOrderById(ctx, req)
+	if err != nil {
+		return model.GetOrderByIDResponse{
+			Code: basepb.ErrorCode_INTERNAL.String(),
+		}, err
+	}
+
+	return model.GetOrderByIDResponse{
+		Data: mapProtoToModel(resp.Order),
+		Code: resp.GetCode().String(),
+	}, nil
+}
 
 func safeFloat(ptr *float64) float64 {
 	if ptr == nil {

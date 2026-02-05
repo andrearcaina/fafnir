@@ -153,6 +153,34 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Order
 	return i, err
 }
 
+const rejectOrder = `-- name: RejectOrder :one
+UPDATE orders
+SET status = 'rejected', updated_at = NOW()
+WHERE id = $1
+RETURNING id, user_id, symbol, side, type, status, quantity, filled_quantity, price, stop_price, avg_fill_price, created_at, updated_at
+`
+
+func (q *Queries) RejectOrder(ctx context.Context, id uuid.UUID) (Order, error) {
+	row := q.db.QueryRow(ctx, rejectOrder, id)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Symbol,
+		&i.Side,
+		&i.Type,
+		&i.Status,
+		&i.Quantity,
+		&i.FilledQuantity,
+		&i.Price,
+		&i.StopPrice,
+		&i.AvgFillPrice,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateOrderStatus = `-- name: UpdateOrderStatus :one
 UPDATE orders
 SET filled_quantity = $2, avg_fill_price = $3,

@@ -9,8 +9,9 @@ import "fafnir/api-gateway/internal/clients"
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	SecurityClient *clients.SecurityClient
-	UserClient     *clients.UserClient
-	StockClient    *clients.StockClient
-	OrderClient    *clients.OrderClient
+	SecurityClient  *clients.SecurityClient
+	UserClient      *clients.UserClient
+	StockClient     *clients.StockClient
+	OrderClient     *clients.OrderClient
+	PortfolioClient *clients.PortfolioClient
 }

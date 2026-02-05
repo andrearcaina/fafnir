@@ -9,6 +9,7 @@ type Config struct {
 	PORT         string
 	NATS         NatsConfig
 	StockService StockServiceConfig
+	Portfolio    PortfolioServiceConfig
 }
 
 type NatsConfig struct {
@@ -26,6 +27,7 @@ func New() *Config {
 		PORT:         fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
 		NATS:         newNatsConfig(),
 		StockService: newStockServiceConfig(),
+		Portfolio:    newPortfolioServiceConfig(),
 	}
 }
 
@@ -45,6 +47,19 @@ func newStockServiceConfig() StockServiceConfig {
 	port := os.Getenv("STOCK_SERVICE_PORT")
 
 	return StockServiceConfig{
+		URL: fmt.Sprintf("%s:%s", host, port),
+	}
+}
+
+type PortfolioServiceConfig struct {
+	URL string
+}
+
+func newPortfolioServiceConfig() PortfolioServiceConfig {
+	host := os.Getenv("PORTFOLIO_SERVICE_HOST")
+	port := os.Getenv("PORTFOLIO_SERVICE_PORT")
+
+	return PortfolioServiceConfig{
 		URL: fmt.Sprintf("%s:%s", host, port),
 	}
 }

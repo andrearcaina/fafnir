@@ -1,0 +1,153 @@
+syntax = "proto3";
+
+package portfolio;
+
+import "base.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "fafnir/shared/pb/portfolio";
+
+service PortfolioService {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc GetPortfolioSummary(GetPortfolioSummaryRequest) returns (GetPortfolioSummaryResponse);
+  rpc GetHoldings(GetHoldingsRequest) returns (GetHoldingsResponse);
+  rpc GetHolding(GetHoldingRequest) returns (GetHoldingResponse);
+  rpc GetWatchlist(GetWatchlistRequest) returns (GetWatchlistResponse);
+  rpc AddToWatchlist(AddToWatchlistRequest) returns (AddToWatchlistResponse);
+  rpc RemoveFromWatchlist(RemoveFromWatchlistRequest) returns (RemoveFromWatchlistResponse);
+  rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
+}
+
+enum AccountType {
+  ACCOUNT_TYPE_UNSPECIFIED = 0;
+  ACCOUNT_TYPE_SAVINGS = 1;
+  ACCOUNT_TYPE_INVESTMENT = 2;
+  ACCOUNT_TYPE_CHEQUING = 3;
+}
+
+enum CurrencyType {
+  CURRENCY_TYPE_UNSPECIFIED = 0;
+  CURRENCY_TYPE_USD = 1;
+  CURRENCY_TYPE_CAD = 2;
+}
+
+message Account {
+  string id = 1;
+  string user_id = 2;
+  string account_number = 3;
+  AccountType type = 4;
+  CurrencyType currency = 5;
+  double balance = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message Holding {
+  string id = 1;
+  string account_id = 2;
+  string symbol = 3;
+  double quantity = 4;
+  double avg_cost = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message WatchlistItem {
+  string symbol = 1;
+  google.protobuf.Timestamp added_at = 2;
+}
+
+message CreateAccountRequest {
+  string user_id = 1;
+  AccountType type = 2;
+  CurrencyType currency = 3;
+}
+
+message CreateAccountResponse {
+  base.ErrorCode code = 1;
+  Account account = 2;
+}
+
+message GetPortfolioSummaryRequest {
+  string user_id = 1;
+}
+
+message GetPortfolioSummaryResponse {
+  base.ErrorCode code = 1;
+  repeated Account accounts = 2;
+  double total_balance = 3;
+}
+
+message GetHoldingsRequest {
+  string account_id = 1;
+}
+
+message GetHoldingsResponse {
+  base.ErrorCode code = 1;
+  repeated Holding holdings = 2;
+}
+
+message GetHoldingRequest {
+  string account_id = 1;
+  string symbol = 2;
+}
+
+message GetHoldingResponse {
+  base.ErrorCode code = 1;
+  Holding holding = 2;
+}
+
+message GetWatchlistRequest {
+  string user_id = 1;
+}
+
+message GetWatchlistResponse {
+  base.ErrorCode code = 1;
+  repeated WatchlistItem items = 2;
+}
+
+message AddToWatchlistRequest {
+  string user_id = 1;
+  string symbol = 2;
+}
+
+message AddToWatchlistResponse {
+  base.ErrorCode code = 1;
+}
+
+message RemoveFromWatchlistRequest {
+  string user_id = 1;
+  string symbol = 2;
+}
+
+message RemoveFromWatchlistResponse {
+  base.ErrorCode code = 1;
+}
+
+message DeleteAccountRequest {
+  string account_id = 1;
+}
+
+message DeleteAccountResponse {
+  base.ErrorCode code = 1;
+}
+
+message Transaction {
+  string id = 1;
+  string account_id = 2;
+  string type = 3;
+  double amount = 4;
+  string description = 5;
+  string reference_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message GetTransactionsRequest {
+  string account_id = 1;
+}
+
+message GetTransactionsResponse {
+  base.ErrorCode code = 1;
+  repeated Transaction transactions = 2;
+}

@@ -21,24 +21,37 @@ func (q *Queries) DeleteAccount(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getAccountByUserId = `-- name: GetAccountByUserId :one
+const getAccountByUserId = `-- name: GetAccountByUserId :many
 SELECT id, user_id, account_number, account_type, currency, balance, created_at, updated_at FROM accounts WHERE user_id = $1
 `
 
-func (q *Queries) GetAccountByUserId(ctx context.Context, userID uuid.UUID) (Account, error) {
-	row := q.db.QueryRow(ctx, getAccountByUserId, userID)
-	var i Account
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.AccountNumber,
-		&i.AccountType,
-		&i.Currency,
-		&i.Balance,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) GetAccountByUserId(ctx context.Context, userID uuid.UUID) ([]Account, error) {
+	rows, err := q.db.Query(ctx, getAccountByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Account{}
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.AccountNumber,
+			&i.AccountType,
+			&i.Currency,
+			&i.Balance,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertAccount = `-- name: InsertAccount :one
@@ -63,36 +76,6 @@ func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) (A
 		arg.Currency,
 		arg.Balance,
 	)
-	var i Account
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.AccountNumber,
-		&i.AccountType,
-		&i.Currency,
-		&i.Balance,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const updateAccountBalance = `-- name: UpdateAccountBalance :one
-UPDATE accounts
-SET
-    balance = balance + $2,
-    updated_at = NOW()
-WHERE id = $1
-RETURNING id, user_id, account_number, account_type, currency, balance, created_at, updated_at
-`
-
-type UpdateAccountBalanceParams struct {
-	ID      uuid.UUID      `json:"id"`
-	Balance pgtype.Numeric `json:"balance"`
-}
-
-func (q *Queries) UpdateAccountBalance(ctx context.Context, arg UpdateAccountBalanceParams) (Account, error) {
-	row := q.db.QueryRow(ctx, updateAccountBalance, arg.ID, arg.Balance)
 	var i Account
 	err := row.Scan(
 		&i.ID,

@@ -12,18 +12,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getHolding = `-- name: GetHolding :one
+const getHoldingByAccountIdAndSymbol = `-- name: GetHoldingByAccountIdAndSymbol :one
 SELECT id, account_id, symbol, quantity, avg_cost, created_at, updated_at FROM holdings
 WHERE account_id = $1 AND symbol = $2
 `
 
-type GetHoldingParams struct {
+type GetHoldingByAccountIdAndSymbolParams struct {
 	AccountID uuid.UUID `json:"account_id"`
 	Symbol    string    `json:"symbol"`
 }
 
-func (q *Queries) GetHolding(ctx context.Context, arg GetHoldingParams) (Holding, error) {
-	row := q.db.QueryRow(ctx, getHolding, arg.AccountID, arg.Symbol)
+func (q *Queries) GetHoldingByAccountIdAndSymbol(ctx context.Context, arg GetHoldingByAccountIdAndSymbolParams) (Holding, error) {
+	row := q.db.QueryRow(ctx, getHoldingByAccountIdAndSymbol, arg.AccountID, arg.Symbol)
 	var i Holding
 	err := row.Scan(
 		&i.ID,
@@ -35,6 +35,39 @@ func (q *Queries) GetHolding(ctx context.Context, arg GetHoldingParams) (Holding
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getHoldingsByAccountId = `-- name: GetHoldingsByAccountId :many
+SELECT id, account_id, symbol, quantity, avg_cost, created_at, updated_at FROM holdings
+WHERE account_id = $1
+`
+
+func (q *Queries) GetHoldingsByAccountId(ctx context.Context, accountID uuid.UUID) ([]Holding, error) {
+	rows, err := q.db.Query(ctx, getHoldingsByAccountId, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Holding{}
+	for rows.Next() {
+		var i Holding
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.Symbol,
+			&i.Quantity,
+			&i.AvgCost,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertHolding = `-- name: InsertHolding :one

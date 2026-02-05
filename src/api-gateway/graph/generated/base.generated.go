@@ -19,10 +19,20 @@ import (
 type MutationResolver interface {
 	CreateOrder(ctx context.Context, request model.CreateOrderRequest) (*model.CreateOrderResponse, error)
 	CancelOrder(ctx context.Context, orderID string) (*model.CancelOrderResponse, error)
+	CreateAccount(ctx context.Context, request model.CreateAccountRequest) (*model.CreateAccountResponse, error)
+	AddToWatchlist(ctx context.Context, request model.AddToWatchlistRequest) (*model.AddToWatchlistResponse, error)
+	RemoveFromWatchlist(ctx context.Context, request model.RemoveFromWatchlistRequest) (*model.RemoveFromWatchlistResponse, error)
+	DeleteAccount(ctx context.Context, accountID string) (bool, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (string, error)
 	GetOrders(ctx context.Context) (*model.OrdersResponse, error)
+	GetOrderByOrderID(ctx context.Context, request model.GetOrderByIDRequest) (*model.GetOrderByIDResponse, error)
+	GetPortfolioSummary(ctx context.Context) (*model.GetPortfolioSummaryResponse, error)
+	GetHoldings(ctx context.Context, request model.GetHoldingsRequest) (*model.GetHoldingsResponse, error)
+	GetHolding(ctx context.Context, request model.GetHoldingRequest) (*model.GetHoldingResponse, error)
+	GetWatchlist(ctx context.Context) (*model.GetWatchlistResponse, error)
+	GetTransactions(ctx context.Context, request model.GetTransactionsRequest) (*model.GetTransactionsResponse, error)
 	CheckPermission(ctx context.Context, request model.HasPermissionRequest) (*model.HasPermissionResponse, error)
 	GetStockMetadata(ctx context.Context, symbol string) (*model.StockMetadataResponse, error)
 	GetStockQuote(ctx context.Context, symbol string) (*model.StockQuoteResponse, error)
@@ -35,6 +45,17 @@ type QueryResolver interface {
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addToWatchlist_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNAddToWatchlistRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐAddToWatchlistRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_cancelOrder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -46,10 +67,43 @@ func (ec *executionContext) field_Mutation_cancelOrder_args(ctx context.Context,
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNCreateAccountRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐCreateAccountRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createOrder_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNCreateOrderRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐCreateOrderRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "accountId", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["accountId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeFromWatchlist_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNRemoveFromWatchlistRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐRemoveFromWatchlistRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +126,39 @@ func (ec *executionContext) field_Query_checkPermission_args(ctx context.Context
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNHasPermissionRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐHasPermissionRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getHolding_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNGetHoldingRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetHoldingRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getHoldings_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNGetHoldingsRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetHoldingsRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getOrderByOrderID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNGetOrderByIDRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetOrderByIDRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +212,17 @@ func (ec *executionContext) field_Query_getStockQuote_args(ctx context.Context, 
 		return nil, err
 	}
 	args["symbol"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTransactions_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNGetTransactionsRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetTransactionsRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
 	return args, nil
 }
 
@@ -230,6 +328,184 @@ func (ec *executionContext) fieldContext_Mutation_cancelOrder(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CreateAccount(ctx, fc.Args["request"].(model.CreateAccountRequest))
+		},
+		nil,
+		ec.marshalNCreateAccountResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐCreateAccountResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_CreateAccountResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_CreateAccountResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CreateAccountResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addToWatchlist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_addToWatchlist,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().AddToWatchlist(ctx, fc.Args["request"].(model.AddToWatchlistRequest))
+		},
+		nil,
+		ec.marshalNAddToWatchlistResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐAddToWatchlistResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addToWatchlist(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_AddToWatchlistResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddToWatchlistResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addToWatchlist_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeFromWatchlist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_removeFromWatchlist,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RemoveFromWatchlist(ctx, fc.Args["request"].(model.RemoveFromWatchlistRequest))
+		},
+		nil,
+		ec.marshalNRemoveFromWatchlistResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐRemoveFromWatchlistResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeFromWatchlist(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_RemoveFromWatchlistResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RemoveFromWatchlistResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeFromWatchlist_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().DeleteAccount(ctx, fc.Args["accountId"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_health(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -292,6 +568,266 @@ func (ec *executionContext) fieldContext_Query_getOrders(_ context.Context, fiel
 			}
 			return nil, fmt.Errorf("no field named %q was found under type OrdersResponse", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getOrderByOrderID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getOrderByOrderID,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetOrderByOrderID(ctx, fc.Args["request"].(model.GetOrderByIDRequest))
+		},
+		nil,
+		ec.marshalNGetOrderByIDResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetOrderByIDResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getOrderByOrderID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_GetOrderByIDResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_GetOrderByIDResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetOrderByIDResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getOrderByOrderID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getPortfolioSummary(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getPortfolioSummary,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetPortfolioSummary(ctx)
+		},
+		nil,
+		ec.marshalNGetPortfolioSummaryResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetPortfolioSummaryResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getPortfolioSummary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "accounts":
+				return ec.fieldContext_GetPortfolioSummaryResponse_accounts(ctx, field)
+			case "totalBalance":
+				return ec.fieldContext_GetPortfolioSummaryResponse_totalBalance(ctx, field)
+			case "code":
+				return ec.fieldContext_GetPortfolioSummaryResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetPortfolioSummaryResponse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getHoldings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getHoldings,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetHoldings(ctx, fc.Args["request"].(model.GetHoldingsRequest))
+		},
+		nil,
+		ec.marshalNGetHoldingsResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetHoldingsResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getHoldings(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_GetHoldingsResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_GetHoldingsResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetHoldingsResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getHoldings_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getHolding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getHolding,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetHolding(ctx, fc.Args["request"].(model.GetHoldingRequest))
+		},
+		nil,
+		ec.marshalNGetHoldingResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetHoldingResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getHolding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_GetHoldingResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_GetHoldingResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetHoldingResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getHolding_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getWatchlist(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getWatchlist,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetWatchlist(ctx)
+		},
+		nil,
+		ec.marshalNGetWatchlistResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetWatchlistResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getWatchlist(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_GetWatchlistResponse_data(ctx, field)
+			case "code":
+				return ec.fieldContext_GetWatchlistResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetWatchlistResponse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getTransactions(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getTransactions,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetTransactions(ctx, fc.Args["request"].(model.GetTransactionsRequest))
+		},
+		nil,
+		ec.marshalNGetTransactionsResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetTransactionsResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getTransactions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_GetTransactionsResponse_code(ctx, field)
+			case "data":
+				return ec.fieldContext_GetTransactionsResponse_data(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GetTransactionsResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getTransactions_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -719,6 +1255,34 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addToWatchlist":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addToWatchlist(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeFromWatchlist":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeFromWatchlist(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -793,6 +1357,138 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getOrders(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getOrderByOrderID":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getOrderByOrderID(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getPortfolioSummary":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getPortfolioSummary(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getHoldings":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getHoldings(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getHolding":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getHolding(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getWatchlist":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getWatchlist(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getTransactions":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getTransactions(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

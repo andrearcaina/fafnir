@@ -16,6 +16,7 @@ type Querier interface {
 	GetOrdersByUserId(ctx context.Context, userID uuid.UUID) ([]Order, error)
 	InsertOrder(ctx context.Context, arg InsertOrderParams) (Order, error)
 	InsertOrderFilled(ctx context.Context, arg InsertOrderFilledParams) (OrdersFill, error)
+	RejectOrder(ctx context.Context, id uuid.UUID) (Order, error)
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (Order, error)
 }
 

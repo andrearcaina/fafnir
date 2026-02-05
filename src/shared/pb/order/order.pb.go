@@ -994,9 +994,10 @@ type OrderFilledEvent struct {
 	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
 	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Symbol        string                 `protobuf:"bytes,3,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	FillQuantity  float64                `protobuf:"fixed64,4,opt,name=fill_quantity,json=fillQuantity,proto3" json:"fill_quantity,omitempty"`
-	FillPrice     float64                `protobuf:"fixed64,5,opt,name=fill_price,json=fillPrice,proto3" json:"fill_price,omitempty"`
-	FilledAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=filled_at,json=filledAt,proto3" json:"filled_at,omitempty"`
+	Side          OrderSide              `protobuf:"varint,4,opt,name=side,proto3,enum=order.OrderSide" json:"side,omitempty"`
+	FillQuantity  float64                `protobuf:"fixed64,5,opt,name=fill_quantity,json=fillQuantity,proto3" json:"fill_quantity,omitempty"`
+	FillPrice     float64                `protobuf:"fixed64,6,opt,name=fill_price,json=fillPrice,proto3" json:"fill_price,omitempty"`
+	FilledAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=filled_at,json=filledAt,proto3" json:"filled_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1050,6 +1051,13 @@ func (x *OrderFilledEvent) GetSymbol() string {
 		return x.Symbol
 	}
 	return ""
+}
+
+func (x *OrderFilledEvent) GetSide() OrderSide {
+	if x != nil {
+		return x.Side
+	}
+	return OrderSide_ORDER_SIDE_UNSPECIFIED
 }
 
 func (x *OrderFilledEvent) GetFillQuantity() float64 {
@@ -1157,6 +1165,82 @@ func (x *OrderCancelledEvent) GetCancelledAt() *timestamppb.Timestamp {
 	return nil
 }
 
+type OrderRejectedEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Symbol        string                 `protobuf:"bytes,3,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Reason        string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	RejectedAt    *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=rejected_at,json=rejectedAt,proto3" json:"rejected_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OrderRejectedEvent) Reset() {
+	*x = OrderRejectedEvent{}
+	mi := &file_order_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OrderRejectedEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OrderRejectedEvent) ProtoMessage() {}
+
+func (x *OrderRejectedEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_order_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OrderRejectedEvent.ProtoReflect.Descriptor instead.
+func (*OrderRejectedEvent) Descriptor() ([]byte, []int) {
+	return file_order_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *OrderRejectedEvent) GetOrderId() string {
+	if x != nil {
+		return x.OrderId
+	}
+	return ""
+}
+
+func (x *OrderRejectedEvent) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *OrderRejectedEvent) GetSymbol() string {
+	if x != nil {
+		return x.Symbol
+	}
+	return ""
+}
+
+func (x *OrderRejectedEvent) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *OrderRejectedEvent) GetRejectedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.RejectedAt
+	}
+	return nil
+}
+
 var File_order_proto protoreflect.FileDescriptor
 
 const file_order_proto_rawDesc = "" +
@@ -1234,22 +1318,30 @@ const file_order_proto_rawDesc = "" +
 	"stop_price\x18\t \x01(\x01R\tstopPrice\x129\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xdb\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x81\x02\n" +
 	"\x10OrderFilledEvent\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
-	"\x06symbol\x18\x03 \x01(\tR\x06symbol\x12#\n" +
-	"\rfill_quantity\x18\x04 \x01(\x01R\ffillQuantity\x12\x1d\n" +
+	"\x06symbol\x18\x03 \x01(\tR\x06symbol\x12$\n" +
+	"\x04side\x18\x04 \x01(\x0e2\x10.order.OrderSideR\x04side\x12#\n" +
+	"\rfill_quantity\x18\x05 \x01(\x01R\ffillQuantity\x12\x1d\n" +
 	"\n" +
-	"fill_price\x18\x05 \x01(\x01R\tfillPrice\x127\n" +
-	"\tfilled_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\bfilledAt\"\xf2\x01\n" +
+	"fill_price\x18\x06 \x01(\x01R\tfillPrice\x127\n" +
+	"\tfilled_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\bfilledAt\"\xf2\x01\n" +
 	"\x13OrderCancelledEvent\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
 	"\x06symbol\x18\x03 \x01(\tR\x06symbol\x12$\n" +
 	"\x04side\x18\x04 \x01(\x0e2\x10.order.OrderSideR\x04side\x12*\n" +
 	"\x06status\x18\x05 \x01(\x0e2\x12.order.OrderStatusR\x06status\x12=\n" +
-	"\fcancelled_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vcancelledAt*P\n" +
+	"\fcancelled_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\vcancelledAt\"\xb5\x01\n" +
+	"\x12OrderRejectedEvent\x12\x19\n" +
+	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06symbol\x18\x03 \x01(\tR\x06symbol\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12;\n" +
+	"\vrejected_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"rejectedAt*P\n" +
 	"\tOrderSide\x12\x1a\n" +
 	"\x16ORDER_SIDE_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eORDER_SIDE_BUY\x10\x01\x12\x13\n" +
@@ -1286,7 +1378,7 @@ func file_order_proto_rawDescGZIP() []byte {
 }
 
 var file_order_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_order_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_order_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_order_proto_goTypes = []any{
 	(OrderSide)(0),                    // 0: order.OrderSide
 	(OrderType)(0),                    // 1: order.OrderType
@@ -1304,48 +1396,51 @@ var file_order_proto_goTypes = []any{
 	(*OrderCreatedEvent)(nil),         // 13: order.OrderCreatedEvent
 	(*OrderFilledEvent)(nil),          // 14: order.OrderFilledEvent
 	(*OrderCancelledEvent)(nil),       // 15: order.OrderCancelledEvent
-	(*timestamppb.Timestamp)(nil),     // 16: google.protobuf.Timestamp
-	(base.ErrorCode)(0),               // 17: base.ErrorCode
+	(*OrderRejectedEvent)(nil),        // 16: order.OrderRejectedEvent
+	(*timestamppb.Timestamp)(nil),     // 17: google.protobuf.Timestamp
+	(base.ErrorCode)(0),               // 18: base.ErrorCode
 }
 var file_order_proto_depIdxs = []int32{
 	0,  // 0: order.Order.side:type_name -> order.OrderSide
 	1,  // 1: order.Order.type:type_name -> order.OrderType
 	2,  // 2: order.Order.status:type_name -> order.OrderStatus
-	16, // 3: order.Order.created_at:type_name -> google.protobuf.Timestamp
-	16, // 4: order.Order.updated_at:type_name -> google.protobuf.Timestamp
-	16, // 5: order.OrderFill.filled_at:type_name -> google.protobuf.Timestamp
+	17, // 3: order.Order.created_at:type_name -> google.protobuf.Timestamp
+	17, // 4: order.Order.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 5: order.OrderFill.filled_at:type_name -> google.protobuf.Timestamp
 	3,  // 6: order.GetOrderByIdResponse.order:type_name -> order.Order
-	17, // 7: order.GetOrderByIdResponse.code:type_name -> base.ErrorCode
+	18, // 7: order.GetOrderByIdResponse.code:type_name -> base.ErrorCode
 	3,  // 8: order.GetOrdersByUserIdResponse.orders:type_name -> order.Order
-	17, // 9: order.GetOrdersByUserIdResponse.code:type_name -> base.ErrorCode
+	18, // 9: order.GetOrdersByUserIdResponse.code:type_name -> base.ErrorCode
 	0,  // 10: order.InsertOrderRequest.side:type_name -> order.OrderSide
 	1,  // 11: order.InsertOrderRequest.type:type_name -> order.OrderType
 	2,  // 12: order.InsertOrderRequest.status:type_name -> order.OrderStatus
 	3,  // 13: order.InsertOrderResponse.order:type_name -> order.Order
-	17, // 14: order.InsertOrderResponse.code:type_name -> base.ErrorCode
+	18, // 14: order.InsertOrderResponse.code:type_name -> base.ErrorCode
 	3,  // 15: order.CancelOrderResponse.order:type_name -> order.Order
-	17, // 16: order.CancelOrderResponse.code:type_name -> base.ErrorCode
+	18, // 16: order.CancelOrderResponse.code:type_name -> base.ErrorCode
 	0,  // 17: order.OrderCreatedEvent.side:type_name -> order.OrderSide
 	1,  // 18: order.OrderCreatedEvent.type:type_name -> order.OrderType
 	2,  // 19: order.OrderCreatedEvent.status:type_name -> order.OrderStatus
-	16, // 20: order.OrderCreatedEvent.created_at:type_name -> google.protobuf.Timestamp
-	16, // 21: order.OrderFilledEvent.filled_at:type_name -> google.protobuf.Timestamp
-	0,  // 22: order.OrderCancelledEvent.side:type_name -> order.OrderSide
-	2,  // 23: order.OrderCancelledEvent.status:type_name -> order.OrderStatus
-	16, // 24: order.OrderCancelledEvent.cancelled_at:type_name -> google.protobuf.Timestamp
-	5,  // 25: order.OrderService.GetOrderById:input_type -> order.GetOrderByIdRequest
-	7,  // 26: order.OrderService.GetOrdersByUserId:input_type -> order.GetOrdersByUserIdRequest
-	9,  // 27: order.OrderService.InsertOrder:input_type -> order.InsertOrderRequest
-	11, // 28: order.OrderService.CancelOrder:input_type -> order.CancelOrderRequest
-	6,  // 29: order.OrderService.GetOrderById:output_type -> order.GetOrderByIdResponse
-	8,  // 30: order.OrderService.GetOrdersByUserId:output_type -> order.GetOrdersByUserIdResponse
-	10, // 31: order.OrderService.InsertOrder:output_type -> order.InsertOrderResponse
-	12, // 32: order.OrderService.CancelOrder:output_type -> order.CancelOrderResponse
-	29, // [29:33] is the sub-list for method output_type
-	25, // [25:29] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	17, // 20: order.OrderCreatedEvent.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 21: order.OrderFilledEvent.side:type_name -> order.OrderSide
+	17, // 22: order.OrderFilledEvent.filled_at:type_name -> google.protobuf.Timestamp
+	0,  // 23: order.OrderCancelledEvent.side:type_name -> order.OrderSide
+	2,  // 24: order.OrderCancelledEvent.status:type_name -> order.OrderStatus
+	17, // 25: order.OrderCancelledEvent.cancelled_at:type_name -> google.protobuf.Timestamp
+	17, // 26: order.OrderRejectedEvent.rejected_at:type_name -> google.protobuf.Timestamp
+	5,  // 27: order.OrderService.GetOrderById:input_type -> order.GetOrderByIdRequest
+	7,  // 28: order.OrderService.GetOrdersByUserId:input_type -> order.GetOrdersByUserIdRequest
+	9,  // 29: order.OrderService.InsertOrder:input_type -> order.InsertOrderRequest
+	11, // 30: order.OrderService.CancelOrder:input_type -> order.CancelOrderRequest
+	6,  // 31: order.OrderService.GetOrderById:output_type -> order.GetOrderByIdResponse
+	8,  // 32: order.OrderService.GetOrdersByUserId:output_type -> order.GetOrdersByUserIdResponse
+	10, // 33: order.OrderService.InsertOrder:output_type -> order.InsertOrderResponse
+	12, // 34: order.OrderService.CancelOrder:output_type -> order.CancelOrderResponse
+	31, // [31:35] is the sub-list for method output_type
+	27, // [27:31] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_order_proto_init() }
@@ -1359,7 +1454,7 @@ func file_order_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_order_proto_rawDesc), len(file_order_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

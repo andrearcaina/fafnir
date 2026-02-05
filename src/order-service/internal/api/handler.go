@@ -36,11 +36,33 @@ func NewOrderHandler(db *db.Database, natsClient *natsC.NatsClient, stockClient 
 	}
 }
 
-func (h *OrderHandler) ConsumeFilledEvents() {
-	_, err := h.natsClient.QueueSubscribe("orders.filled", "order-service", "order-service-durable", h.handleOrderFilled)
+func (h *OrderHandler) RegisterSubscribeHandlers() {
+	_, err := h.natsClient.QueueSubscribe("orders.>", "order-service", "order-service-durable", h.handleOrderEvents)
+	if err != nil {
+		log.Fatalf("Failed to subscribe to orders.>: %v\n", err)
+	}
+}
+
+func (h *OrderHandler) handleOrderEvents(msg *nats.Msg) {
+	var err error
+
+	switch msg.Subject {
+	case "orders.filled":
+		err = h.handleOrderFilled(msg)
+	case "orders.rejected":
+		err = h.handleOrderRejected(msg)
+	default:
+		// ignore events we don't care about
+		// we must ack them, otherwise they come back forever
+		_ = msg.Ack()
+		return
+	}
 
 	if err != nil {
-		log.Printf("Failed to subscribe to orders.filled: %v\n", err)
+		log.Printf("Failed to process %s: %v", msg.Subject, err)
+		_ = msg.Nak() // retry later (negative ack)
+	} else {
+		_ = msg.Ack() // success (acknowledge message)
 	}
 }
 
@@ -212,17 +234,17 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 	}, nil
 }
 
-func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) {
+func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) error {
 	var event orderpb.OrderFilledEvent
 	if err := proto.Unmarshal(msg.Data, &event); err != nil {
 		log.Printf("Error unmarshalling order filled event: %v\n", err)
-		return
+		return err
 	}
 
 	orderId, err := uuid.Parse(event.OrderId)
 	if err != nil {
 		log.Printf("Invalid order ID in filled event: %v\n", err)
-		return
+		return err
 	}
 
 	// insert into orders_fill table
@@ -249,11 +271,39 @@ func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) {
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			log.Printf("Order %s not found during fill update (possibly deleted or inconsistent state)\n", event.OrderId)
-			return
+			return err
 		}
 		log.Printf("Failed to update order status for order %s: %v\n", event.OrderId, err)
-		return
+		return err
 	}
 
 	log.Printf("Order %s updated to FILLED via NATS event\n", event.OrderId)
+	return nil
+}
+
+func (h *OrderHandler) handleOrderRejected(msg *nats.Msg) error {
+	var event orderpb.OrderRejectedEvent
+	if err := proto.Unmarshal(msg.Data, &event); err != nil {
+		log.Printf("Error unmarshalling order rejected event: %v\n", err)
+		return err
+	}
+
+	orderId, err := uuid.Parse(event.OrderId)
+	if err != nil {
+		log.Printf("Invalid order ID in rejected event: %v\n", err)
+		return err
+	}
+
+	_, err = h.db.GetQueries().RejectOrder(context.Background(), orderId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			log.Printf("Order %s not found during rejection update\n", event.OrderId)
+			return err
+		}
+		log.Printf("Failed to update order status to rejected for order %s: %v\n", event.OrderId, err)
+		return err
+	}
+
+	log.Printf("Order %s updated to REJECTED via NATS event. Reason: %s\n", event.OrderId, event.Reason)
+	return nil
 }

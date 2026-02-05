@@ -24,6 +24,15 @@ input CreateOrderRequest {
     status: String # optional, defaults to PENDING
 }
 
+input GetOrderByIDRequest {
+    orderId: String!
+}
+
+type GetOrderByIDResponse {
+    data: Order
+    code: String!
+}
+
 type CreateOrderResponse {
     data: Order
     code: String!
@@ -42,6 +51,7 @@ type OrdersResponse {
 
 extend type Query {
     getOrders: OrdersResponse!
+    getOrderByOrderID(request: GetOrderByIDRequest!): GetOrderByIDResponse!
 }
 
 extend type Mutation {
