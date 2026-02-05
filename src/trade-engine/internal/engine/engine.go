@@ -131,7 +131,9 @@ func (e *Engine) pollOrders() {
 				filledOrders := e.orderBook.Evaluate(quote.Symbol, quote.LastPrice)
 				for _, order := range filledOrders {
 					// get stock metadata (we should probably cache this or batch it too, but for now individual calls)
-					metaResp, err := e.stockClient.GetStockMetadata(ctx, &stockpb.GetStockMetadataRequest{Symbol: quote.Symbol})
+					metaResp, err := e.stockClient.GetStockMetadata(ctx, &stockpb.GetStockMetadataRequest{
+						Symbol: quote.Symbol,
+					})
 					if err != nil {
 						log.Printf("Failed to get metadata for polling match %s: %v", quote.Symbol, err)
 						continue
@@ -145,8 +147,12 @@ func (e *Engine) pollOrders() {
 						continue
 					}
 
-					exchangeRate := e.getExchangeRate(stockCurrency, e.getCurrencyString(acc.Currency))
+					if acc.Currency == portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED {
+						log.Printf("Polling match failed: account has unspecified currency for user %s", order.UserId)
+						continue // just skip
+					}
 
+					exchangeRate := getExchangeRate(stockCurrency, getCurrencyString(acc.Currency))
 					hasSufficientResources := false
 					var settlementAmount float64
 
@@ -201,7 +207,9 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	currentPrice := resp.Data.LastPrice
 
 	// get stock metadata for currency
-	metaResp, err := e.stockClient.GetStockMetadata(ctx, &stockpb.GetStockMetadataRequest{Symbol: order.Symbol})
+	metaResp, err := e.stockClient.GetStockMetadata(ctx, &stockpb.GetStockMetadataRequest{
+		Symbol: order.Symbol,
+	})
 	if err != nil {
 		log.Printf("Failed to get stock metadata for %s: %v", order.Symbol, err)
 		return
@@ -216,8 +224,15 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		return
 	}
 
-	// Calculate Settlement
-	exchangeRate := e.getExchangeRate(stockCurrency, e.getCurrencyString(acc.Currency))
+	// calculate settlement
+	// lotta conversions going on here, for example string "USD" = CURRENCY_TYPE_USD for portfolio service
+	if acc.Currency == portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED {
+		log.Printf("Order %s rejected: Account has unspecified currency", order.OrderId)
+		e.publishRejectedEvent(order, "Account has unspecified currency")
+		return
+	}
+
+	exchangeRate := getExchangeRate(stockCurrency, getCurrencyString(acc.Currency))
 
 	// check funds/holdings before evaluating match
 	hasSufficientResources := false
@@ -274,7 +289,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		}
 	}
 
-	// execute or queue (in order book)
+	// execute or add to queue (in order book)
 	if shouldExecute {
 		e.publishFilledEvent(order, currentPrice, exchangeRate, settlementAmount, acc.Currency.String())
 	} else {
@@ -319,37 +334,13 @@ func (e *Engine) getInvestmentAccount(ctx context.Context, userId string) (*port
 		return nil, err
 	}
 
+	// find investment account and if multiple, just return the first one
 	for _, acc := range resp.Accounts {
 		if acc.Type == portfoliopb.AccountType_ACCOUNT_TYPE_INVESTMENT {
 			return acc, nil
 		}
 	}
 	return nil, fmt.Errorf("no investment account found for user %s", userId)
-}
-
-func (e *Engine) getCurrencyString(c portfoliopb.CurrencyType) string {
-	switch c {
-	case portfoliopb.CurrencyType_CURRENCY_TYPE_USD:
-		return "USD"
-	case portfoliopb.CurrencyType_CURRENCY_TYPE_CAD:
-		return "CAD"
-	default:
-		return "USD" // default fallback
-	}
-}
-
-func (e *Engine) getExchangeRate(from string, to string) float64 {
-	if from == to {
-		return 1.0
-	}
-	// mock FX rates
-	if from == "USD" && to == "CAD" {
-		return 1.35
-	}
-	if from == "CAD" && to == "USD" {
-		return 0.74
-	}
-	return 1.0 // default
 }
 
 func (e *Engine) checkHoldings(ctx context.Context, userId string, symbol string, requiredQty float64) bool {
