@@ -152,11 +152,11 @@ func (h *OrderHandler) InsertOrder(ctx context.Context, req *orderpb.InsertOrder
 
 	eventBytes, err := proto.Marshal(event)
 	if err != nil {
-		fmt.Printf("failed to marshal orders.created event: %v\n", err)
+		log.Printf("failed to marshal orders.created event: %v\n", err)
 	} else {
 		_, err = h.natsClient.Publish("orders.created", eventBytes)
 		if err != nil {
-			fmt.Printf("failed to publish orders.created event: %v\n", err)
+			log.Printf("failed to publish orders.created event: %v\n", err)
 		}
 	}
 
@@ -179,7 +179,7 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 		if errors.Is(err, pgx.ErrNoRows) {
 			return &orderpb.CancelOrderResponse{
 				Code: basepb.ErrorCode_NOT_FOUND,
-			}, fmt.Errorf("order not found or not in pending status")
+			}, errors.New("order not found or not in pending status")
 		}
 		return &orderpb.CancelOrderResponse{
 			Code: basepb.ErrorCode_INTERNAL,
@@ -198,11 +198,11 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 
 	eventBytes, err := proto.Marshal(event)
 	if err != nil {
-		fmt.Printf("failed to marshal orders.cancelled event: %v\n", err)
+		log.Printf("failed to marshal orders.cancelled event: %v\n", err)
 	} else {
 		_, err = h.natsClient.Publish("orders.cancelled", eventBytes)
 		if err != nil {
-			fmt.Printf("failed to publish orders.cancelled event: %v\n", err)
+			log.Printf("failed to publish orders.cancelled event: %v\n", err)
 		}
 	}
 
@@ -215,13 +215,13 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) {
 	var event orderpb.OrderFilledEvent
 	if err := proto.Unmarshal(msg.Data, &event); err != nil {
-		fmt.Printf("Error unmarshalling order filled event: %v\n", err)
+		log.Printf("Error unmarshalling order filled event: %v\n", err)
 		return
 	}
 
 	orderId, err := uuid.Parse(event.OrderId)
 	if err != nil {
-		fmt.Printf("Invalid order ID in filled event: %v\n", err)
+		log.Printf("Invalid order ID in filled event: %v\n", err)
 		return
 	}
 

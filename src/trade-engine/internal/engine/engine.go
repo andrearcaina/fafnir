@@ -22,6 +22,7 @@ type Engine struct {
 	cfg         *config.Config
 	natsClient  *natsC.NatsClient
 	stockClient stockpb.StockServiceClient
+	orderBook   *OrderBook // basically a "cache" of pending limit orders
 	stopCh      chan struct{}
 }
 
@@ -43,6 +44,7 @@ func NewEngine(cfg *config.Config) (*Engine, error) {
 		cfg:         cfg,
 		natsClient:  nc,
 		stockClient: stockClient,
+		orderBook:   NewOrderBook(),
 		stopCh:      make(chan struct{}),
 	}, nil
 }
@@ -53,7 +55,10 @@ func (e *Engine) Start() {
 		log.Fatalf("Failed to subscribe to orders.created: %v", err)
 	}
 
-	// engine is a long-running process, so we block until stopCh is closed
+	// start polling for pending limit orders
+	go e.pollOrders()
+
+	// basically block (the main thread) from exiting until stopCh is closed
 	<-e.stopCh
 }
 
@@ -84,11 +89,48 @@ func (e *Engine) subscribeToOrders() error {
 	return nil
 }
 
+func (e *Engine) pollOrders() {
+	ticker := time.NewTicker(5 * time.Second) // poll every 5 seconds
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-e.stopCh:
+			return
+		case <-ticker.C:
+			symbols := e.orderBook.MGet()
+			if len(symbols) == 0 {
+				continue
+			}
+
+			// batch process all symbols
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			resp, err := e.stockClient.GetStockQuoteBatch(ctx, &stockpb.GetStockQuoteBatchRequest{
+				Symbols: symbols,
+			})
+			cancel()
+
+			if err != nil {
+				log.Printf("Failed to get stock quotes batch: %v", err)
+				continue
+			}
+
+			// process results for each symbol
+			for _, quote := range resp.Data {
+				filledOrders := e.orderBook.Evaluate(quote.Symbol, quote.LastPrice)
+				for _, order := range filledOrders {
+					e.publishFilledEvent(order, quote.LastPrice)
+				}
+			}
+		}
+	}
+}
+
 func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// 1. Get current market price
+	// get current market price
 	resp, err := e.stockClient.GetStockQuote(ctx, &stockpb.GetStockQuoteRequest{
 		Symbol: order.Symbol,
 	})
@@ -100,7 +142,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	currentPrice := resp.Data.LastPrice
 	shouldFill := false
 
-	// 2. Evaluate Match
+	// evaluate match
 	switch order.Type {
 	case orderpb.OrderType_ORDER_TYPE_MARKET:
 		shouldFill = true
@@ -119,19 +161,29 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		}
 	}
 
-	if !shouldFill {
-		log.Printf("Order %s not filled. Type: %v, Side: %v, Limit: %f, Current: %f",
-			order.OrderId, order.Type, order.Side, order.Price, currentPrice)
-		return
+	if shouldFill {
+		e.publishFilledEvent(order, currentPrice)
+	} else {
+		// if not filled, add to order book
+		if order.Type == orderpb.OrderType_ORDER_TYPE_LIMIT {
+			log.Printf("Order %s not immediately filled. Adding to Order Book. Limit: %f, Current: %f",
+				order.OrderId, order.Price, currentPrice)
+			e.orderBook.Add(order)
+		} else {
+			// log market order not filled (unexpected)
+			// this should never happen and honestly, it's not a big deal (as it's a simulator)
+			log.Printf("Market Order %s not filled (unexpected).", order.OrderId)
+		}
 	}
+}
 
-	// 3. Publish Filled Event
+func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice float64) {
 	filledEvent := &orderpb.OrderFilledEvent{
 		OrderId:      order.OrderId,
 		UserId:       order.UserId,
 		Symbol:       order.Symbol,
-		FillQuantity: order.Quantity, // simple simulation: fills entire quantity (partial fills can be implemented later)
-		FillPrice:    currentPrice,
+		FillQuantity: order.Quantity,
+		FillPrice:    fillPrice,
 		FilledAt:     timestamppb.Now(),
 	}
 
@@ -147,5 +199,5 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		return
 	}
 
-	log.Printf("Order %s FILLED at %f", order.OrderId, currentPrice)
+	log.Printf("Order %s FILLED at %f", order.OrderId, fillPrice)
 }
