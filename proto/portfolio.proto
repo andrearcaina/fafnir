@@ -17,6 +17,8 @@ service PortfolioService {
   rpc RemoveFromWatchlist(RemoveFromWatchlistRequest) returns (RemoveFromWatchlistResponse);
   rpc DeleteAccount(DeleteAccountRequest) returns (DeleteAccountResponse);
   rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse);
+  rpc Deposit(DepositRequest) returns (DepositResponse);
+  rpc Transfer(TransferRequest) returns (TransferResponse);
 }
 
 enum AccountType {
@@ -30,6 +32,15 @@ enum CurrencyType {
   CURRENCY_TYPE_UNSPECIFIED = 0;
   CURRENCY_TYPE_USD = 1;
   CURRENCY_TYPE_CAD = 2;
+}
+
+enum TransactionType {
+  TRANSACTION_TYPE_UNSPECIFIED = 0;
+  TRANSACTION_TYPE_DEPOSIT = 1;
+  TRANSACTION_TYPE_BUY = 3;
+  TRANSACTION_TYPE_SELL = 4;
+  TRANSACTION_TYPE_TRANSFER_IN = 5;
+  TRANSACTION_TYPE_TRANSFER_OUT = 6;
 }
 
 message Account {
@@ -136,7 +147,7 @@ message DeleteAccountResponse {
 message Transaction {
   string id = 1;
   string account_id = 2;
-  string type = 3;
+  TransactionType type = 3;
   double amount = 4;
   string description = 5;
   string reference_id = 6;
@@ -150,4 +161,26 @@ message GetTransactionsRequest {
 message GetTransactionsResponse {
   base.ErrorCode code = 1;
   repeated Transaction transactions = 2;
+}
+
+message DepositRequest {
+  string account_id = 1;
+  double amount = 2;
+  CurrencyType currency = 3;
+}
+
+message DepositResponse {
+  base.ErrorCode code = 1;
+  double new_balance = 2;
+}
+
+message TransferRequest {
+  string from_account_id = 1;
+  string to_account_id = 2;
+  double amount = 3;
+  CurrencyType currency = 4;
+}
+
+message TransferResponse {
+  base.ErrorCode code = 1;
 }

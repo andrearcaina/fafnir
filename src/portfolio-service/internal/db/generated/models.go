@@ -100,10 +100,11 @@ func (ns NullCurrencyType) Value() (driver.Value, error) {
 type TransactionType string
 
 const (
-	TransactionTypeDeposit    TransactionType = "deposit"
-	TransactionTypeWithdrawal TransactionType = "withdrawal"
-	TransactionTypeBuy        TransactionType = "buy"
-	TransactionTypeSell       TransactionType = "sell"
+	TransactionTypeDeposit     TransactionType = "deposit"
+	TransactionTypeTransferIn  TransactionType = "transfer_in"
+	TransactionTypeTransferOut TransactionType = "transfer_out"
+	TransactionTypeBuy         TransactionType = "buy"
+	TransactionTypeSell        TransactionType = "sell"
 )
 
 func (e *TransactionType) Scan(src interface{}) error {

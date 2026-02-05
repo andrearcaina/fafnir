@@ -28,6 +28,8 @@ const (
 	PortfolioService_RemoveFromWatchlist_FullMethodName = "/portfolio.PortfolioService/RemoveFromWatchlist"
 	PortfolioService_DeleteAccount_FullMethodName       = "/portfolio.PortfolioService/DeleteAccount"
 	PortfolioService_GetTransactions_FullMethodName     = "/portfolio.PortfolioService/GetTransactions"
+	PortfolioService_Deposit_FullMethodName             = "/portfolio.PortfolioService/Deposit"
+	PortfolioService_Transfer_FullMethodName            = "/portfolio.PortfolioService/Transfer"
 )
 
 // PortfolioServiceClient is the client API for PortfolioService service.
@@ -43,6 +45,8 @@ type PortfolioServiceClient interface {
 	RemoveFromWatchlist(ctx context.Context, in *RemoveFromWatchlistRequest, opts ...grpc.CallOption) (*RemoveFromWatchlistResponse, error)
 	DeleteAccount(ctx context.Context, in *DeleteAccountRequest, opts ...grpc.CallOption) (*DeleteAccountResponse, error)
 	GetTransactions(ctx context.Context, in *GetTransactionsRequest, opts ...grpc.CallOption) (*GetTransactionsResponse, error)
+	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositResponse, error)
+	Transfer(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error)
 }
 
 type portfolioServiceClient struct {
@@ -143,6 +147,26 @@ func (c *portfolioServiceClient) GetTransactions(ctx context.Context, in *GetTra
 	return out, nil
 }
 
+func (c *portfolioServiceClient) Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DepositResponse)
+	err := c.cc.Invoke(ctx, PortfolioService_Deposit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portfolioServiceClient) Transfer(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TransferResponse)
+	err := c.cc.Invoke(ctx, PortfolioService_Transfer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortfolioServiceServer is the server API for PortfolioService service.
 // All implementations must embed UnimplementedPortfolioServiceServer
 // for forward compatibility.
@@ -156,6 +180,8 @@ type PortfolioServiceServer interface {
 	RemoveFromWatchlist(context.Context, *RemoveFromWatchlistRequest) (*RemoveFromWatchlistResponse, error)
 	DeleteAccount(context.Context, *DeleteAccountRequest) (*DeleteAccountResponse, error)
 	GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsResponse, error)
+	Deposit(context.Context, *DepositRequest) (*DepositResponse, error)
+	Transfer(context.Context, *TransferRequest) (*TransferResponse, error)
 	mustEmbedUnimplementedPortfolioServiceServer()
 }
 
@@ -192,6 +218,12 @@ func (UnimplementedPortfolioServiceServer) DeleteAccount(context.Context, *Delet
 }
 func (UnimplementedPortfolioServiceServer) GetTransactions(context.Context, *GetTransactionsRequest) (*GetTransactionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTransactions not implemented")
+}
+func (UnimplementedPortfolioServiceServer) Deposit(context.Context, *DepositRequest) (*DepositResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
+}
+func (UnimplementedPortfolioServiceServer) Transfer(context.Context, *TransferRequest) (*TransferResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Transfer not implemented")
 }
 func (UnimplementedPortfolioServiceServer) mustEmbedUnimplementedPortfolioServiceServer() {}
 func (UnimplementedPortfolioServiceServer) testEmbeddedByValue()                          {}
@@ -376,6 +408,42 @@ func _PortfolioService_GetTransactions_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortfolioService_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortfolioServiceServer).Deposit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortfolioService_Deposit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortfolioServiceServer).Deposit(ctx, req.(*DepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortfolioService_Transfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransferRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortfolioServiceServer).Transfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortfolioService_Transfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortfolioServiceServer).Transfer(ctx, req.(*TransferRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortfolioService_ServiceDesc is the grpc.ServiceDesc for PortfolioService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +486,14 @@ var PortfolioService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTransactions",
 			Handler:    _PortfolioService_GetTransactions_Handler,
+		},
+		{
+			MethodName: "Deposit",
+			Handler:    _PortfolioService_Deposit_Handler,
+		},
+		{
+			MethodName: "Transfer",
+			Handler:    _PortfolioService_Transfer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

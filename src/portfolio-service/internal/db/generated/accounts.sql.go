@@ -21,6 +21,26 @@ func (q *Queries) DeleteAccount(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAccountById = `-- name: GetAccountById :one
+SELECT id, user_id, account_number, account_type, currency, balance, created_at, updated_at FROM accounts WHERE id = $1
+`
+
+func (q *Queries) GetAccountById(ctx context.Context, id uuid.UUID) (Account, error) {
+	row := q.db.QueryRow(ctx, getAccountById, id)
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.AccountNumber,
+		&i.AccountType,
+		&i.Currency,
+		&i.Balance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getAccountByUserId = `-- name: GetAccountByUserId :many
 SELECT id, user_id, account_number, account_type, currency, balance, created_at, updated_at FROM accounts WHERE user_id = $1
 `

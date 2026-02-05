@@ -204,7 +204,7 @@ func (c *PortfolioClient) GetTransactions(ctx context.Context, req model.GetTran
 		txs = append(txs, &model.Transaction{
 			ID:          t.Id,
 			AccountID:   t.AccountId,
-			Type:        t.Type,
+			Type:        t.Type.String(),
 			Amount:      t.Amount,
 			Description: t.Description,
 			ReferenceID: &t.ReferenceId,
@@ -215,6 +215,56 @@ func (c *PortfolioClient) GetTransactions(ctx context.Context, req model.GetTran
 	return model.GetTransactionsResponse{
 		Code: resp.Code.String(),
 		Data: txs,
+	}, nil
+}
+
+func (c *PortfolioClient) Deposit(ctx context.Context, req model.DepositRequest) (model.DepositResponse, error) {
+	curr := pb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
+	if req.Currency == "USD" {
+		curr = pb.CurrencyType_CURRENCY_TYPE_USD
+	} else if req.Currency == "CAD" {
+		curr = pb.CurrencyType_CURRENCY_TYPE_CAD
+	}
+
+	resp, err := c.client.Deposit(ctx, &pb.DepositRequest{
+		AccountId: req.AccountID,
+		Amount:    req.Amount,
+		Currency:  curr,
+	})
+	if err != nil {
+		return model.DepositResponse{
+			Code: basepb.ErrorCode_INTERNAL.String(),
+		}, err
+	}
+
+	return model.DepositResponse{
+		Code:       resp.Code.String(),
+		NewBalance: resp.NewBalance,
+	}, nil
+}
+
+func (c *PortfolioClient) Transfer(ctx context.Context, req model.TransferRequest) (model.TransferResponse, error) {
+	curr := pb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
+	if req.Currency == "USD" {
+		curr = pb.CurrencyType_CURRENCY_TYPE_USD
+	} else if req.Currency == "CAD" {
+		curr = pb.CurrencyType_CURRENCY_TYPE_CAD
+	}
+
+	resp, err := c.client.Transfer(ctx, &pb.TransferRequest{
+		FromAccountId: req.FromAccountID,
+		ToAccountId:   req.ToAccountID,
+		Amount:        req.Amount,
+		Currency:      curr,
+	})
+	if err != nil {
+		return model.TransferResponse{
+			Code: basepb.ErrorCode_INTERNAL.String(),
+		}, err
+	}
+
+	return model.TransferResponse{
+		Code: resp.Code.String(),
 	}, nil
 }
 

@@ -128,7 +128,10 @@ message OrderFilledEvent {
   OrderSide side = 4;
   double fill_quantity = 5;
   double fill_price = 6;
-  google.protobuf.Timestamp filled_at = 7;
+  double exchange_rate = 7;
+  double settlement_amount = 8;
+  string settlement_currency = 9;
+  google.protobuf.Timestamp filled_at = 10;
 }
 
 message OrderCancelledEvent {

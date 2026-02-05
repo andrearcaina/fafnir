@@ -99,6 +99,28 @@ type GetTransactionsResponse {
     data: [Transaction!]
 }
 
+input DepositRequest {
+    accountId: String!
+    amount: Float!
+    currency: String! # either USD or CAD
+}
+
+type DepositResponse {
+    code: String!
+    newBalance: Float!
+}
+
+input TransferRequest {
+    fromAccountId: String!
+    toAccountId: String!
+    amount: Float!
+    currency: String! # either USD or CAD
+}
+
+type TransferResponse {
+    code: String!
+}
+
 extend type Query {
     getPortfolioSummary: GetPortfolioSummaryResponse!
     getHoldings(request: GetHoldingsRequest!): GetHoldingsResponse!
@@ -112,4 +134,6 @@ extend type Mutation {
     addToWatchlist(request: AddToWatchlistRequest!): AddToWatchlistResponse!
     removeFromWatchlist(request: RemoveFromWatchlistRequest!): RemoveFromWatchlistResponse!
     deleteAccount(accountId: String!): Boolean!
+    deposit(request: DepositRequest!): DepositResponse!
+    transfer(request: TransferRequest!): TransferResponse!
 }

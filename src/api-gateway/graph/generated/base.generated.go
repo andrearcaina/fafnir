@@ -23,6 +23,8 @@ type MutationResolver interface {
 	AddToWatchlist(ctx context.Context, request model.AddToWatchlistRequest) (*model.AddToWatchlistResponse, error)
 	RemoveFromWatchlist(ctx context.Context, request model.RemoveFromWatchlistRequest) (*model.RemoveFromWatchlistResponse, error)
 	DeleteAccount(ctx context.Context, accountID string) (bool, error)
+	Deposit(ctx context.Context, request model.DepositRequest) (*model.DepositResponse, error)
+	Transfer(ctx context.Context, request model.TransferRequest) (*model.TransferResponse, error)
 }
 type QueryResolver interface {
 	Health(ctx context.Context) (string, error)
@@ -100,10 +102,32 @@ func (ec *executionContext) field_Mutation_deleteAccount_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deposit_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNDepositRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐDepositRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_removeFromWatchlist_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNRemoveFromWatchlistRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐRemoveFromWatchlistRequest)
+	if err != nil {
+		return nil, err
+	}
+	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_transfer_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "request", ec.unmarshalNTransferRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐTransferRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -500,6 +524,98 @@ func (ec *executionContext) fieldContext_Mutation_deleteAccount(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deposit(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deposit,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().Deposit(ctx, fc.Args["request"].(model.DepositRequest))
+		},
+		nil,
+		ec.marshalNDepositResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐDepositResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deposit(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_DepositResponse_code(ctx, field)
+			case "newBalance":
+				return ec.fieldContext_DepositResponse_newBalance(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DepositResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deposit_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_transfer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_transfer,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().Transfer(ctx, fc.Args["request"].(model.TransferRequest))
+		},
+		nil,
+		ec.marshalNTransferResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐTransferResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_transfer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_TransferResponse_code(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TransferResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_transfer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1279,6 +1395,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteAccount":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deposit":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deposit(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "transfer":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_transfer(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

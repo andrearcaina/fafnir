@@ -130,18 +130,42 @@ func (e *Engine) pollOrders() {
 			for _, quote := range resp.Data {
 				filledOrders := e.orderBook.Evaluate(quote.Symbol, quote.LastPrice)
 				for _, order := range filledOrders {
+					// get stock metadata (we should probably cache this or batch it too, but for now individual calls)
+					metaResp, err := e.stockClient.GetStockMetadata(ctx, &stockpb.GetStockMetadataRequest{Symbol: quote.Symbol})
+					if err != nil {
+						log.Printf("Failed to get metadata for polling match %s: %v", quote.Symbol, err)
+						continue
+					}
+					stockCurrency := metaResp.Data.Currency
+
+					// get account
+					acc, err := e.getInvestmentAccount(ctx, order.UserId)
+					if err != nil {
+						log.Printf("Polling match failed: no account for user %s", order.UserId)
+						continue
+					}
+
+					exchangeRate := e.getExchangeRate(stockCurrency, e.getCurrencyString(acc.Currency))
+
 					hasSufficientResources := false
+					var settlementAmount float64
+
 					if order.Side == orderpb.OrderSide_ORDER_SIDE_BUY {
 						// buy
-						requiredAmount := quote.LastPrice * order.Quantity
-						if e.checkFunds(ctx, order.UserId, requiredAmount) {
+						rawAmount := quote.LastPrice * order.Quantity
+						settlementAmount = rawAmount * exchangeRate
+
+						if acc.Balance >= settlementAmount {
 							hasSufficientResources = true
 						} else {
-							log.Printf("Limit Order %s matched but insufficient funds (Required: %f). Rejecting.", order.OrderId, requiredAmount)
+							log.Printf("Limit Order %s matched but insufficient funds (Required: %f %s). Rejecting.", order.OrderId, settlementAmount, acc.Currency)
 							e.publishRejectedEvent(order, "Insufficient funds")
 						}
 					} else {
 						// sell
+						rawAmount := quote.LastPrice * order.Quantity
+						settlementAmount = rawAmount * exchangeRate
+
 						if e.checkHoldings(ctx, order.UserId, order.Symbol, order.Quantity) {
 							hasSufficientResources = true
 						} else {
@@ -151,7 +175,7 @@ func (e *Engine) pollOrders() {
 					}
 
 					if hasSufficientResources {
-						e.publishFilledEvent(order, quote.LastPrice)
+						e.publishFilledEvent(order, quote.LastPrice, exchangeRate, settlementAmount, acc.Currency.String())
 					} else {
 						// put it back in the book so it can be retried later
 						e.orderBook.Add(order)
@@ -176,18 +200,47 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	}
 	currentPrice := resp.Data.LastPrice
 
+	// get stock metadata for currency
+	metaResp, err := e.stockClient.GetStockMetadata(ctx, &stockpb.GetStockMetadataRequest{Symbol: order.Symbol})
+	if err != nil {
+		log.Printf("Failed to get stock metadata for %s: %v", order.Symbol, err)
+		return
+	}
+	stockCurrency := metaResp.Data.Currency
+
+	// get investment account for user
+	acc, err := e.getInvestmentAccount(ctx, order.UserId)
+	if err != nil {
+		log.Printf("Order %s rejected: %v", order.OrderId, err)
+		e.publishRejectedEvent(order, "No investment account found")
+		return
+	}
+
+	// Calculate Settlement
+	exchangeRate := e.getExchangeRate(stockCurrency, e.getCurrencyString(acc.Currency))
+
 	// check funds/holdings before evaluating match
 	hasSufficientResources := false
+	var settlementAmount float64
+
 	if order.Side == orderpb.OrderSide_ORDER_SIDE_BUY {
-		requiredAmount := currentPrice * order.Quantity
-		if e.checkFunds(ctx, order.UserId, requiredAmount) {
+		rawAmount := currentPrice * order.Quantity
+		settlementAmount = rawAmount * exchangeRate
+
+		if acc.Balance >= settlementAmount {
 			hasSufficientResources = true
 		} else {
-			log.Printf("Order %s rejected: Insufficient funds (Required: %f)", order.OrderId, requiredAmount)
-			e.publishRejectedEvent(order, fmt.Sprintf("Insufficient funds. Required: %f", requiredAmount))
+			log.Printf("Order %s rejected: Insufficient funds (Required: %f %s, Have: %f %s)",
+				order.OrderId, settlementAmount, acc.Currency, acc.Balance, acc.Currency)
+			e.publishRejectedEvent(order, fmt.Sprintf("Insufficient funds. Required: %f %s", settlementAmount, acc.Currency))
 			return
 		}
 	} else { // order side is sell
+		// for sell, we check holdings. Holdings don't need currency conversion check, just quantity.
+		// but we still calculate settlement amount to tell portfolio how much to credit.
+		rawAmount := currentPrice * order.Quantity
+		settlementAmount = rawAmount * exchangeRate
+
 		if e.checkHoldings(ctx, order.UserId, order.Symbol, order.Quantity) {
 			hasSufficientResources = true
 		} else {
@@ -223,7 +276,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 
 	// execute or queue (in order book)
 	if shouldExecute {
-		e.publishFilledEvent(order, currentPrice)
+		e.publishFilledEvent(order, currentPrice, exchangeRate, settlementAmount, acc.Currency.String())
 	} else {
 		// no match yet (limit order waiting for price target)
 		if order.Type == orderpb.OrderType_ORDER_TYPE_LIMIT {
@@ -260,21 +313,43 @@ func (e *Engine) publishRejectedEvent(order *orderpb.OrderCreatedEvent, reason s
 	log.Printf("Order %s REJECTED: %s", order.OrderId, reason)
 }
 
-func (e *Engine) checkFunds(ctx context.Context, userId string, requiredAmount float64) bool {
+func (e *Engine) getInvestmentAccount(ctx context.Context, userId string) (*portfoliopb.Account, error) {
 	resp, err := e.portfolioClient.GetPortfolioSummary(ctx, &portfoliopb.GetPortfolioSummaryRequest{UserId: userId})
 	if err != nil {
-		log.Printf("Error checking funds for user %s: %v", userId, err)
-		return false
+		return nil, err
 	}
 
 	for _, acc := range resp.Accounts {
 		if acc.Type == portfoliopb.AccountType_ACCOUNT_TYPE_INVESTMENT {
-			if acc.Balance >= requiredAmount {
-				return true
-			}
+			return acc, nil
 		}
 	}
-	return false
+	return nil, fmt.Errorf("no investment account found for user %s", userId)
+}
+
+func (e *Engine) getCurrencyString(c portfoliopb.CurrencyType) string {
+	switch c {
+	case portfoliopb.CurrencyType_CURRENCY_TYPE_USD:
+		return "USD"
+	case portfoliopb.CurrencyType_CURRENCY_TYPE_CAD:
+		return "CAD"
+	default:
+		return "USD" // default fallback
+	}
+}
+
+func (e *Engine) getExchangeRate(from string, to string) float64 {
+	if from == to {
+		return 1.0
+	}
+	// mock FX rates
+	if from == "USD" && to == "CAD" {
+		return 1.35
+	}
+	if from == "CAD" && to == "USD" {
+		return 0.74
+	}
+	return 1.0 // default
 }
 
 func (e *Engine) checkHoldings(ctx context.Context, userId string, symbol string, requiredQty float64) bool {
@@ -302,15 +377,18 @@ func (e *Engine) checkHoldings(ctx context.Context, userId string, symbol string
 	return false
 }
 
-func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice float64) {
+func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice float64, exchangeRate float64, settlementAmount float64, settlementCurrency string) {
 	filledEvent := &orderpb.OrderFilledEvent{
-		OrderId:      order.OrderId,
-		UserId:       order.UserId,
-		Symbol:       order.Symbol,
-		Side:         order.Side,
-		FillQuantity: order.Quantity,
-		FillPrice:    fillPrice,
-		FilledAt:     timestamppb.Now(),
+		OrderId:            order.OrderId,
+		UserId:             order.UserId,
+		Symbol:             order.Symbol,
+		Side:               order.Side,
+		FillQuantity:       order.Quantity,
+		FillPrice:          fillPrice,
+		FilledAt:           timestamppb.Now(),
+		ExchangeRate:       exchangeRate,
+		SettlementAmount:   settlementAmount,
+		SettlementCurrency: settlementCurrency,
 	}
 
 	data, err := proto.Marshal(filledEvent)
@@ -325,5 +403,5 @@ func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice 
 		return
 	}
 
-	log.Printf("Order %s FILLED at %f", order.OrderId, fillPrice)
+	log.Printf("Order %s FILLED at %f %s (Settlement: %f %s)", order.OrderId, fillPrice, order.Symbol, settlementAmount, settlementCurrency)
 }

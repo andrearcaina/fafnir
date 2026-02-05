@@ -15,7 +15,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nats-io/nats.go"
 	"google.golang.org/protobuf/proto"
 )
@@ -56,12 +55,23 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 		return
 	}
 
-	// Calculate total cost/proceeds
-	totalValue := event.FillQuantity * event.FillPrice
+	// calculate total cost/proceeds
+	// use SettlementAmount if available (for multi-currency support)
+	var totalSettlementValue float64
+	var avgCostBasis float64
 
-	err = h.db.ExecTx(context.Background(), func(q *generated.Queries) error {
+	if event.SettlementAmount > 0 {
+		totalSettlementValue = event.SettlementAmount
+		avgCostBasis = event.SettlementAmount / event.FillQuantity
+	} else {
+		// fallback for legacy events or same-currency
+		totalSettlementValue = event.FillQuantity * event.FillPrice
+		avgCostBasis = event.FillPrice
+	}
+
+	err = h.db.ExecMultiTx(context.Background(), func(q *generated.Queries) error {
 		// first get the investment account for the user
-		accounts, err := h.db.GetQueries().GetAccountByUserId(context.Background(), userId)
+		accounts, err := q.GetAccountByUserId(context.Background(), userId)
 		if err != nil {
 			return fmt.Errorf("failed to get accounts: %w", err)
 		}
@@ -87,7 +97,7 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 			// buy order, deduct funds
 			_, err := q.UpdateAccountBalance(context.Background(), generated.UpdateAccountBalanceParams{
 				ID:      investmentAcc.ID,
-				Balance: floatToNumeric(-totalValue),
+				Balance: floatToNumeric(-totalSettlementValue),
 			})
 			if err != nil {
 				return fmt.Errorf("failed to deduct funds: %w", err)
@@ -98,7 +108,7 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 				AccountID: investmentAcc.ID,
 				Symbol:    event.Symbol,
 				Quantity:  floatToNumeric(event.FillQuantity),
-				AvgCost:   floatToNumeric(event.FillPrice),
+				AvgCost:   floatToNumeric(avgCostBasis),
 			})
 			if err != nil {
 				return fmt.Errorf("failed to upsert holding (buy): %w", err)
@@ -108,7 +118,7 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 			// otherwise, sell order, add funds
 			_, err := q.UpdateAccountBalance(context.Background(), generated.UpdateAccountBalanceParams{
 				ID:      investmentAcc.ID,
-				Balance: floatToNumeric(totalValue),
+				Balance: floatToNumeric(totalSettlementValue),
 			})
 			if err != nil {
 				return fmt.Errorf("failed to add funds: %w", err)
@@ -143,7 +153,7 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 		_, err = q.InsertAuditLog(context.Background(), generated.InsertAuditLogParams{
 			AccountID:       investmentAcc.ID,
 			TransactionType: txType,
-			Amount:          floatToNumeric(totalValue),
+			Amount:          floatToNumeric(totalSettlementValue),
 			Description:     desc,
 			ReferenceID:     &refID,
 		})
@@ -196,7 +206,7 @@ func (h *PortfolioHandler) CreateAccount(ctx context.Context, req *portfoliopb.C
 
 	var account generated.Account
 
-	err = h.db.ExecTx(ctx, func(q *generated.Queries) error {
+	err = h.db.ExecMultiTx(ctx, func(q *generated.Queries) error {
 		var err error
 		account, err = q.InsertAccount(ctx, params)
 		if err != nil {
@@ -415,6 +425,14 @@ func (h *PortfolioHandler) GetTransactions(ctx context.Context, req *portfoliopb
 		}, err
 	}
 
+	// first check if account id exists
+	if _, err := h.db.GetQueries().GetAccountById(ctx, accountId); err != nil {
+		return &portfoliopb.GetTransactionsResponse{
+			Code: basepb.ErrorCode_NOT_FOUND,
+		}, nil
+	}
+
+	// then get transactions
 	txs, err := h.db.GetQueries().GetTransactionsByAccountId(ctx, accountId)
 	if err != nil {
 		return &portfoliopb.GetTransactionsResponse{
@@ -427,7 +445,7 @@ func (h *PortfolioHandler) GetTransactions(ctx context.Context, req *portfoliopb
 		protoTx := &portfoliopb.Transaction{
 			Id:          tx.ID.String(),
 			AccountId:   tx.AccountID.String(),
-			Type:        string(tx.TransactionType),
+			Type:        convertTransactionTypeToProto(tx.TransactionType),
 			Amount:      numericToFloat(tx.Amount),
 			Description: tx.Description,
 			CreatedAt:   convertTime(tx.CreatedAt),
@@ -444,7 +462,172 @@ func (h *PortfolioHandler) GetTransactions(ctx context.Context, req *portfoliopb
 	}, nil
 }
 
-func numericToFloat(n pgtype.Numeric) float64 {
-	f, _ := n.Float64Value()
-	return f.Float64
+func (h *PortfolioHandler) Deposit(ctx context.Context, req *portfoliopb.DepositRequest) (*portfoliopb.DepositResponse, error) {
+	accountId, err := uuid.Parse(req.AccountId)
+	if err != nil {
+		return &portfoliopb.DepositResponse{
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, err
+	}
+
+	if req.Amount <= 0 {
+		return &portfoliopb.DepositResponse{
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, errors.New("deposit amount must be positive")
+	}
+
+	var newBalance float64
+
+	err = h.db.ExecMultiTx(ctx, func(q *generated.Queries) error {
+		// verify account exists
+		acc, err := q.GetAccountById(ctx, accountId)
+		if err != nil {
+			return err
+		}
+
+		// simple currency check (reject mismatch)
+		dbCurrency := convertCurrencyTypeToProto(acc.Currency)
+		if req.Currency != portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED && req.Currency != dbCurrency {
+			return fmt.Errorf("currency mismatch: account is %s, deposit is %s", dbCurrency, req.Currency)
+		}
+
+		// update balance
+		updatedAcc, err := q.UpdateAccountBalance(ctx, generated.UpdateAccountBalanceParams{
+			ID:      accountId,
+			Balance: floatToNumeric(req.Amount),
+		})
+		if err != nil {
+			return err
+		}
+
+		bal, _ := updatedAcc.Balance.Float64Value()
+		newBalance = bal.Float64
+
+		// insert audit log
+		_, err = q.InsertAuditLog(ctx, generated.InsertAuditLogParams{
+			AccountID:       accountId,
+			TransactionType: generated.TransactionTypeDeposit,
+			Amount:          floatToNumeric(req.Amount),
+			Description:     "Manual Deposit",
+		})
+		return err
+	})
+
+	if err != nil {
+		return &portfoliopb.DepositResponse{Code: basepb.ErrorCode_INTERNAL}, err
+	}
+
+	return &portfoliopb.DepositResponse{
+		Code:       basepb.ErrorCode_OK,
+		NewBalance: newBalance,
+	}, nil
+}
+
+func (h *PortfolioHandler) Transfer(ctx context.Context, req *portfoliopb.TransferRequest) (*portfoliopb.TransferResponse, error) {
+	fromId, err := uuid.Parse(req.FromAccountId)
+	if err != nil {
+		return &portfoliopb.TransferResponse{
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, err
+	}
+	toId, err := uuid.Parse(req.ToAccountId)
+	if err != nil {
+		return &portfoliopb.TransferResponse{
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, err
+	}
+
+	if req.Amount <= 0 {
+		return &portfoliopb.TransferResponse{
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, errors.New("transfer amount must be positive")
+	}
+
+	err = h.db.ExecMultiTx(ctx, func(q *generated.Queries) error {
+		// get both accounts
+		fromAcc, err := q.GetAccountById(ctx, fromId)
+		if err != nil {
+			return fmt.Errorf("from_account not found: %w", err)
+		}
+		toAcc, err := q.GetAccountById(ctx, toId)
+		if err != nil {
+			return fmt.Errorf("to_account not found: %w", err)
+		}
+
+		// check currencies (must match for now)
+		fromCurr := convertCurrencyTypeToProto(fromAcc.Currency)
+		toCurr := convertCurrencyTypeToProto(toAcc.Currency)
+
+		if req.Currency != portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED {
+			if req.Currency != fromCurr {
+				return fmt.Errorf("currency mismatch: from_account is %s, req is %s", fromCurr, req.Currency)
+			}
+		}
+
+		if fromCurr != toCurr {
+			return fmt.Errorf("cross-currency transfer not supported yet (%s -> %s)", fromCurr, toCurr)
+		}
+
+		// check balance
+		currentBal, _ := fromAcc.Balance.Float64Value()
+		if currentBal.Float64 < req.Amount {
+			return errors.New("insufficient funds")
+		}
+
+		// deduct from source
+		_, err = q.UpdateAccountBalance(ctx, generated.UpdateAccountBalanceParams{
+			ID:      fromId,
+			Balance: floatToNumeric(-req.Amount),
+		})
+		if err != nil {
+			return err
+		}
+
+		// add to destination
+		_, err = q.UpdateAccountBalance(ctx, generated.UpdateAccountBalanceParams{
+			ID:      toId,
+			Balance: floatToNumeric(req.Amount),
+		})
+		if err != nil {
+			return err
+		}
+
+		// insert audit logs
+		// outgoing
+		_, err = q.InsertAuditLog(ctx, generated.InsertAuditLogParams{
+			AccountID:       fromId,
+			TransactionType: generated.TransactionTypeTransferOut,
+			Amount:          floatToNumeric(req.Amount), // positive amount
+			Description:     fmt.Sprintf("Transfer to %s", toAcc.AccountNumber),
+			ReferenceID:     &toId, // referencing other account ID
+		})
+		if err != nil {
+			return err
+		}
+
+		// incoming
+		_, err = q.InsertAuditLog(ctx, generated.InsertAuditLogParams{
+			AccountID:       toId,
+			TransactionType: generated.TransactionTypeTransferIn,
+			Amount:          floatToNumeric(req.Amount), // positive amount
+			Description:     fmt.Sprintf("Transfer from %s", fromAcc.AccountNumber),
+			ReferenceID:     &fromId, // referencing other account ID
+		})
+		return err
+	})
+
+	if err != nil {
+		if err.Error() == "insufficient funds" {
+			return &portfoliopb.TransferResponse{
+				Code: basepb.ErrorCode_INTERNAL,
+			}, err
+		}
+		return &portfoliopb.TransferResponse{
+			Code: basepb.ErrorCode_INTERNAL,
+		}, err
+	}
+
+	return &portfoliopb.TransferResponse{
+		Code: basepb.ErrorCode_OK,
+	}, nil
 }

@@ -51,6 +51,17 @@ type CreateOrderResponse struct {
 	Code string `json:"code"`
 }
 
+type DepositRequest struct {
+	AccountID string  `json:"accountId"`
+	Amount    float64 `json:"amount"`
+	Currency  string  `json:"currency"`
+}
+
+type DepositResponse struct {
+	Code       string  `json:"code"`
+	NewBalance float64 `json:"newBalance"`
+}
+
 type GetHoldingRequest struct {
 	AccountID string `json:"accountId"`
 	Symbol    string `json:"symbol"`
@@ -232,6 +243,17 @@ type Transaction struct {
 	Description string  `json:"description"`
 	ReferenceID *string `json:"referenceId,omitempty"`
 	CreatedAt   string  `json:"createdAt"`
+}
+
+type TransferRequest struct {
+	FromAccountID string  `json:"fromAccountId"`
+	ToAccountID   string  `json:"toAccountId"`
+	Amount        float64 `json:"amount"`
+	Currency      string  `json:"currency"`
+}
+
+type TransferResponse struct {
+	Code string `json:"code"`
 }
 
 type WatchlistItem struct {

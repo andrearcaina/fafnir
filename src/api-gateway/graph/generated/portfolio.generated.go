@@ -366,6 +366,64 @@ func (ec *executionContext) fieldContext_CreateAccountResponse_code(_ context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _DepositResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.DepositResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DepositResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DepositResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DepositResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DepositResponse_newBalance(ctx context.Context, field graphql.CollectedField, obj *model.DepositResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DepositResponse_newBalance,
+		func(ctx context.Context) (any, error) {
+			return obj.NewBalance, nil
+		},
+		nil,
+		ec.marshalNFloat2float64,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DepositResponse_newBalance(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DepositResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _GetHoldingResponse_data(ctx context.Context, field graphql.CollectedField, obj *model.GetHoldingResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1192,6 +1250,35 @@ func (ec *executionContext) fieldContext_Transaction_createdAt(_ context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _TransferResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.TransferResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TransferResponse_code,
+		func(ctx context.Context) (any, error) {
+			return obj.Code, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TransferResponse_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TransferResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _WatchlistItem_symbol(ctx context.Context, field graphql.CollectedField, obj *model.WatchlistItem) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1315,6 +1402,47 @@ func (ec *executionContext) unmarshalInputCreateAccountRequest(ctx context.Conte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDepositRequest(ctx context.Context, obj any) (model.DepositRequest, error) {
+	var it model.DepositRequest
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"accountId", "amount", "currency"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "accountId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accountId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccountID = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "currency":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Currency = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGetHoldingRequest(ctx context.Context, obj any) (model.GetHoldingRequest, error) {
 	var it model.GetHoldingRequest
 	asMap := map[string]any{}
@@ -1424,6 +1552,54 @@ func (ec *executionContext) unmarshalInputRemoveFromWatchlistRequest(ctx context
 				return it, err
 			}
 			it.Symbol = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTransferRequest(ctx context.Context, obj any) (model.TransferRequest, error) {
+	var it model.TransferRequest
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"fromAccountId", "toAccountId", "amount", "currency"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "fromAccountId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fromAccountId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FromAccountID = data
+		case "toAccountId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("toAccountId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ToAccountID = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "currency":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Currency = data
 		}
 	}
 
@@ -1566,6 +1742,50 @@ func (ec *executionContext) _CreateAccountResponse(ctx context.Context, sel ast.
 			out.Values[i] = ec._CreateAccountResponse_data(ctx, field, obj)
 		case "code":
 			out.Values[i] = ec._CreateAccountResponse_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var depositResponseImplementors = []string{"DepositResponse"}
+
+func (ec *executionContext) _DepositResponse(ctx context.Context, sel ast.SelectionSet, obj *model.DepositResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, depositResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DepositResponse")
+		case "code":
+			out.Values[i] = ec._DepositResponse_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "newBalance":
+			out.Values[i] = ec._DepositResponse_newBalance(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1976,6 +2196,45 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var transferResponseImplementors = []string{"TransferResponse"}
+
+func (ec *executionContext) _TransferResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TransferResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, transferResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TransferResponse")
+		case "code":
+			out.Values[i] = ec._TransferResponse_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var watchlistItemImplementors = []string{"WatchlistItem"}
 
 func (ec *executionContext) _WatchlistItem(ctx context.Context, sel ast.SelectionSet, obj *model.WatchlistItem) graphql.Marshaler {
@@ -2070,6 +2329,25 @@ func (ec *executionContext) marshalNCreateAccountResponse2ᚖfafnirᚋapiᚑgate
 		return graphql.Null
 	}
 	return ec._CreateAccountResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDepositRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐDepositRequest(ctx context.Context, v any) (model.DepositRequest, error) {
+	res, err := ec.unmarshalInputDepositRequest(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDepositResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐDepositResponse(ctx context.Context, sel ast.SelectionSet, v model.DepositResponse) graphql.Marshaler {
+	return ec._DepositResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDepositResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐDepositResponse(ctx context.Context, sel ast.SelectionSet, v *model.DepositResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DepositResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNGetHoldingRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐGetHoldingRequest(ctx context.Context, v any) (model.GetHoldingRequest, error) {
@@ -2194,6 +2472,25 @@ func (ec *executionContext) marshalNTransaction2ᚖfafnirᚋapiᚑgatewayᚋgrap
 		return graphql.Null
 	}
 	return ec._Transaction(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTransferRequest2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐTransferRequest(ctx context.Context, v any) (model.TransferRequest, error) {
+	res, err := ec.unmarshalInputTransferRequest(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTransferResponse2fafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐTransferResponse(ctx context.Context, sel ast.SelectionSet, v model.TransferResponse) graphql.Marshaler {
+	return ec._TransferResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTransferResponse2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐTransferResponse(ctx context.Context, sel ast.SelectionSet, v *model.TransferResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TransferResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNWatchlistItem2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐWatchlistItem(ctx context.Context, sel ast.SelectionSet, v *model.WatchlistItem) graphql.Marshaler {

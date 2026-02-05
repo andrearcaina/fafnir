@@ -124,6 +124,64 @@ func (CurrencyType) EnumDescriptor() ([]byte, []int) {
 	return file_portfolio_proto_rawDescGZIP(), []int{1}
 }
 
+type TransactionType int32
+
+const (
+	TransactionType_TRANSACTION_TYPE_UNSPECIFIED  TransactionType = 0
+	TransactionType_TRANSACTION_TYPE_DEPOSIT      TransactionType = 1
+	TransactionType_TRANSACTION_TYPE_BUY          TransactionType = 3
+	TransactionType_TRANSACTION_TYPE_SELL         TransactionType = 4
+	TransactionType_TRANSACTION_TYPE_TRANSFER_IN  TransactionType = 5
+	TransactionType_TRANSACTION_TYPE_TRANSFER_OUT TransactionType = 6
+)
+
+// Enum value maps for TransactionType.
+var (
+	TransactionType_name = map[int32]string{
+		0: "TRANSACTION_TYPE_UNSPECIFIED",
+		1: "TRANSACTION_TYPE_DEPOSIT",
+		3: "TRANSACTION_TYPE_BUY",
+		4: "TRANSACTION_TYPE_SELL",
+		5: "TRANSACTION_TYPE_TRANSFER_IN",
+		6: "TRANSACTION_TYPE_TRANSFER_OUT",
+	}
+	TransactionType_value = map[string]int32{
+		"TRANSACTION_TYPE_UNSPECIFIED":  0,
+		"TRANSACTION_TYPE_DEPOSIT":      1,
+		"TRANSACTION_TYPE_BUY":          3,
+		"TRANSACTION_TYPE_SELL":         4,
+		"TRANSACTION_TYPE_TRANSFER_IN":  5,
+		"TRANSACTION_TYPE_TRANSFER_OUT": 6,
+	}
+)
+
+func (x TransactionType) Enum() *TransactionType {
+	p := new(TransactionType)
+	*p = x
+	return p
+}
+
+func (x TransactionType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TransactionType) Descriptor() protoreflect.EnumDescriptor {
+	return file_portfolio_proto_enumTypes[2].Descriptor()
+}
+
+func (TransactionType) Type() protoreflect.EnumType {
+	return &file_portfolio_proto_enumTypes[2]
+}
+
+func (x TransactionType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TransactionType.Descriptor instead.
+func (TransactionType) EnumDescriptor() ([]byte, []int) {
+	return file_portfolio_proto_rawDescGZIP(), []int{2}
+}
+
 type Account struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1164,7 +1222,7 @@ type Transaction struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	AccountId     string                 `protobuf:"bytes,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
-	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
+	Type          TransactionType        `protobuf:"varint,3,opt,name=type,proto3,enum=portfolio.TransactionType" json:"type,omitempty"`
 	Amount        float64                `protobuf:"fixed64,4,opt,name=amount,proto3" json:"amount,omitempty"`
 	Description   string                 `protobuf:"bytes,5,opt,name=description,proto3" json:"description,omitempty"`
 	ReferenceId   string                 `protobuf:"bytes,6,opt,name=reference_id,json=referenceId,proto3" json:"reference_id,omitempty"`
@@ -1217,11 +1275,11 @@ func (x *Transaction) GetAccountId() string {
 	return ""
 }
 
-func (x *Transaction) GetType() string {
+func (x *Transaction) GetType() TransactionType {
 	if x != nil {
 		return x.Type
 	}
-	return ""
+	return TransactionType_TRANSACTION_TYPE_UNSPECIFIED
 }
 
 func (x *Transaction) GetAmount() float64 {
@@ -1348,6 +1406,230 @@ func (x *GetTransactionsResponse) GetTransactions() []*Transaction {
 	return nil
 }
 
+type DepositRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AccountId     string                 `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	Currency      CurrencyType           `protobuf:"varint,3,opt,name=currency,proto3,enum=portfolio.CurrencyType" json:"currency,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DepositRequest) Reset() {
+	*x = DepositRequest{}
+	mi := &file_portfolio_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DepositRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DepositRequest) ProtoMessage() {}
+
+func (x *DepositRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_portfolio_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DepositRequest.ProtoReflect.Descriptor instead.
+func (*DepositRequest) Descriptor() ([]byte, []int) {
+	return file_portfolio_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DepositRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
+func (x *DepositRequest) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+func (x *DepositRequest) GetCurrency() CurrencyType {
+	if x != nil {
+		return x.Currency
+	}
+	return CurrencyType_CURRENCY_TYPE_UNSPECIFIED
+}
+
+type DepositResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          base.ErrorCode         `protobuf:"varint,1,opt,name=code,proto3,enum=base.ErrorCode" json:"code,omitempty"`
+	NewBalance    float64                `protobuf:"fixed64,2,opt,name=new_balance,json=newBalance,proto3" json:"new_balance,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DepositResponse) Reset() {
+	*x = DepositResponse{}
+	mi := &file_portfolio_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DepositResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DepositResponse) ProtoMessage() {}
+
+func (x *DepositResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_portfolio_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DepositResponse.ProtoReflect.Descriptor instead.
+func (*DepositResponse) Descriptor() ([]byte, []int) {
+	return file_portfolio_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DepositResponse) GetCode() base.ErrorCode {
+	if x != nil {
+		return x.Code
+	}
+	return base.ErrorCode(0)
+}
+
+func (x *DepositResponse) GetNewBalance() float64 {
+	if x != nil {
+		return x.NewBalance
+	}
+	return 0
+}
+
+type TransferRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromAccountId string                 `protobuf:"bytes,1,opt,name=from_account_id,json=fromAccountId,proto3" json:"from_account_id,omitempty"`
+	ToAccountId   string                 `protobuf:"bytes,2,opt,name=to_account_id,json=toAccountId,proto3" json:"to_account_id,omitempty"`
+	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	Currency      CurrencyType           `protobuf:"varint,4,opt,name=currency,proto3,enum=portfolio.CurrencyType" json:"currency,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferRequest) Reset() {
+	*x = TransferRequest{}
+	mi := &file_portfolio_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferRequest) ProtoMessage() {}
+
+func (x *TransferRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_portfolio_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferRequest.ProtoReflect.Descriptor instead.
+func (*TransferRequest) Descriptor() ([]byte, []int) {
+	return file_portfolio_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *TransferRequest) GetFromAccountId() string {
+	if x != nil {
+		return x.FromAccountId
+	}
+	return ""
+}
+
+func (x *TransferRequest) GetToAccountId() string {
+	if x != nil {
+		return x.ToAccountId
+	}
+	return ""
+}
+
+func (x *TransferRequest) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+func (x *TransferRequest) GetCurrency() CurrencyType {
+	if x != nil {
+		return x.Currency
+	}
+	return CurrencyType_CURRENCY_TYPE_UNSPECIFIED
+}
+
+type TransferResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          base.ErrorCode         `protobuf:"varint,1,opt,name=code,proto3,enum=base.ErrorCode" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferResponse) Reset() {
+	*x = TransferResponse{}
+	mi := &file_portfolio_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferResponse) ProtoMessage() {}
+
+func (x *TransferResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_portfolio_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferResponse.ProtoReflect.Descriptor instead.
+func (*TransferResponse) Descriptor() ([]byte, []int) {
+	return file_portfolio_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *TransferResponse) GetCode() base.ErrorCode {
+	if x != nil {
+		return x.Code
+	}
+	return base.ErrorCode(0)
+}
+
 var File_portfolio_proto protoreflect.FileDescriptor
 
 const file_portfolio_proto_rawDesc = "" +
@@ -1424,12 +1706,12 @@ const file_portfolio_proto_rawDesc = "" +
 	"\n" +
 	"account_id\x18\x01 \x01(\tR\taccountId\"<\n" +
 	"\x15DeleteAccountResponse\x12#\n" +
-	"\x04code\x18\x01 \x01(\x0e2\x0f.base.ErrorCodeR\x04code\"\xe8\x01\n" +
+	"\x04code\x18\x01 \x01(\x0e2\x0f.base.ErrorCodeR\x04code\"\x84\x02\n" +
 	"\vTransaction\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
-	"account_id\x18\x02 \x01(\tR\taccountId\x12\x12\n" +
-	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
+	"account_id\x18\x02 \x01(\tR\taccountId\x12.\n" +
+	"\x04type\x18\x03 \x01(\x0e2\x1a.portfolio.TransactionTypeR\x04type\x12\x16\n" +
 	"\x06amount\x18\x04 \x01(\x01R\x06amount\x12 \n" +
 	"\vdescription\x18\x05 \x01(\tR\vdescription\x12!\n" +
 	"\freference_id\x18\x06 \x01(\tR\vreferenceId\x129\n" +
@@ -1440,7 +1722,23 @@ const file_portfolio_proto_rawDesc = "" +
 	"account_id\x18\x01 \x01(\tR\taccountId\"z\n" +
 	"\x17GetTransactionsResponse\x12#\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x0f.base.ErrorCodeR\x04code\x12:\n" +
-	"\ftransactions\x18\x02 \x03(\v2\x16.portfolio.TransactionR\ftransactions*}\n" +
+	"\ftransactions\x18\x02 \x03(\v2\x16.portfolio.TransactionR\ftransactions\"|\n" +
+	"\x0eDepositRequest\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\tR\taccountId\x12\x16\n" +
+	"\x06amount\x18\x02 \x01(\x01R\x06amount\x123\n" +
+	"\bcurrency\x18\x03 \x01(\x0e2\x17.portfolio.CurrencyTypeR\bcurrency\"W\n" +
+	"\x0fDepositResponse\x12#\n" +
+	"\x04code\x18\x01 \x01(\x0e2\x0f.base.ErrorCodeR\x04code\x12\x1f\n" +
+	"\vnew_balance\x18\x02 \x01(\x01R\n" +
+	"newBalance\"\xaa\x01\n" +
+	"\x0fTransferRequest\x12&\n" +
+	"\x0ffrom_account_id\x18\x01 \x01(\tR\rfromAccountId\x12\"\n" +
+	"\rto_account_id\x18\x02 \x01(\tR\vtoAccountId\x12\x16\n" +
+	"\x06amount\x18\x03 \x01(\x01R\x06amount\x123\n" +
+	"\bcurrency\x18\x04 \x01(\x0e2\x17.portfolio.CurrencyTypeR\bcurrency\"7\n" +
+	"\x10TransferResponse\x12#\n" +
+	"\x04code\x18\x01 \x01(\x0e2\x0f.base.ErrorCodeR\x04code*}\n" +
 	"\vAccountType\x12\x1c\n" +
 	"\x18ACCOUNT_TYPE_UNSPECIFIED\x10\x00\x12\x18\n" +
 	"\x14ACCOUNT_TYPE_SAVINGS\x10\x01\x12\x1b\n" +
@@ -1449,7 +1747,14 @@ const file_portfolio_proto_rawDesc = "" +
 	"\fCurrencyType\x12\x1d\n" +
 	"\x19CURRENCY_TYPE_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11CURRENCY_TYPE_USD\x10\x01\x12\x15\n" +
-	"\x11CURRENCY_TYPE_CAD\x10\x022\xa1\x06\n" +
+	"\x11CURRENCY_TYPE_CAD\x10\x02*\xcb\x01\n" +
+	"\x0fTransactionType\x12 \n" +
+	"\x1cTRANSACTION_TYPE_UNSPECIFIED\x10\x00\x12\x1c\n" +
+	"\x18TRANSACTION_TYPE_DEPOSIT\x10\x01\x12\x18\n" +
+	"\x14TRANSACTION_TYPE_BUY\x10\x03\x12\x19\n" +
+	"\x15TRANSACTION_TYPE_SELL\x10\x04\x12 \n" +
+	"\x1cTRANSACTION_TYPE_TRANSFER_IN\x10\x05\x12!\n" +
+	"\x1dTRANSACTION_TYPE_TRANSFER_OUT\x10\x062\xa8\a\n" +
 	"\x10PortfolioService\x12R\n" +
 	"\rCreateAccount\x12\x1f.portfolio.CreateAccountRequest\x1a .portfolio.CreateAccountResponse\x12d\n" +
 	"\x13GetPortfolioSummary\x12%.portfolio.GetPortfolioSummaryRequest\x1a&.portfolio.GetPortfolioSummaryResponse\x12L\n" +
@@ -1460,7 +1765,9 @@ const file_portfolio_proto_rawDesc = "" +
 	"\x0eAddToWatchlist\x12 .portfolio.AddToWatchlistRequest\x1a!.portfolio.AddToWatchlistResponse\x12d\n" +
 	"\x13RemoveFromWatchlist\x12%.portfolio.RemoveFromWatchlistRequest\x1a&.portfolio.RemoveFromWatchlistResponse\x12R\n" +
 	"\rDeleteAccount\x12\x1f.portfolio.DeleteAccountRequest\x1a .portfolio.DeleteAccountResponse\x12X\n" +
-	"\x0fGetTransactions\x12!.portfolio.GetTransactionsRequest\x1a\".portfolio.GetTransactionsResponseB\x1cZ\x1afafnir/shared/pb/portfoliob\x06proto3"
+	"\x0fGetTransactions\x12!.portfolio.GetTransactionsRequest\x1a\".portfolio.GetTransactionsResponse\x12@\n" +
+	"\aDeposit\x12\x19.portfolio.DepositRequest\x1a\x1a.portfolio.DepositResponse\x12C\n" +
+	"\bTransfer\x12\x1a.portfolio.TransferRequest\x1a\x1b.portfolio.TransferResponseB\x1cZ\x1afafnir/shared/pb/portfoliob\x06proto3"
 
 var (
 	file_portfolio_proto_rawDescOnce sync.Once
@@ -1474,85 +1781,99 @@ func file_portfolio_proto_rawDescGZIP() []byte {
 	return file_portfolio_proto_rawDescData
 }
 
-var file_portfolio_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_portfolio_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_portfolio_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_portfolio_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_portfolio_proto_goTypes = []any{
 	(AccountType)(0),                    // 0: portfolio.AccountType
 	(CurrencyType)(0),                   // 1: portfolio.CurrencyType
-	(*Account)(nil),                     // 2: portfolio.Account
-	(*Holding)(nil),                     // 3: portfolio.Holding
-	(*WatchlistItem)(nil),               // 4: portfolio.WatchlistItem
-	(*CreateAccountRequest)(nil),        // 5: portfolio.CreateAccountRequest
-	(*CreateAccountResponse)(nil),       // 6: portfolio.CreateAccountResponse
-	(*GetPortfolioSummaryRequest)(nil),  // 7: portfolio.GetPortfolioSummaryRequest
-	(*GetPortfolioSummaryResponse)(nil), // 8: portfolio.GetPortfolioSummaryResponse
-	(*GetHoldingsRequest)(nil),          // 9: portfolio.GetHoldingsRequest
-	(*GetHoldingsResponse)(nil),         // 10: portfolio.GetHoldingsResponse
-	(*GetHoldingRequest)(nil),           // 11: portfolio.GetHoldingRequest
-	(*GetHoldingResponse)(nil),          // 12: portfolio.GetHoldingResponse
-	(*GetWatchlistRequest)(nil),         // 13: portfolio.GetWatchlistRequest
-	(*GetWatchlistResponse)(nil),        // 14: portfolio.GetWatchlistResponse
-	(*AddToWatchlistRequest)(nil),       // 15: portfolio.AddToWatchlistRequest
-	(*AddToWatchlistResponse)(nil),      // 16: portfolio.AddToWatchlistResponse
-	(*RemoveFromWatchlistRequest)(nil),  // 17: portfolio.RemoveFromWatchlistRequest
-	(*RemoveFromWatchlistResponse)(nil), // 18: portfolio.RemoveFromWatchlistResponse
-	(*DeleteAccountRequest)(nil),        // 19: portfolio.DeleteAccountRequest
-	(*DeleteAccountResponse)(nil),       // 20: portfolio.DeleteAccountResponse
-	(*Transaction)(nil),                 // 21: portfolio.Transaction
-	(*GetTransactionsRequest)(nil),      // 22: portfolio.GetTransactionsRequest
-	(*GetTransactionsResponse)(nil),     // 23: portfolio.GetTransactionsResponse
-	(*timestamppb.Timestamp)(nil),       // 24: google.protobuf.Timestamp
-	(base.ErrorCode)(0),                 // 25: base.ErrorCode
+	(TransactionType)(0),                // 2: portfolio.TransactionType
+	(*Account)(nil),                     // 3: portfolio.Account
+	(*Holding)(nil),                     // 4: portfolio.Holding
+	(*WatchlistItem)(nil),               // 5: portfolio.WatchlistItem
+	(*CreateAccountRequest)(nil),        // 6: portfolio.CreateAccountRequest
+	(*CreateAccountResponse)(nil),       // 7: portfolio.CreateAccountResponse
+	(*GetPortfolioSummaryRequest)(nil),  // 8: portfolio.GetPortfolioSummaryRequest
+	(*GetPortfolioSummaryResponse)(nil), // 9: portfolio.GetPortfolioSummaryResponse
+	(*GetHoldingsRequest)(nil),          // 10: portfolio.GetHoldingsRequest
+	(*GetHoldingsResponse)(nil),         // 11: portfolio.GetHoldingsResponse
+	(*GetHoldingRequest)(nil),           // 12: portfolio.GetHoldingRequest
+	(*GetHoldingResponse)(nil),          // 13: portfolio.GetHoldingResponse
+	(*GetWatchlistRequest)(nil),         // 14: portfolio.GetWatchlistRequest
+	(*GetWatchlistResponse)(nil),        // 15: portfolio.GetWatchlistResponse
+	(*AddToWatchlistRequest)(nil),       // 16: portfolio.AddToWatchlistRequest
+	(*AddToWatchlistResponse)(nil),      // 17: portfolio.AddToWatchlistResponse
+	(*RemoveFromWatchlistRequest)(nil),  // 18: portfolio.RemoveFromWatchlistRequest
+	(*RemoveFromWatchlistResponse)(nil), // 19: portfolio.RemoveFromWatchlistResponse
+	(*DeleteAccountRequest)(nil),        // 20: portfolio.DeleteAccountRequest
+	(*DeleteAccountResponse)(nil),       // 21: portfolio.DeleteAccountResponse
+	(*Transaction)(nil),                 // 22: portfolio.Transaction
+	(*GetTransactionsRequest)(nil),      // 23: portfolio.GetTransactionsRequest
+	(*GetTransactionsResponse)(nil),     // 24: portfolio.GetTransactionsResponse
+	(*DepositRequest)(nil),              // 25: portfolio.DepositRequest
+	(*DepositResponse)(nil),             // 26: portfolio.DepositResponse
+	(*TransferRequest)(nil),             // 27: portfolio.TransferRequest
+	(*TransferResponse)(nil),            // 28: portfolio.TransferResponse
+	(*timestamppb.Timestamp)(nil),       // 29: google.protobuf.Timestamp
+	(base.ErrorCode)(0),                 // 30: base.ErrorCode
 }
 var file_portfolio_proto_depIdxs = []int32{
 	0,  // 0: portfolio.Account.type:type_name -> portfolio.AccountType
 	1,  // 1: portfolio.Account.currency:type_name -> portfolio.CurrencyType
-	24, // 2: portfolio.Account.created_at:type_name -> google.protobuf.Timestamp
-	24, // 3: portfolio.Account.updated_at:type_name -> google.protobuf.Timestamp
-	24, // 4: portfolio.Holding.created_at:type_name -> google.protobuf.Timestamp
-	24, // 5: portfolio.Holding.updated_at:type_name -> google.protobuf.Timestamp
-	24, // 6: portfolio.WatchlistItem.added_at:type_name -> google.protobuf.Timestamp
+	29, // 2: portfolio.Account.created_at:type_name -> google.protobuf.Timestamp
+	29, // 3: portfolio.Account.updated_at:type_name -> google.protobuf.Timestamp
+	29, // 4: portfolio.Holding.created_at:type_name -> google.protobuf.Timestamp
+	29, // 5: portfolio.Holding.updated_at:type_name -> google.protobuf.Timestamp
+	29, // 6: portfolio.WatchlistItem.added_at:type_name -> google.protobuf.Timestamp
 	0,  // 7: portfolio.CreateAccountRequest.type:type_name -> portfolio.AccountType
 	1,  // 8: portfolio.CreateAccountRequest.currency:type_name -> portfolio.CurrencyType
-	25, // 9: portfolio.CreateAccountResponse.code:type_name -> base.ErrorCode
-	2,  // 10: portfolio.CreateAccountResponse.account:type_name -> portfolio.Account
-	25, // 11: portfolio.GetPortfolioSummaryResponse.code:type_name -> base.ErrorCode
-	2,  // 12: portfolio.GetPortfolioSummaryResponse.accounts:type_name -> portfolio.Account
-	25, // 13: portfolio.GetHoldingsResponse.code:type_name -> base.ErrorCode
-	3,  // 14: portfolio.GetHoldingsResponse.holdings:type_name -> portfolio.Holding
-	25, // 15: portfolio.GetHoldingResponse.code:type_name -> base.ErrorCode
-	3,  // 16: portfolio.GetHoldingResponse.holding:type_name -> portfolio.Holding
-	25, // 17: portfolio.GetWatchlistResponse.code:type_name -> base.ErrorCode
-	4,  // 18: portfolio.GetWatchlistResponse.items:type_name -> portfolio.WatchlistItem
-	25, // 19: portfolio.AddToWatchlistResponse.code:type_name -> base.ErrorCode
-	25, // 20: portfolio.RemoveFromWatchlistResponse.code:type_name -> base.ErrorCode
-	25, // 21: portfolio.DeleteAccountResponse.code:type_name -> base.ErrorCode
-	24, // 22: portfolio.Transaction.created_at:type_name -> google.protobuf.Timestamp
-	25, // 23: portfolio.GetTransactionsResponse.code:type_name -> base.ErrorCode
-	21, // 24: portfolio.GetTransactionsResponse.transactions:type_name -> portfolio.Transaction
-	5,  // 25: portfolio.PortfolioService.CreateAccount:input_type -> portfolio.CreateAccountRequest
-	7,  // 26: portfolio.PortfolioService.GetPortfolioSummary:input_type -> portfolio.GetPortfolioSummaryRequest
-	9,  // 27: portfolio.PortfolioService.GetHoldings:input_type -> portfolio.GetHoldingsRequest
-	11, // 28: portfolio.PortfolioService.GetHolding:input_type -> portfolio.GetHoldingRequest
-	13, // 29: portfolio.PortfolioService.GetWatchlist:input_type -> portfolio.GetWatchlistRequest
-	15, // 30: portfolio.PortfolioService.AddToWatchlist:input_type -> portfolio.AddToWatchlistRequest
-	17, // 31: portfolio.PortfolioService.RemoveFromWatchlist:input_type -> portfolio.RemoveFromWatchlistRequest
-	19, // 32: portfolio.PortfolioService.DeleteAccount:input_type -> portfolio.DeleteAccountRequest
-	22, // 33: portfolio.PortfolioService.GetTransactions:input_type -> portfolio.GetTransactionsRequest
-	6,  // 34: portfolio.PortfolioService.CreateAccount:output_type -> portfolio.CreateAccountResponse
-	8,  // 35: portfolio.PortfolioService.GetPortfolioSummary:output_type -> portfolio.GetPortfolioSummaryResponse
-	10, // 36: portfolio.PortfolioService.GetHoldings:output_type -> portfolio.GetHoldingsResponse
-	12, // 37: portfolio.PortfolioService.GetHolding:output_type -> portfolio.GetHoldingResponse
-	14, // 38: portfolio.PortfolioService.GetWatchlist:output_type -> portfolio.GetWatchlistResponse
-	16, // 39: portfolio.PortfolioService.AddToWatchlist:output_type -> portfolio.AddToWatchlistResponse
-	18, // 40: portfolio.PortfolioService.RemoveFromWatchlist:output_type -> portfolio.RemoveFromWatchlistResponse
-	20, // 41: portfolio.PortfolioService.DeleteAccount:output_type -> portfolio.DeleteAccountResponse
-	23, // 42: portfolio.PortfolioService.GetTransactions:output_type -> portfolio.GetTransactionsResponse
-	34, // [34:43] is the sub-list for method output_type
-	25, // [25:34] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	25, // [25:25] is the sub-list for extension extendee
-	0,  // [0:25] is the sub-list for field type_name
+	30, // 9: portfolio.CreateAccountResponse.code:type_name -> base.ErrorCode
+	3,  // 10: portfolio.CreateAccountResponse.account:type_name -> portfolio.Account
+	30, // 11: portfolio.GetPortfolioSummaryResponse.code:type_name -> base.ErrorCode
+	3,  // 12: portfolio.GetPortfolioSummaryResponse.accounts:type_name -> portfolio.Account
+	30, // 13: portfolio.GetHoldingsResponse.code:type_name -> base.ErrorCode
+	4,  // 14: portfolio.GetHoldingsResponse.holdings:type_name -> portfolio.Holding
+	30, // 15: portfolio.GetHoldingResponse.code:type_name -> base.ErrorCode
+	4,  // 16: portfolio.GetHoldingResponse.holding:type_name -> portfolio.Holding
+	30, // 17: portfolio.GetWatchlistResponse.code:type_name -> base.ErrorCode
+	5,  // 18: portfolio.GetWatchlistResponse.items:type_name -> portfolio.WatchlistItem
+	30, // 19: portfolio.AddToWatchlistResponse.code:type_name -> base.ErrorCode
+	30, // 20: portfolio.RemoveFromWatchlistResponse.code:type_name -> base.ErrorCode
+	30, // 21: portfolio.DeleteAccountResponse.code:type_name -> base.ErrorCode
+	2,  // 22: portfolio.Transaction.type:type_name -> portfolio.TransactionType
+	29, // 23: portfolio.Transaction.created_at:type_name -> google.protobuf.Timestamp
+	30, // 24: portfolio.GetTransactionsResponse.code:type_name -> base.ErrorCode
+	22, // 25: portfolio.GetTransactionsResponse.transactions:type_name -> portfolio.Transaction
+	1,  // 26: portfolio.DepositRequest.currency:type_name -> portfolio.CurrencyType
+	30, // 27: portfolio.DepositResponse.code:type_name -> base.ErrorCode
+	1,  // 28: portfolio.TransferRequest.currency:type_name -> portfolio.CurrencyType
+	30, // 29: portfolio.TransferResponse.code:type_name -> base.ErrorCode
+	6,  // 30: portfolio.PortfolioService.CreateAccount:input_type -> portfolio.CreateAccountRequest
+	8,  // 31: portfolio.PortfolioService.GetPortfolioSummary:input_type -> portfolio.GetPortfolioSummaryRequest
+	10, // 32: portfolio.PortfolioService.GetHoldings:input_type -> portfolio.GetHoldingsRequest
+	12, // 33: portfolio.PortfolioService.GetHolding:input_type -> portfolio.GetHoldingRequest
+	14, // 34: portfolio.PortfolioService.GetWatchlist:input_type -> portfolio.GetWatchlistRequest
+	16, // 35: portfolio.PortfolioService.AddToWatchlist:input_type -> portfolio.AddToWatchlistRequest
+	18, // 36: portfolio.PortfolioService.RemoveFromWatchlist:input_type -> portfolio.RemoveFromWatchlistRequest
+	20, // 37: portfolio.PortfolioService.DeleteAccount:input_type -> portfolio.DeleteAccountRequest
+	23, // 38: portfolio.PortfolioService.GetTransactions:input_type -> portfolio.GetTransactionsRequest
+	25, // 39: portfolio.PortfolioService.Deposit:input_type -> portfolio.DepositRequest
+	27, // 40: portfolio.PortfolioService.Transfer:input_type -> portfolio.TransferRequest
+	7,  // 41: portfolio.PortfolioService.CreateAccount:output_type -> portfolio.CreateAccountResponse
+	9,  // 42: portfolio.PortfolioService.GetPortfolioSummary:output_type -> portfolio.GetPortfolioSummaryResponse
+	11, // 43: portfolio.PortfolioService.GetHoldings:output_type -> portfolio.GetHoldingsResponse
+	13, // 44: portfolio.PortfolioService.GetHolding:output_type -> portfolio.GetHoldingResponse
+	15, // 45: portfolio.PortfolioService.GetWatchlist:output_type -> portfolio.GetWatchlistResponse
+	17, // 46: portfolio.PortfolioService.AddToWatchlist:output_type -> portfolio.AddToWatchlistResponse
+	19, // 47: portfolio.PortfolioService.RemoveFromWatchlist:output_type -> portfolio.RemoveFromWatchlistResponse
+	21, // 48: portfolio.PortfolioService.DeleteAccount:output_type -> portfolio.DeleteAccountResponse
+	24, // 49: portfolio.PortfolioService.GetTransactions:output_type -> portfolio.GetTransactionsResponse
+	26, // 50: portfolio.PortfolioService.Deposit:output_type -> portfolio.DepositResponse
+	28, // 51: portfolio.PortfolioService.Transfer:output_type -> portfolio.TransferResponse
+	41, // [41:52] is the sub-list for method output_type
+	30, // [30:41] is the sub-list for method input_type
+	30, // [30:30] is the sub-list for extension type_name
+	30, // [30:30] is the sub-list for extension extendee
+	0,  // [0:30] is the sub-list for field type_name
 }
 
 func init() { file_portfolio_proto_init() }
@@ -1565,8 +1886,8 @@ func file_portfolio_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_portfolio_proto_rawDesc), len(file_portfolio_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   22,
+			NumEnums:      3,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

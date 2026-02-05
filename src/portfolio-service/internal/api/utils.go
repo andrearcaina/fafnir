@@ -72,6 +72,17 @@ func convertCurrencyTypeFromDB(t generated.CurrencyType) portfoliopb.CurrencyTyp
 	}
 }
 
+func convertCurrencyTypeToProto(t generated.CurrencyType) portfoliopb.CurrencyType {
+	switch t {
+	case generated.CurrencyTypeUSD:
+		return portfoliopb.CurrencyType_CURRENCY_TYPE_USD
+	case generated.CurrencyTypeCAD:
+		return portfoliopb.CurrencyType_CURRENCY_TYPE_CAD
+	default:
+		return portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
+	}
+}
+
 func convertHoldingToProto(h generated.Holding) *portfoliopb.Holding {
 	qty, _ := h.Quantity.Float64Value()
 	avg, _ := h.AvgCost.Float64Value()
@@ -87,6 +98,23 @@ func convertHoldingToProto(h generated.Holding) *portfoliopb.Holding {
 	}
 }
 
+func convertTransactionTypeToProto(t generated.TransactionType) portfoliopb.TransactionType {
+	switch t {
+	case generated.TransactionTypeDeposit:
+		return portfoliopb.TransactionType_TRANSACTION_TYPE_DEPOSIT
+	case generated.TransactionTypeTransferIn:
+		return portfoliopb.TransactionType_TRANSACTION_TYPE_TRANSFER_IN
+	case generated.TransactionTypeTransferOut:
+		return portfoliopb.TransactionType_TRANSACTION_TYPE_TRANSFER_OUT
+	case generated.TransactionTypeBuy:
+		return portfoliopb.TransactionType_TRANSACTION_TYPE_BUY
+	case generated.TransactionTypeSell:
+		return portfoliopb.TransactionType_TRANSACTION_TYPE_SELL
+	default:
+		return portfoliopb.TransactionType_TRANSACTION_TYPE_UNSPECIFIED
+	}
+}
+
 func floatToNumeric(f float64) pgtype.Numeric {
 	var n pgtype.Numeric
 	s := fmt.Sprintf("%f", f)
@@ -94,6 +122,11 @@ func floatToNumeric(f float64) pgtype.Numeric {
 		return pgtype.Numeric{Valid: false}
 	}
 	return n
+}
+
+func numericToFloat(n pgtype.Numeric) float64 {
+	f, _ := n.Float64Value()
+	return f.Float64
 }
 
 func floatToNumericNullIfZero(f float64) pgtype.Numeric {

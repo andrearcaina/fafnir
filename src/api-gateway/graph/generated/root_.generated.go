@@ -71,6 +71,11 @@ type ComplexityRoot struct {
 		Data func(childComplexity int) int
 	}
 
+	DepositResponse struct {
+		Code       func(childComplexity int) int
+		NewBalance func(childComplexity int) int
+	}
+
 	GetHoldingResponse struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
@@ -123,7 +128,9 @@ type ComplexityRoot struct {
 		CreateAccount       func(childComplexity int, request model.CreateAccountRequest) int
 		CreateOrder         func(childComplexity int, request model.CreateOrderRequest) int
 		DeleteAccount       func(childComplexity int, accountID string) int
+		Deposit             func(childComplexity int, request model.DepositRequest) int
 		RemoveFromWatchlist func(childComplexity int, request model.RemoveFromWatchlistRequest) int
+		Transfer            func(childComplexity int, request model.TransferRequest) int
 	}
 
 	Order struct {
@@ -247,6 +254,10 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		ReferenceID func(childComplexity int) int
 		Type        func(childComplexity int) int
+	}
+
+	TransferResponse struct {
+		Code func(childComplexity int) int
 	}
 
 	WatchlistItem struct {
@@ -378,6 +389,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.CreateOrderResponse.Data(childComplexity), true
+
+	case "DepositResponse.code":
+		if e.complexity.DepositResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.DepositResponse.Code(childComplexity), true
+
+	case "DepositResponse.newBalance":
+		if e.complexity.DepositResponse.NewBalance == nil {
+			break
+		}
+
+		return e.complexity.DepositResponse.NewBalance(childComplexity), true
 
 	case "GetHoldingResponse.code":
 		if e.complexity.GetHoldingResponse.Code == nil {
@@ -593,6 +618,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.DeleteAccount(childComplexity, args["accountId"].(string)), true
 
+	case "Mutation.deposit":
+		if e.complexity.Mutation.Deposit == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deposit_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Deposit(childComplexity, args["request"].(model.DepositRequest)), true
+
 	case "Mutation.removeFromWatchlist":
 		if e.complexity.Mutation.RemoveFromWatchlist == nil {
 			break
@@ -604,6 +641,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.RemoveFromWatchlist(childComplexity, args["request"].(model.RemoveFromWatchlistRequest)), true
+
+	case "Mutation.transfer":
+		if e.complexity.Mutation.Transfer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_transfer_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Transfer(childComplexity, args["request"].(model.TransferRequest)), true
 
 	case "Order.avgFillPrice":
 		if e.complexity.Order.AvgFillPrice == nil {
@@ -1196,6 +1245,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Transaction.Type(childComplexity), true
 
+	case "TransferResponse.code":
+		if e.complexity.TransferResponse.Code == nil {
+			break
+		}
+
+		return e.complexity.TransferResponse.Code(childComplexity), true
+
 	case "WatchlistItem.addedAt":
 		if e.complexity.WatchlistItem.AddedAt == nil {
 			break
@@ -1221,12 +1277,14 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAddToWatchlistRequest,
 		ec.unmarshalInputCreateAccountRequest,
 		ec.unmarshalInputCreateOrderRequest,
+		ec.unmarshalInputDepositRequest,
 		ec.unmarshalInputGetHoldingRequest,
 		ec.unmarshalInputGetHoldingsRequest,
 		ec.unmarshalInputGetOrderByIDRequest,
 		ec.unmarshalInputGetTransactionsRequest,
 		ec.unmarshalInputHasPermissionRequest,
 		ec.unmarshalInputRemoveFromWatchlistRequest,
+		ec.unmarshalInputTransferRequest,
 	)
 	first := true
 
@@ -1497,6 +1555,28 @@ type GetTransactionsResponse {
     data: [Transaction!]
 }
 
+input DepositRequest {
+    accountId: String!
+    amount: Float!
+    currency: String! # either USD or CAD
+}
+
+type DepositResponse {
+    code: String!
+    newBalance: Float!
+}
+
+input TransferRequest {
+    fromAccountId: String!
+    toAccountId: String!
+    amount: Float!
+    currency: String! # either USD or CAD
+}
+
+type TransferResponse {
+    code: String!
+}
+
 extend type Query {
     getPortfolioSummary: GetPortfolioSummaryResponse!
     getHoldings(request: GetHoldingsRequest!): GetHoldingsResponse!
@@ -1510,8 +1590,9 @@ extend type Mutation {
     addToWatchlist(request: AddToWatchlistRequest!): AddToWatchlistResponse!
     removeFromWatchlist(request: RemoveFromWatchlistRequest!): RemoveFromWatchlistResponse!
     deleteAccount(accountId: String!): Boolean!
-}
-`, BuiltIn: false},
+    deposit(request: DepositRequest!): DepositResponse!
+    transfer(request: TransferRequest!): TransferResponse!
+}`, BuiltIn: false},
 	{Name: "../schemas/security.graphqls", Input: `input HasPermissionRequest {
     permission: String!
 }

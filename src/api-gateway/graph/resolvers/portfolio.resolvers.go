@@ -58,6 +58,24 @@ func (r *mutationResolver) DeleteAccount(ctx context.Context, accountID string) 
 	return r.PortfolioClient.DeleteAccount(ctx, accountID)
 }
 
+// Deposit is the resolver for the deposit field.
+func (r *mutationResolver) Deposit(ctx context.Context, request model.DepositRequest) (*model.DepositResponse, error) {
+	resp, err := r.PortfolioClient.Deposit(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// Transfer is the resolver for the transfer field.
+func (r *mutationResolver) Transfer(ctx context.Context, request model.TransferRequest) (*model.TransferResponse, error) {
+	resp, err := r.PortfolioClient.Transfer(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 // GetPortfolioSummary is the resolver for the getPortfolioSummary field.
 func (r *queryResolver) GetPortfolioSummary(ctx context.Context) (*model.GetPortfolioSummaryResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)

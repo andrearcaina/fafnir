@@ -74,7 +74,9 @@ func (db *Database) GetPool() *pgxpool.Pool {
 	return db.pool
 }
 
-func (db *Database) ExecTx(ctx context.Context, fn func(*generated.Queries) error) error {
+// ExecMultiTx executes a function as a database transaction (it handles multiple queries)
+// This is used for operations that require multiple database operations to be performed as a single unit
+func (db *Database) ExecMultiTx(ctx context.Context, fn func(*generated.Queries) error) error {
 	tx, err := db.pool.Begin(ctx)
 	if err != nil {
 		return err

@@ -14,6 +14,7 @@ type Querier interface {
 	AddToWatchlist(ctx context.Context, arg AddToWatchlistParams) error
 	DecreaseHolding(ctx context.Context, arg DecreaseHoldingParams) (Holding, error)
 	DeleteAccount(ctx context.Context, id uuid.UUID) error
+	GetAccountById(ctx context.Context, id uuid.UUID) (Account, error)
 	GetAccountByUserId(ctx context.Context, userID uuid.UUID) ([]Account, error)
 	GetHoldingByAccountIdAndSymbol(ctx context.Context, arg GetHoldingByAccountIdAndSymbolParams) (Holding, error)
 	GetHoldingsByAccountId(ctx context.Context, accountID uuid.UUID) ([]Holding, error)

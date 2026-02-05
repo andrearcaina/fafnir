@@ -990,16 +990,19 @@ func (x *OrderCreatedEvent) GetCreatedAt() *timestamppb.Timestamp {
 }
 
 type OrderFilledEvent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	OrderId       string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Symbol        string                 `protobuf:"bytes,3,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	Side          OrderSide              `protobuf:"varint,4,opt,name=side,proto3,enum=order.OrderSide" json:"side,omitempty"`
-	FillQuantity  float64                `protobuf:"fixed64,5,opt,name=fill_quantity,json=fillQuantity,proto3" json:"fill_quantity,omitempty"`
-	FillPrice     float64                `protobuf:"fixed64,6,opt,name=fill_price,json=fillPrice,proto3" json:"fill_price,omitempty"`
-	FilledAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=filled_at,json=filledAt,proto3" json:"filled_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	OrderId            string                 `protobuf:"bytes,1,opt,name=order_id,json=orderId,proto3" json:"order_id,omitempty"`
+	UserId             string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Symbol             string                 `protobuf:"bytes,3,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	Side               OrderSide              `protobuf:"varint,4,opt,name=side,proto3,enum=order.OrderSide" json:"side,omitempty"`
+	FillQuantity       float64                `protobuf:"fixed64,5,opt,name=fill_quantity,json=fillQuantity,proto3" json:"fill_quantity,omitempty"`
+	FillPrice          float64                `protobuf:"fixed64,6,opt,name=fill_price,json=fillPrice,proto3" json:"fill_price,omitempty"`
+	ExchangeRate       float64                `protobuf:"fixed64,7,opt,name=exchange_rate,json=exchangeRate,proto3" json:"exchange_rate,omitempty"`
+	SettlementAmount   float64                `protobuf:"fixed64,8,opt,name=settlement_amount,json=settlementAmount,proto3" json:"settlement_amount,omitempty"`
+	SettlementCurrency string                 `protobuf:"bytes,9,opt,name=settlement_currency,json=settlementCurrency,proto3" json:"settlement_currency,omitempty"`
+	FilledAt           *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=filled_at,json=filledAt,proto3" json:"filled_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *OrderFilledEvent) Reset() {
@@ -1072,6 +1075,27 @@ func (x *OrderFilledEvent) GetFillPrice() float64 {
 		return x.FillPrice
 	}
 	return 0
+}
+
+func (x *OrderFilledEvent) GetExchangeRate() float64 {
+	if x != nil {
+		return x.ExchangeRate
+	}
+	return 0
+}
+
+func (x *OrderFilledEvent) GetSettlementAmount() float64 {
+	if x != nil {
+		return x.SettlementAmount
+	}
+	return 0
+}
+
+func (x *OrderFilledEvent) GetSettlementCurrency() string {
+	if x != nil {
+		return x.SettlementCurrency
+	}
+	return ""
 }
 
 func (x *OrderFilledEvent) GetFilledAt() *timestamppb.Timestamp {
@@ -1318,7 +1342,7 @@ const file_order_proto_rawDesc = "" +
 	"stop_price\x18\t \x01(\x01R\tstopPrice\x129\n" +
 	"\n" +
 	"created_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x81\x02\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x84\x03\n" +
 	"\x10OrderFilledEvent\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
@@ -1326,8 +1350,12 @@ const file_order_proto_rawDesc = "" +
 	"\x04side\x18\x04 \x01(\x0e2\x10.order.OrderSideR\x04side\x12#\n" +
 	"\rfill_quantity\x18\x05 \x01(\x01R\ffillQuantity\x12\x1d\n" +
 	"\n" +
-	"fill_price\x18\x06 \x01(\x01R\tfillPrice\x127\n" +
-	"\tfilled_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\bfilledAt\"\xf2\x01\n" +
+	"fill_price\x18\x06 \x01(\x01R\tfillPrice\x12#\n" +
+	"\rexchange_rate\x18\a \x01(\x01R\fexchangeRate\x12+\n" +
+	"\x11settlement_amount\x18\b \x01(\x01R\x10settlementAmount\x12/\n" +
+	"\x13settlement_currency\x18\t \x01(\tR\x12settlementCurrency\x127\n" +
+	"\tfilled_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\bfilledAt\"\xf2\x01\n" +
 	"\x13OrderCancelledEvent\x12\x19\n" +
 	"\border_id\x18\x01 \x01(\tR\aorderId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
