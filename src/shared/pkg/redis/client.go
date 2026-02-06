@@ -19,6 +19,7 @@ type CacheConfig struct {
 	Host     string
 	Port     string
 	Password string
+	DB       int
 }
 
 // New: initializes a new Redis client with retry logic
@@ -33,7 +34,7 @@ func New(config CacheConfig) (*Cache, error) {
 		rdb = redis.NewClient(&redis.Options{
 			Addr:     fmt.Sprintf("%s:%s", config.Host, config.Port),
 			Password: config.Password,
-			DB:       0,
+			DB:       config.DB,
 		})
 
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -84,6 +85,41 @@ func (c *Cache) MGet(ctx context.Context, keys []string) ([]interface{}, error) 
 		return nil, errors.New("no keys provided")
 	}
 	return c.client.MGet(ctx, keys...).Result()
+}
+
+// RPush: append to a list (right push)
+func (c *Cache) RPush(ctx context.Context, key string, values ...interface{}) error {
+	return c.client.RPush(ctx, key, values...).Err()
+}
+
+// LRange: get range from list (left to right)
+func (c *Cache) LRange(ctx context.Context, key string, start, stop int64) ([]interface{}, error) {
+	result, err := c.client.LRange(ctx, key, start, stop).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	interfaces := make([]interface{}, len(result))
+	for i, v := range result {
+		interfaces[i] = v
+	}
+
+	return interfaces, nil
+}
+
+// SAdd: add to set (random order)
+func (c *Cache) SAdd(ctx context.Context, key string, members ...interface{}) error {
+	return c.client.SAdd(ctx, key, members...).Err()
+}
+
+// SMembers: get all members of set (random order)
+func (c *Cache) SMembers(ctx context.Context, key string) ([]string, error) {
+	return c.client.SMembers(ctx, key).Result()
+}
+
+// SRem: remove from set (random order)
+func (c *Cache) SRem(ctx context.Context, key string, members ...interface{}) error {
+	return c.client.SRem(ctx, key, members...).Err()
 }
 
 func (c *Cache) Close() error {

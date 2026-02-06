@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fafnir/shared/pkg/redis"
 	"fmt"
 	"os"
 )
@@ -10,6 +11,7 @@ type Config struct {
 	NATS         NatsConfig
 	StockService StockServiceConfig
 	Portfolio    PortfolioServiceConfig
+	Cache        redis.CacheConfig
 }
 
 type NatsConfig struct {
@@ -22,12 +24,17 @@ type StockServiceConfig struct {
 	URL string
 }
 
+type PortfolioServiceConfig struct {
+	URL string
+}
+
 func New() *Config {
 	return &Config{
 		PORT:         fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
 		NATS:         newNatsConfig(),
 		StockService: newStockServiceConfig(),
 		Portfolio:    newPortfolioServiceConfig(),
+		Cache:        newRedisConfig(),
 	}
 }
 
@@ -42,6 +49,20 @@ func newNatsConfig() NatsConfig {
 	}
 }
 
+func newRedisConfig() redis.CacheConfig {
+	host := os.Getenv("REDIS_HOST")
+	port := os.Getenv("REDIS_PORT")
+	password := os.Getenv("REDIS_PASSWORD")
+	db := 1
+
+	return redis.CacheConfig{
+		Host:     host,
+		Port:     port,
+		Password: password,
+		DB:       db,
+	}
+}
+
 func newStockServiceConfig() StockServiceConfig {
 	host := os.Getenv("STOCK_SERVICE_HOST")
 	port := os.Getenv("STOCK_SERVICE_PORT")
@@ -49,10 +70,6 @@ func newStockServiceConfig() StockServiceConfig {
 	return StockServiceConfig{
 		URL: fmt.Sprintf("%s:%s", host, port),
 	}
-}
-
-type PortfolioServiceConfig struct {
-	URL string
 }
 
 func newPortfolioServiceConfig() PortfolioServiceConfig {

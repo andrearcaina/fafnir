@@ -10,6 +10,8 @@ import (
 	portfoliopb "fafnir/shared/pb/portfolio"
 	stockpb "fafnir/shared/pb/stock"
 	natsC "fafnir/shared/pkg/nats"
+	"fafnir/shared/pkg/redis"
+	"fafnir/trade-engine/internal/cache"
 	"fafnir/trade-engine/internal/config"
 
 	"github.com/nats-io/nats.go"
@@ -24,8 +26,8 @@ type Engine struct {
 	natsClient      *natsC.NatsClient
 	stockClient     stockpb.StockServiceClient
 	portfolioClient portfoliopb.PortfolioServiceClient
-	orderBook       *OrderBook // basically a "cache" of pending limit orders
-	stopCh          chan struct{}
+	orderBook       *cache.OrderBook // a cache of pending limit orders (map of symbols -> queue of orders)
+	stopCh          chan struct{}    // a channel to signal the engine to stop (used for graceful shutdown)
 }
 
 func NewEngine(cfg *config.Config) (*Engine, error) {
@@ -49,12 +51,18 @@ func NewEngine(cfg *config.Config) (*Engine, error) {
 	}
 	portfolioClient := portfoliopb.NewPortfolioServiceClient(pConn)
 
+	log.Printf("Engine connecting to Redis at %s:%s", cfg.Cache.Host, cfg.Cache.Port)
+	redisClient, err := redis.New(cfg.Cache)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to redis: %w", err)
+	}
+
 	return &Engine{
 		cfg:             cfg,
 		natsClient:      nc,
 		stockClient:     stockClient,
 		portfolioClient: portfolioClient,
-		orderBook:       NewOrderBook(),
+		orderBook:       cache.NewOrderBook(redisClient),
 		stopCh:          make(chan struct{}),
 	}, nil
 }
@@ -101,7 +109,9 @@ func (e *Engine) subscribeToOrders() error {
 }
 
 func (e *Engine) pollOrders() {
-	ticker := time.NewTicker(5 * time.Second) // poll every 5 seconds
+	// poll every 5 seconds (this is considered "long polling")
+	// probably not the best way to do this, but it works for now (it's not truly real-time data anyway)
+	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -304,30 +314,6 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	}
 }
 
-func (e *Engine) publishRejectedEvent(order *orderpb.OrderCreatedEvent, reason string) {
-	rejectedEvent := &orderpb.OrderRejectedEvent{
-		OrderId:    order.OrderId,
-		UserId:     order.UserId,
-		Symbol:     order.Symbol,
-		Reason:     reason,
-		RejectedAt: timestamppb.Now(),
-	}
-
-	data, err := proto.Marshal(rejectedEvent)
-	if err != nil {
-		log.Printf("Failed to marshal rejected event: %v", err)
-		return
-	}
-
-	_, err = e.natsClient.Publish("orders.rejected", data)
-	if err != nil {
-		log.Printf("Failed to publish orders.rejected for order %s: %v", order.OrderId, err)
-		return
-	}
-
-	log.Printf("Order %s REJECTED: %s", order.OrderId, reason)
-}
-
 func (e *Engine) getInvestmentAccount(ctx context.Context, userId string) (*portfoliopb.Account, error) {
 	resp, err := e.portfolioClient.GetPortfolioSummary(ctx, &portfoliopb.GetPortfolioSummaryRequest{UserId: userId})
 	if err != nil {
@@ -366,6 +352,30 @@ func (e *Engine) checkHoldings(ctx context.Context, userId string, symbol string
 		}
 	}
 	return false
+}
+
+func (e *Engine) publishRejectedEvent(order *orderpb.OrderCreatedEvent, reason string) {
+	rejectedEvent := &orderpb.OrderRejectedEvent{
+		OrderId:    order.OrderId,
+		UserId:     order.UserId,
+		Symbol:     order.Symbol,
+		Reason:     reason,
+		RejectedAt: timestamppb.Now(),
+	}
+
+	data, err := proto.Marshal(rejectedEvent)
+	if err != nil {
+		log.Printf("Failed to marshal rejected event: %v", err)
+		return
+	}
+
+	_, err = e.natsClient.Publish("orders.rejected", data)
+	if err != nil {
+		log.Printf("Failed to publish orders.rejected for order %s: %v", order.OrderId, err)
+		return
+	}
+
+	log.Printf("Order %s REJECTED: %s", order.OrderId, reason)
 }
 
 func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice float64, exchangeRate float64, settlementAmount float64, settlementCurrency string) {

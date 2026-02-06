@@ -1,11 +1,13 @@
 # Project Architecture
 
 ### Latest Architecture Designs
+
 - [System High Level Design](designs/images/latest/system_hld.png)
 - [Kubernetes Infrastructure Design](designs/images/latest/k8s_infra.png)
 - [NATS JetStream Diagram](designs/images/latest/nats_js.png)
 
 ### Key Architectural Principles
+
 - **Microservices**: Each service is independently deployable, scalable and follows the single responsibility principle (each service does one thing well)
 - **Backend-for-Frontend (BFF)**: Designed for tailored client experiences (this means the API Gateway is optimized for a singular frontend)
 - **API Gateway Pattern**: Single entry point for all client requests, routing to appropriate services
@@ -28,6 +30,7 @@ fafnir/
 ├── docs/                    # Documentation
 │   └── designs/             # Excalidraw designs and images
 ├── infra/                   # Infrastructure configurations
+│   ├── broker/              # NATS JetStream broker configurations (initialization scripts)
 │   ├── db/                  # Database configurations (initialization scripts)
 │   ├── env/                 # Environment variables
 │   └── monitoring/          # Prometheus, Loki, and Grafana configurations
@@ -42,7 +45,7 @@ fafnir/
 │   ├── portfolio-service/   # Portfolio service
 │   └── shared/              # Shared libraries and utilities
 ├── tests/                   # Testing suites
-│   ├── e2e/                 # End-to-end tests 
+│   ├── e2e/                 # End-to-end tests
 │   └── locust/              # Load testing with Locust
 ├── tools/                   # Development tools
 │   ├── cli/                 # some dev CLIs
@@ -57,28 +60,34 @@ fafnir/
 
 ### Core Services
 
-| Service              | Description                                                      | Tech Stack                   | Ports           | Database        |
-|----------------------|------------------------------------------------------------------|------------------------------|-----------------|-----------------|
-| **api-gateway**      | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi, promhttp | 8080 (public)   | -               |
-| **auth-service**     | Authentication & JWT token management                            | Go, sqlc, go-chi, promhttp   | 8081 (internal) | auth_db         |
-| **security-service** | Role-based access control and authorization                      | Go, sqlc, gRPC, promhttp     | 8082 (internal) | security_db     |
-| **user-service**     | User profile management and CRUD operations                      | Go, sqlc, gRPC, promhttp     | 8083 (internal) | user_db         |
-| **stock-service**    | Stock quote and metadata information                             | Go, sqlc, gRPC, promhttp     | 8084 (internal) | stock_db, redis |
+| Service               | Description                                                      | Tech Stack                   | Ports           | Database          |
+| --------------------- | ---------------------------------------------------------------- | ---------------------------- | --------------- | ----------------- |
+| **api-gateway**       | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi, promhttp | 8080 (public)   | -                 |
+| **auth-service**      | Authentication & JWT token management                            | Go, sqlc, go-chi, promhttp   | 8081 (internal) | auth_db           |
+| **security-service**  | Role-based access control and authorization                      | Go, sqlc, gRPC, promhttp     | 8082 (internal) | security_db       |
+| **user-service**      | User profile management and CRUD operations                      | Go, sqlc, gRPC, promhttp     | 8083 (internal) | user_db           |
+| **stock-service**     | Stock quote and metadata information                             | Go, sqlc, gRPC, promhttp     | 8084 (internal) | stock_db, redis-0 |
+| **order-service**     | Order processing and order history                               | Go, sqlc, gRPC, promhttp     | 8085 (internal) | order_db          |
+| **portfolio-service** | Portfolio management, performance tracking, and reporting        | Go, sqlc, gRPC, promhttp     | 8086 (internal) | portfolio_db      |
+| **trade-engine**      | Trade execution and settlement logic                             | Go, sqlc, gRPC, promhttp     | 8087 (internal) | redis-1           |
+| **shared**            | Shared libraries, utilities, and common code                     | Go                           | -               | -                 |
 
 ### Infrastructure Services
 
-| Service           | Description                                       | Ports           | Purpose                    |
-|-------------------|---------------------------------------------------|-----------------|----------------------------|
-| **postgres**      | Postgres database with per-service databases      | 5432 (internal) | Data persistence           |
-| **redis**         | Redis caching for quick look up                   | 6379 (internal) | Caching                    |
-| **prometheus**    | Metrics collection and monitoring                 | 9090 (dev only) | Observability              |
-| **loki**          | Unified logging storage                           | 3100 (dev only) | Observability              |
-| **grafana**       | Dashboard and Observability UI                    | 3000 (dev only) | Observability              |
-| **nats jetstream**| Persistent event streaming message broker         | 4222 (internal) | Event Streaming            |
-| **locust**        | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing               |
+| Service            | Description                                       | Ports           | Purpose          |
+| ------------------ | ------------------------------------------------- | --------------- | ---------------- |
+| **postgres**       | Postgres database with per-service databases      | 5432 (internal) | Data persistence |
+| **redis**          | Redis caching for quick look up                   | 6379 (internal) | Caching          |
+| **prometheus**     | Metrics collection and monitoring                 | 9090 (dev only) | Observability    |
+| **loki**           | Unified logging storage                           | 3100 (dev only) | Observability    |
+| **grafana**        | Dashboard and Observability UI                    | 3000 (dev only) | Observability    |
+| **nats jetstream** | Persistent event streaming message broker         | 4222 (internal) | Event Streaming  |
+| **locust**         | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing     |
 
 ### Communication Patterns
+
 This architecture employs a combination of synchronous and asynchronous communication patterns:
+
 - **Synchronous Communication**: The API Gateway handles client requests and routes them to the appropriate microservices using REST or gRPC.
 - **Asynchronous Communication**: Microservices communicate with each other using NATS JetStream for event-driven interactions, allowing for decoupled and scalable service interactions.
 
@@ -87,6 +96,7 @@ It is both event driven and request-response based, depending on the use case an
 Feel free to take a look at the [designs](designs/images) folder for visual representations of architecture, network, and data flow designs.
 
 ### Helpful Resources and Readings
+
 - [Microservices](https://martinfowler.com/articles/microservices.html) by [Martin Fowler](https://martinfowler.com/)
 - [What is Microservices Architecture?](https://webandcrafts.com/blog/what-is-microservices-architecture) by [Anjaly Chandran](https://webandcrafts.com/author/anjaly-chandran)
 - [A pattern language for microservices](https://microservices.io/patterns/) by [Chris Richardson](https://microservices.io/about.html)

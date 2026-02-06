@@ -29,7 +29,7 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
-	// create a nats client instanc
+	// create a nats client instance
 	natsClient, err := nats.New(cfg.NATS.URL)
 	if err != nil {
 		log.Fatal(err)

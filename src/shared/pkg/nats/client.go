@@ -67,7 +67,12 @@ func (c *NatsClient) Publish(subject string, data []byte) (*nats.PubAck, error) 
 	return c.js.Publish(subject, data)
 }
 
-// QueueSubscribeSubscribe to a subject with a queue group (this enables load balancing) and a durable name (to maintain state)
+// Subscribe to a subject (broadcast to all subscribers -> fan-out, not load balanced)
+func (c *NatsClient) Subscribe(subject string, handler nats.MsgHandler) (*nats.Subscription, error) {
+	return c.js.Subscribe(subject, handler)
+}
+
+// QueueSubscribe to a subject with a queue group (enables load balancing) and a durable name (to maintain state)
 func (c *NatsClient) QueueSubscribe(subject, queue, durable string, handler nats.MsgHandler) (*nats.Subscription, error) {
 	return c.js.QueueSubscribe(subject, queue, handler, nats.Durable(durable), nats.ManualAck())
 }

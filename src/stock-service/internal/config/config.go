@@ -70,10 +70,12 @@ func newRedisConfig() redis.CacheConfig {
 	host := os.Getenv("REDIS_HOST")
 	port := os.Getenv("REDIS_PORT")
 	password := os.Getenv("REDIS_PASSWORD")
+	db := 0
 
 	return redis.CacheConfig{
 		Host:     host,
 		Port:     port,
 		Password: password,
+		DB:       db,
 	}
 }

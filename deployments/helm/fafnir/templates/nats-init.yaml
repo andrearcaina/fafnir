@@ -28,7 +28,7 @@ data:
         --max-age 7d \
         --max-bytes 100MB \
         --defaults
-
+        
 ---
 apiVersion: batch/v1
 kind: Job

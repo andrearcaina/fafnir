@@ -161,6 +161,10 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            nats:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
         networks:
             - fafnir-network
 
@@ -236,6 +240,9 @@ services:
             - STOCK_SERVICE_PORT=8084
             - PORTFOLIO_SERVICE_HOST=portfolio-service
             - PORTFOLIO_SERVICE_PORT=8086
+            - REDIS_HOST=${REDIS_HOST_DOCKER}
+            - REDIS_PORT=${REDIS_PORT}
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
             - NATS_HOST=${NATS_HOST_DOCKER}
             - NATS_PORT=${NATS_PORT}
         volumes:
@@ -243,6 +250,8 @@ services:
             - ../../src/shared:/app/src/shared:cached
         depends_on:
             nats:
+                condition: service_healthy
+            redis:
                 condition: service_healthy
             stock-service:
                 condition: service_started
@@ -262,7 +271,14 @@ services:
         volumes:
             - natsdata:/data
         healthcheck:
-            test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+            test:
+                [
+                    "CMD",
+                    "wget",
+                    "--spider",
+                    "-q",
+                    "http://localhost:8222/healthz",
+                ]
             interval: 10s
             timeout: 5s
             retries: 10
@@ -288,10 +304,16 @@ services:
 
     redis:
         image: "redis:latest"
-        container_name: fafnir-stock-redis
+        container_name: fafnir-redis
         restart: always
         ports:
             - "6379:6379"
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+            start_period: 60s
         networks:
             - fafnir-network
 
