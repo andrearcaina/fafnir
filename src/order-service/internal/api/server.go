@@ -31,8 +31,8 @@ func NewServer() *Server {
 		log.Fatal(err)
 	}
 
-	// create a nats client instanc
-	natsClient, err := nats.New(cfg.NATS.URL)
+	// create a nats client instance
+	natsClient, err := nats.New(cfg.NATS.URL, nil) // pass in nil logger for now (TODO: implement for gRPC)
 	if err != nil {
 		log.Fatal(err)
 	}

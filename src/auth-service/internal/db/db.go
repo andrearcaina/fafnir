@@ -4,8 +4,8 @@ import (
 	"context"
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db/generated"
+	"fafnir/shared/pkg/logger"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -14,9 +14,10 @@ import (
 type Database struct {
 	pool    *pgxpool.Pool
 	queries *generated.Queries
+	logger  *logger.Logger
 }
 
-func New(cfg *config.Config) (*Database, error) {
+func New(cfg *config.Config, logger *logger.Logger) (*Database, error) {
 	var pool *pgxpool.Pool
 	var err error
 
@@ -26,7 +27,7 @@ func New(cfg *config.Config) (*Database, error) {
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		pool, err = pgxpool.New(context.Background(), cfg.DB.URL)
 		if err != nil {
-			log.Printf("Attempt %d/%d: Failed to create connection pool: %v", attempt, maxRetries, err)
+			logger.Error(context.Background(), "Failed to create connection pool", "attempt", attempt, "max_retries", maxRetries, "error", err)
 			if attempt < maxRetries {
 				time.Sleep(retryInterval)
 				continue
@@ -39,20 +40,21 @@ func New(cfg *config.Config) (*Database, error) {
 		cancel()
 
 		if err == nil {
-			log.Printf("Successfully connected to database on attempt %d", attempt)
+			logger.Info(context.Background(), "Successfully connected to database", "attempt", attempt)
 			queries := generated.New(pool)
 			return &Database{
 				pool:    pool,
 				queries: queries,
+				logger:  logger,
 			}, nil
 		}
 
-		log.Printf("Attempt %d/%d: Failed to ping database: %v", attempt, maxRetries, err)
+		logger.Error(context.Background(), "Failed to ping database", "attempt", attempt, "max_retries", maxRetries, "error", err)
 
 		pool.Close()
 
 		if attempt < maxRetries {
-			log.Printf("Retrying in %v...", retryInterval)
+			logger.Info(context.Background(), "Retrying in %v...", retryInterval)
 			time.Sleep(retryInterval)
 		}
 	}

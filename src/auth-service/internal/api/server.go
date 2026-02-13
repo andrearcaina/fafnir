@@ -4,6 +4,7 @@ import (
 	"context"
 	"fafnir/auth-service/internal/config"
 	"fafnir/auth-service/internal/db"
+	"fafnir/shared/pkg/logger"
 	"fafnir/shared/pkg/nats"
 	"fafnir/shared/pkg/validator"
 	"log"
@@ -19,9 +20,10 @@ import (
 type Server struct {
 	HTTP     *http.Server
 	Database *db.Database
+	Logger   *logger.Logger
 }
 
-func NewServer() *Server {
+func NewServer(logger *logger.Logger) *Server {
 	router := chi.NewRouter()
 
 	// set up CORS options
@@ -36,7 +38,8 @@ func NewServer() *Server {
 	// custom logger middleware (by go chi)
 	router.Use(
 		corsOptions,
-		middleware.Logger,
+		// middleware.Logger,
+		logger.RequestLogger,
 		middleware.Recoverer,
 	)
 
@@ -44,13 +47,13 @@ func NewServer() *Server {
 
 	// connect to auth db by instantiating a new database connection
 	// and passing the config to it
-	dbInstance, err := db.New(cfg)
+	dbInstance, err := db.New(cfg, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// create a nats client instance
-	natsClient, err := nats.New(cfg.NATS.URL)
+	natsClient, err := nats.New(cfg.NATS.URL, logger)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,9 +65,9 @@ func NewServer() *Server {
 	// create a custom validator instance for request payload validation
 	validator := validator.New()
 
-	// create an auth service and handler instance passing in the db instance, nats client, config and validator
+	// create an auth service and handler instance passing in the db instance, nats client, config, logger and validator
 	authService := NewAuthService(dbInstance, natsClient, cfg.JWT)
-	authHandler := NewAuthHandler(authService, validator)
+	authHandler := NewAuthHandler(authService, validator, logger)
 
 	// mount the auth handler to the router at /auth path
 	router.Mount("/auth", authHandler.ServeAuthRoutes())
@@ -77,19 +80,20 @@ func NewServer() *Server {
 			Handler: router,
 		},
 		Database: dbInstance,
+		Logger:   logger,
 	}
 }
 
 func (s *Server) Run() error {
-	log.Printf("Starting auth service on port %s\n", s.HTTP.Addr)
+	s.Logger.Info(context.Background(), "Starting auth service", "port", s.HTTP.Addr)
 	return s.HTTP.ListenAndServe()
 }
 
 func (s *Server) Close(ctx context.Context) error {
-	log.Println("Shutting down auth service gracefully...")
+	s.Logger.Info(ctx, "Shutting down auth service gracefully...")
 
 	if s.Database != nil {
-		log.Println("Database connection closed.")
+		s.Logger.Info(ctx, "Database connection closed.")
 		s.Database.Close()
 	}
 
@@ -98,6 +102,6 @@ func (s *Server) Close(ctx context.Context) error {
 		return err
 	}
 
-	log.Println("Auth service shutdown complete.")
+	s.Logger.Info(ctx, "Auth service shutdown complete.")
 	return nil
 }
