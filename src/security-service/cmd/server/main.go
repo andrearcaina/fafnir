@@ -26,7 +26,7 @@ func main() {
 	cfg := config.NewConfig()
 
 	// connect to security db
-	dbInstance, err := db.New(cfg, logger)
+	db, err := db.New(cfg, logger)
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize database", "error", err)
 		os.Exit(1)
@@ -39,7 +39,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	handler := api.NewSecurityHandler(dbInstance, natsClient, logger)
+	handler := api.NewSecurityHandler(db, natsClient, logger)
 
 	server := api.NewServer(cfg, logger, handler)
 

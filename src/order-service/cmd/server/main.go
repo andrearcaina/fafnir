@@ -29,7 +29,7 @@ func main() {
 	cfg := config.NewConfig()
 
 	// connect to order db
-	dbInstance, err := db.New(cfg, logger)
+	db, err := db.New(cfg, logger)
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize database", "error", err)
 		os.Exit(1)
@@ -50,7 +50,7 @@ func main() {
 	}
 	stockClient := stockpb.NewStockServiceClient(stockConn)
 
-	orderHandler := api.NewOrderHandler(dbInstance, natsClient, stockClient, logger)
+	orderHandler := api.NewOrderHandler(db, natsClient, stockClient, logger)
 
 	server := api.NewServer(cfg, logger, orderHandler)
 

@@ -27,7 +27,7 @@ func main() {
 	cfg := config.NewConfig()
 
 	// connect to stock db
-	dbInstance, err := db.New(cfg, logger)
+	db, err := db.New(cfg, logger)
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize database", "error", err)
 		os.Exit(1)
@@ -47,7 +47,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	stockService := api.NewStockService(dbInstance, redisCache, fmpClient)
+	stockService := api.NewStockService(db, redisCache, fmpClient)
 	stockHandler := api.NewStockHandler(stockService, logger)
 
 	server := api.NewServer(cfg, logger, stockHandler)

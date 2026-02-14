@@ -28,8 +28,7 @@ func main() {
 	// instantiate the configuration (environment variables) for the service
 	cfg := config.NewConfig()
 
-	// connect to auth db by instantiating a new database connection
-	// and passing the config to it
+	// connect to auth db
 	db, err := db.New(cfg, logger)
 	if err != nil {
 		logger.Error(ctx, "Failed to initialize database", "error", err)
