@@ -39,5 +39,6 @@ In no particular order:
     - [x] Use Helm for Kubernetes package management and manifests ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
 - [x] Explore centralizing logging with Elasticsearch ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
     - [x] Migrate to utilizing [Loki](https://grafana.com/oss/loki/) for both Minikube and docker-compose ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
+    - [x] Migrate from `log` to `log/slog` for structured logging and better integration with [Loki](https://grafana.com/oss/loki/) ([issue #31](https://github.com/andrearcaina/fafnir/issues/31)).
 - [ ] Implement a CI/CD pipeline for automated testing and Docker builds.
 - [ ] Production deployment via DigitalOcean and Traefik ([issue #22](https://github.com/andrearcaina/fafnir/issues/22)).
