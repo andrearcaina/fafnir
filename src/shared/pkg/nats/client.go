@@ -1,21 +1,23 @@
 package nats
 
 import (
+	"context"
 	"errors"
+	"fafnir/shared/pkg/logger"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/nats-io/nats.go"
 )
 
 type NatsClient struct {
-	nc *nats.Conn
-	js nats.JetStreamContext
+	nc     *nats.Conn
+	js     nats.JetStreamContext
+	logger *logger.Logger
 }
 
 // New creates a new NatsClient and connects to the NATS server at the given URL
-func New(url string) (*NatsClient, error) {
+func New(url string, l *logger.Logger) (*NatsClient, error) {
 	nc, err := nats.Connect(url)
 	if err != nil {
 		return nil, errors.New("could not connect to NATs server at specified URL")
@@ -26,11 +28,17 @@ func New(url string) (*NatsClient, error) {
 		return nil, errors.New("could not connect to NATS JetStream server")
 	}
 
-	log.Println("Successfully connected to NATS JetStream server")
+	// fallback since i haven't implemented the logger for gRPC services yet
+	if l == nil {
+		l = logger.New(nil)
+	}
+
+	l.Info(context.Background(), "Successfully connected to NATS JetStream server")
 
 	return &NatsClient{
-		nc: nc,
-		js: js,
+		nc:     nc,
+		js:     js,
+		logger: l,
 	}, nil
 }
 
@@ -50,14 +58,14 @@ func (c *NatsClient) AddStream(name string, subjects []string) (*nats.StreamInfo
 		// ensures idempotency - if the stream already exists, return its info (no error)
 		if err == nats.ErrStreamNameAlreadyInUse {
 			streamInfo, _ := c.js.StreamInfo(name)
-			log.Printf("Stream %s already exists", name)
+			c.logger.Info(context.Background(), "Stream already exists", "name", name)
 			return streamInfo, nil
 		}
 
 		return nil, fmt.Errorf("could not create %s stream: %v", name, err)
 	}
 
-	log.Printf("Stream %s created successfully", name)
+	c.logger.Info(context.Background(), "Stream created successfully", "name", name)
 
 	return streamInfo, nil
 }

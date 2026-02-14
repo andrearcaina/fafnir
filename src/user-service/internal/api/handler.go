@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/user"
+	"fafnir/shared/pkg/logger"
 	natsC "fafnir/shared/pkg/nats"
 	"fafnir/user-service/internal/db"
 	"fafnir/user-service/internal/db/generated"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -18,13 +18,15 @@ import (
 type UserHandler struct {
 	db         *db.Database
 	natsClient *natsC.NatsClient
+	logger     *logger.Logger
 	pb.UnimplementedUserServiceServer
 }
 
-func NewUserHandler(database *db.Database, natsClient *natsC.NatsClient) *UserHandler {
+func NewUserHandler(database *db.Database, natsClient *natsC.NatsClient, logger *logger.Logger) *UserHandler {
 	return &UserHandler{
 		db:         database,
 		natsClient: natsClient,
+		logger:     logger,
 	}
 }
 
@@ -62,7 +64,7 @@ func (h *UserHandler) GetProfileData(ctx context.Context, req *pb.ProfileDataReq
 func (h *UserHandler) RegisterSubscribeHandlers() {
 	_, err := h.natsClient.QueueSubscribe("users.>", "users-service-main", "users-consumer", h.handleUserEvents)
 	if err != nil {
-		log.Fatal(err)
+		h.logger.Debug(context.Background(), "Failed to subscribe to users subject", "error", err)
 	}
 }
 
@@ -82,7 +84,7 @@ func (h *UserHandler) handleUserEvents(msg *nats.Msg) {
 	}
 
 	if err != nil {
-		log.Printf("Failed to process %s: %v", msg.Subject, err)
+		h.logger.Debug(context.Background(), "Error processing user event", "subject", msg.Subject, "error", err)
 		_ = msg.Nak() // retry later (negative ack)
 	} else {
 		_ = msg.Ack() // success (acknowledge message)
@@ -98,7 +100,7 @@ func (h *UserHandler) registerUser(msg *nats.Msg) error {
 	}
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
-		log.Printf("Error unmarshaling user registered event: %v", err)
+		h.logger.Debug(context.Background(), "Error unmarshaling user registered event", "error", err)
 		return nil // don't want to retry unmarshaling errors
 	}
 
@@ -111,11 +113,11 @@ func (h *UserHandler) registerUser(msg *nats.Msg) error {
 
 	_, err := h.db.GetQueries().InsertUserProfileById(context.Background(), params)
 	if err != nil {
-		log.Printf("Error creating user profile: %v", err)
+		h.logger.Debug(context.Background(), "Error inserting user profile", "error", err)
 		return err // want to retry on DB errors
 	}
 
-	log.Printf("User profile created for user ID: %s", userData.UserID)
+	h.logger.Info(context.Background(), "User profile created", "user_id", userData.UserID)
 	return nil
 }
 
@@ -126,17 +128,17 @@ func (h *UserHandler) deleteUser(msg *nats.Msg) error {
 	}
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
-		log.Printf("Error unmarshaling user deleted event: %v", err)
+		h.logger.Debug(context.Background(), "Error unmarshaling user deleted event", "error", err)
 		return nil // don't want to retry unmarshaling errors
 	}
 
 	uid := userData.UserID
 
 	if err := h.db.GetQueries().DeleteUserProfileById(context.Background(), uuid.MustParse(userData.UserID)); err != nil {
-		log.Printf("Error deleting user profile: %v", err)
+		h.logger.Debug(context.Background(), "Error deleting user profile", "user_id", uid, "error", err)
 		return err // want to retry on DB errors
 	}
 
-	log.Printf("User profile deleted for user ID: %s", uid)
+	h.logger.Info(context.Background(), "User profile deleted", "user_id", uid)
 	return nil
 }

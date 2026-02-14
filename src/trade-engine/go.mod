@@ -5,12 +5,15 @@ go 1.24.5
 require (
 	fafnir/shared v0.0.0-00010101000000-000000000000
 	// Dependencies will be added by go mod tidy, but listing core ones here
-	github.com/go-chi/chi/v5 v5.2.3
+	github.com/go-chi/chi/v5 v5.2.5
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
 
-require github.com/nats-io/nats.go v1.48.0
+require (
+	github.com/nats-io/nats.go v1.48.0
+	golang.org/x/sync v0.19.0
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

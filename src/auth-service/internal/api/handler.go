@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fafnir/shared/pkg/logger"
 	"fafnir/shared/pkg/utils"
 	"fafnir/shared/pkg/validator"
 	"net/http"
@@ -11,12 +12,14 @@ import (
 type Handler struct {
 	authService *Service
 	validator   *validator.Validator
+	logger      *logger.Logger
 }
 
-func NewAuthHandler(authService *Service, validator *validator.Validator) *Handler {
+func NewAuthHandler(authService *Service, validator *validator.Validator, logger *logger.Logger) *Handler {
 	return &Handler{
 		authService: authService,
 		validator:   validator,
+		logger:      logger,
 	}
 }
 
@@ -39,11 +42,13 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 	var registerRequest RegisterRequest
 
 	if err := utils.DecodeJSON(r, &registerRequest); err != nil {
+		h.logger.Debug(r.Context(), "Failed to decode register request", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
 
 	if err := h.validator.ValidateRequest(registerRequest); err != nil {
+		h.logger.Debug(r.Context(), "Register request validation failed", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
@@ -61,17 +66,20 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest LoginRequest
 
 	if err := utils.DecodeJSON(r, &loginRequest); err != nil {
+		h.logger.Debug(r.Context(), "Failed to decode login request", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
 
 	if err := h.validator.ValidateRequest(loginRequest); err != nil {
+		h.logger.Debug(r.Context(), "Login request validation failed", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
 
 	resp, err := h.authService.Login(r.Context(), loginRequest)
 	if err != nil {
+		h.logger.Debug(r.Context(), "Failed to login user", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
@@ -94,12 +102,14 @@ func (h *Handler) logout(w http.ResponseWriter, _ *http.Request) {
 func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 	userId, err := GetUserIdFromContext(r.Context())
 	if err != nil {
+		h.logger.Debug(r.Context(), "Failed to get user ID from context", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
 
 	// delete the account first
 	if err := h.authService.DeleteAccount(r.Context(), userId); err != nil {
+		h.logger.Debug(r.Context(), "Failed to delete account", "user_id", userId, "error", err)
 		utils.HandleError(w, err)
 		return
 	}
@@ -111,12 +121,14 @@ func (h *Handler) deleteAccount(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getUserInfo(w http.ResponseWriter, r *http.Request) {
 	userId, err := GetUserIdFromContext(r.Context())
 	if err != nil {
+		h.logger.Debug(r.Context(), "Failed to get user ID from context", "error", err)
 		utils.HandleError(w, err)
 		return
 	}
 
 	resp, err := h.authService.GetUserInfo(r.Context(), userId)
 	if err != nil {
+		h.logger.Debug(r.Context(), "Failed to get user info", "user_id", userId, "error", err)
 		utils.HandleError(w, err)
 		return
 	}

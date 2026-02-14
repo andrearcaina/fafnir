@@ -5,16 +5,19 @@ import (
 	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/stock"
 	"fafnir/shared/pkg/errors"
+	"fafnir/shared/pkg/logger"
 )
 
 type StockHandler struct {
 	stockService *Service
+	logger       *logger.Logger
 	pb.UnimplementedStockServiceServer
 }
 
-func NewStockHandler(stockService *Service) *StockHandler {
+func NewStockHandler(stockService *Service, logger *logger.Logger) *StockHandler {
 	return &StockHandler{
 		stockService: stockService,
+		logger:       logger,
 	}
 }
 

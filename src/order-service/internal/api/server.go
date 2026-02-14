@@ -3,54 +3,33 @@ package api
 import (
 	"context"
 	"fafnir/order-service/internal/config"
-	"fafnir/order-service/internal/db"
 	pb "fafnir/shared/pb/order"
-	stockpb "fafnir/shared/pb/stock"
-	"fafnir/shared/pkg/nats"
-
+	"fafnir/shared/pkg/logger"
 	"log"
 	"net"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Server struct {
-	grpcServer *grpc.Server
-	config     *config.Config
+	grpcServer    *grpc.Server
+	metricsServer *http.Server
+	config        *config.Config
+	logger        *logger.Logger
 }
 
-func NewServer() *Server {
-	cfg := config.NewConfig()
-
-	dbInstance, err := db.New(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// create a nats client instanc
-	natsClient, err := nats.New(cfg.NATS.URL)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// create stock service client
-	stockConn, err := grpc.NewClient(cfg.StockService.URL, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatal(err)
-	}
-	stockClient := stockpb.NewStockServiceClient(stockConn)
-
-	orderHandler := NewOrderHandler(dbInstance, natsClient, stockClient)
+func NewServer(cfg *config.Config, logger *logger.Logger, orderHandler *OrderHandler) *Server {
+	// register subscribe handlers for NATS
 	orderHandler.RegisterSubscribeHandlers()
 
 	// create gRPC server with logging interceptor and prometheus interceptor
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			loggingInterceptor,
+			logger.NewGRPCLoggingInterceptor(nil),
 			grpc_prometheus.UnaryServerInterceptor,
 		),
 		grpc.ChainStreamInterceptor(
@@ -66,23 +45,24 @@ func NewServer() *Server {
 	// enable handling of histogram metrics
 	grpc_prometheus.EnableHandlingTimeHistogram()
 
+	router := chi.NewRouter()
+	router.Handle("/metrics", promhttp.Handler())
+
+	metricsServer := &http.Server{
+		Addr:    ":9090",
+		Handler: router,
+	}
+
 	return &Server{
-		grpcServer: grpcServer,
-		config:     cfg,
+		grpcServer:    grpcServer,
+		metricsServer: metricsServer,
+		config:        cfg,
+		logger:        logger,
 	}
 }
 
-func (s *Server) Run() error {
-	// start metrics server
-	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		log.Printf("Starting metrics server on port :9090")
-		if err := http.ListenAndServe(":9090", nil); err != nil {
-			log.Printf("Metrics server error: %v", err)
-		}
-	}()
-
-	log.Printf("Starting gRPC order service on port %s\n", s.config.PORT)
+func (s *Server) RunGRPCServer() error {
+	s.logger.Info(context.Background(), "Starting order service", "port", s.config.PORT)
 
 	listener, err := net.Listen("tcp", s.config.PORT)
 	if err != nil {
@@ -92,10 +72,23 @@ func (s *Server) Run() error {
 	return s.grpcServer.Serve(listener)
 }
 
+func (s *Server) RunMetricsServer() error {
+	s.logger.Info(context.Background(), "Starting metrics server on port 9090")
+
+	if err := s.metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
+}
+
 func (s *Server) Close(ctx context.Context) error {
-	log.Println("Shutting down order service gracefully...")
+	s.logger.Info(context.Background(), "Shutting down order service gracefully...")
 
 	s.grpcServer.GracefulStop()
+
+	if err := s.metricsServer.Shutdown(ctx); err != nil {
+		return err
+	}
 
 	log.Println("Order service shutdown complete.")
 	return nil

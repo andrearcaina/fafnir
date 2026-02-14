@@ -3,8 +3,8 @@ package redis
 import (
 	"context"
 	"errors"
+	"fafnir/shared/pkg/logger"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -12,6 +12,7 @@ import (
 
 type Cache struct {
 	client *redis.Client
+	logger *logger.Logger
 	ttl    time.Duration // time to live (expiration duration) for cached items
 }
 
@@ -23,7 +24,7 @@ type CacheConfig struct {
 }
 
 // New: initializes a new Redis client with retry logic
-func New(config CacheConfig) (*Cache, error) {
+func New(config CacheConfig, logger *logger.Logger) (*Cache, error) {
 	var rdb *redis.Client
 	var err error
 
@@ -42,14 +43,15 @@ func New(config CacheConfig) (*Cache, error) {
 		cancel()
 
 		if err == nil {
-			log.Println("Successfully connected to Redis", "attempt", attempt, "addr", rdb.Options().Addr)
+			logger.Info(context.Background(), "Successfully connected to Redis", "attempt", attempt, "addr", rdb.Options().Addr)
 			return &Cache{
 				client: rdb,
+				logger: logger,
 				ttl:    5 * time.Minute,
 			}, nil
 		}
 
-		log.Println("Failed to ping Redis", "attempt", attempt, "error", err, "retry_in", retryInterval.String())
+		logger.Error(context.Background(), "Failed to ping Redis", "attempt", attempt, "error", err, "retry_in", retryInterval.String())
 
 		err = rdb.Close()
 		if err != nil {

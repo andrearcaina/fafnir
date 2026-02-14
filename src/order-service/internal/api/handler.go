@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"fafnir/order-service/internal/db"
@@ -12,6 +11,7 @@ import (
 	basepb "fafnir/shared/pb/base"
 	orderpb "fafnir/shared/pb/order"
 	stockpb "fafnir/shared/pb/stock"
+	"fafnir/shared/pkg/logger"
 	natsC "fafnir/shared/pkg/nats"
 
 	"github.com/google/uuid"
@@ -25,21 +25,23 @@ type OrderHandler struct {
 	db          *db.Database
 	natsClient  *natsC.NatsClient
 	stockClient stockpb.StockServiceClient
+	logger      *logger.Logger
 	orderpb.UnimplementedOrderServiceServer
 }
 
-func NewOrderHandler(db *db.Database, natsClient *natsC.NatsClient, stockClient stockpb.StockServiceClient) *OrderHandler {
+func NewOrderHandler(db *db.Database, natsClient *natsC.NatsClient, stockClient stockpb.StockServiceClient, logger *logger.Logger) *OrderHandler {
 	return &OrderHandler{
 		db:          db,
 		natsClient:  natsClient,
 		stockClient: stockClient,
+		logger:      logger,
 	}
 }
 
 func (h *OrderHandler) RegisterSubscribeHandlers() {
 	_, err := h.natsClient.QueueSubscribe("orders.>", "order-service", "order-service-durable", h.handleOrderEvents)
 	if err != nil {
-		log.Fatalf("Failed to subscribe to orders.>: %v\n", err)
+		h.logger.Debug(context.Background(), "Failed to subscribe to orders.> subject", "error", err)
 	}
 }
 
@@ -59,7 +61,7 @@ func (h *OrderHandler) handleOrderEvents(msg *nats.Msg) {
 	}
 
 	if err != nil {
-		log.Printf("Failed to process %s: %v", msg.Subject, err)
+		h.logger.Error(context.Background(), "Failed to process message", "subject", msg.Subject, "error", err)
 		_ = msg.Nak() // retry later (negative ack)
 	} else {
 		_ = msg.Ack() // success (acknowledge message)
@@ -174,11 +176,11 @@ func (h *OrderHandler) InsertOrder(ctx context.Context, req *orderpb.InsertOrder
 
 	eventBytes, err := proto.Marshal(event)
 	if err != nil {
-		log.Printf("failed to marshal orders.created event: %v\n", err)
+		h.logger.Error(context.Background(), "Failed to marshal orders.created event", "error", err)
 	} else {
 		_, err = h.natsClient.Publish("orders.created", eventBytes)
 		if err != nil {
-			log.Printf("failed to publish orders.created event: %v\n", err)
+			h.logger.Error(context.Background(), "Failed to publish orders.created event", "error", err)
 		}
 	}
 
@@ -220,11 +222,11 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 
 	eventBytes, err := proto.Marshal(event)
 	if err != nil {
-		log.Printf("failed to marshal orders.cancelled event: %v\n", err)
+		h.logger.Debug(context.Background(), "Failed to marshal orders.cancelled event", "error", err)
 	} else {
 		_, err = h.natsClient.Publish("orders.cancelled", eventBytes)
 		if err != nil {
-			log.Printf("failed to publish orders.cancelled event: %v\n", err)
+			h.logger.Debug(context.Background(), "Failed to publish orders.cancelled event", "error", err)
 		}
 	}
 
@@ -237,13 +239,13 @@ func (h *OrderHandler) CancelOrder(ctx context.Context, req *orderpb.CancelOrder
 func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) error {
 	var event orderpb.OrderFilledEvent
 	if err := proto.Unmarshal(msg.Data, &event); err != nil {
-		log.Printf("Error unmarshalling order filled event: %v\n", err)
+		h.logger.Debug(context.Background(), "Error unmarshalling order filled event", "error", err)
 		return err
 	}
 
 	orderId, err := uuid.Parse(event.OrderId)
 	if err != nil {
-		log.Printf("Invalid order ID in filled event: %v\n", err)
+		h.logger.Debug(context.Background(), "Invalid order ID in filled event", "error", err)
 		return err
 	}
 
@@ -255,7 +257,7 @@ func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) error {
 		FilledAt:     pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
 	if _, err := h.db.GetQueries().InsertOrderFilled(context.Background(), fillParams); err != nil {
-		log.Printf("Failed to insert order fill: %v\n", err)
+		h.logger.Debug(context.Background(), "Failed to insert order fill", "error", err)
 		// for now just log the error and continue
 	}
 
@@ -270,40 +272,40 @@ func (h *OrderHandler) handleOrderFilled(msg *nats.Msg) error {
 	_, err = h.db.GetQueries().UpdateOrderStatus(context.Background(), params)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Printf("Order %s not found during fill update (possibly deleted or inconsistent state)\n", event.OrderId)
+			h.logger.Debug(context.Background(), "Order not found during fill update", "order_id", event.OrderId)
 			return err
 		}
-		log.Printf("Failed to update order status for order %s: %v\n", event.OrderId, err)
+		h.logger.Debug(context.Background(), "Failed to update order status", "order_id", event.OrderId, "error", err)
 		return err
 	}
 
-	log.Printf("Order %s updated to FILLED via NATS event\n", event.OrderId)
+	h.logger.Info(context.Background(), "Order updated to FILLED", "order_id", event.OrderId)
 	return nil
 }
 
 func (h *OrderHandler) handleOrderRejected(msg *nats.Msg) error {
 	var event orderpb.OrderRejectedEvent
 	if err := proto.Unmarshal(msg.Data, &event); err != nil {
-		log.Printf("Error unmarshalling order rejected event: %v\n", err)
+		h.logger.Debug(context.Background(), "Error unmarshalling order rejected event", "error", err)
 		return err
 	}
 
 	orderId, err := uuid.Parse(event.OrderId)
 	if err != nil {
-		log.Printf("Invalid order ID in rejected event: %v\n", err)
+		h.logger.Debug(context.Background(), "Invalid order ID in rejected event", "error", err)
 		return err
 	}
 
 	_, err = h.db.GetQueries().RejectOrder(context.Background(), orderId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			log.Printf("Order %s not found during rejection update\n", event.OrderId)
+			h.logger.Debug(context.Background(), "Order not found during rejection update", "order_id", event.OrderId)
 			return err
 		}
-		log.Printf("Failed to update order status to rejected for order %s: %v\n", event.OrderId, err)
+		h.logger.Debug(context.Background(), "Failed to update order status to rejected", "order_id", event.OrderId, "error", err)
 		return err
 	}
 
-	log.Printf("Order %s updated to REJECTED via NATS event. Reason: %s\n", event.OrderId, event.Reason)
+	h.logger.Info(context.Background(), "Order updated to REJECTED", "order_id", event.OrderId, "reason", event.Reason)
 	return nil
 }

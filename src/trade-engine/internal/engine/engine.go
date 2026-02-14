@@ -3,12 +3,12 @@ package engine
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	orderpb "fafnir/shared/pb/order"
 	portfoliopb "fafnir/shared/pb/portfolio"
 	stockpb "fafnir/shared/pb/stock"
+	"fafnir/shared/pkg/logger"
 	natsC "fafnir/shared/pkg/nats"
 	"fafnir/shared/pkg/redis"
 	"fafnir/trade-engine/internal/cache"
@@ -28,31 +28,32 @@ type Engine struct {
 	portfolioClient portfoliopb.PortfolioServiceClient
 	orderBook       *cache.OrderBook // a cache of pending limit orders (map of symbols -> queue of orders)
 	stopCh          chan struct{}    // a channel to signal the engine to stop (used for graceful shutdown)
+	logger          *logger.Logger
 }
 
-func NewEngine(cfg *config.Config) (*Engine, error) {
-	log.Printf("Engine connecting to NATS at %s", cfg.NATS.URL)
-	nc, err := natsC.New(cfg.NATS.URL)
+func NewEngine(cfg *config.Config, logger *logger.Logger) (*Engine, error) {
+	logger.Info(context.Background(), "Engine connecting to NATS", "url", cfg.NATS.URL)
+	nc, err := natsC.New(cfg.NATS.URL, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to nats: %w", err)
 	}
 
-	log.Printf("Engine connecting to Stock Service at %s", cfg.StockService.URL)
+	logger.Info(context.Background(), "Engine connecting to Stock Service", "url", cfg.StockService.URL)
 	conn, err := grpc.NewClient(cfg.StockService.URL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to stock service: %w", err)
 	}
 	stockClient := stockpb.NewStockServiceClient(conn)
 
-	log.Printf("Engine connecting to Portfolio Service at %s", cfg.Portfolio.URL)
+	logger.Info(context.Background(), "Engine connecting to Portfolio Service", "url", cfg.Portfolio.URL)
 	pConn, err := grpc.NewClient(cfg.Portfolio.URL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to portfolio service: %w", err)
 	}
 	portfolioClient := portfoliopb.NewPortfolioServiceClient(pConn)
 
-	log.Printf("Engine connecting to Redis at %s:%s", cfg.Cache.Host, cfg.Cache.Port)
-	redisClient, err := redis.New(cfg.Cache)
+	logger.Info(context.Background(), "Engine connecting to Redis", "host", cfg.Cache.Host, "port", cfg.Cache.Port)
+	redisClient, err := redis.New(cfg.Cache, logger)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to redis: %w", err)
 	}
@@ -64,13 +65,15 @@ func NewEngine(cfg *config.Config) (*Engine, error) {
 		portfolioClient: portfolioClient,
 		orderBook:       cache.NewOrderBook(redisClient),
 		stopCh:          make(chan struct{}),
+		logger:          logger,
 	}, nil
 }
 
-func (e *Engine) Start() {
+func (e *Engine) Start() error {
 	err := e.subscribeToOrders()
 	if err != nil {
-		log.Fatalf("Failed to subscribe to orders.created: %v", err)
+		e.logger.Debug(context.Background(), "Failed to subscribe to orders.created", "error", err)
+		return err
 	}
 
 	// start polling for pending limit orders
@@ -78,6 +81,8 @@ func (e *Engine) Start() {
 
 	// basically block (the main thread) from exiting until stopCh is closed
 	<-e.stopCh
+
+	return nil
 }
 
 func (e *Engine) Stop() error {
@@ -93,16 +98,16 @@ func (e *Engine) subscribeToOrders() error {
 	_, err := e.natsClient.QueueSubscribe("orders.created", "trade-engine", "trade-engine-durable", func(msg *nats.Msg) {
 		var event orderpb.OrderCreatedEvent
 		if err := proto.Unmarshal(msg.Data, &event); err != nil {
-			log.Printf("Error unmarshalling order event: %v", err)
+			e.logger.Debug(context.Background(), "Error unmarshalling order event", "error", err)
 			return
 		}
 
-		log.Printf("Received Order: ID=%s Symbol=%s Type=%v", event.OrderId, event.Symbol, event.Type)
+		e.logger.Info(context.Background(), "Received Order", "id", event.OrderId, "symbol", event.Symbol, "type", event.Type)
 		e.processOrder(&event)
 		_ = msg.Ack()
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
@@ -132,7 +137,7 @@ func (e *Engine) pollOrders() {
 			cancel()
 
 			if err != nil {
-				log.Printf("Failed to get stock quotes batch: %v", err)
+				e.logger.Error(context.Background(), "Failed to get stock quotes batch: %v", err)
 				continue
 			}
 
@@ -145,7 +150,7 @@ func (e *Engine) pollOrders() {
 						Symbol: quote.Symbol,
 					})
 					if err != nil {
-						log.Printf("Failed to get metadata for polling match %s: %v", quote.Symbol, err)
+						e.logger.Error(context.Background(), "Failed to get stock metadata for polling match %s: %v", quote.Symbol, err)
 						continue
 					}
 					stockCurrency := metaResp.Data.Currency
@@ -153,12 +158,12 @@ func (e *Engine) pollOrders() {
 					// get account
 					acc, err := e.getInvestmentAccount(ctx, order.UserId)
 					if err != nil {
-						log.Printf("Polling match failed: no account for user %s", order.UserId)
+						e.logger.Error(context.Background(), "Polling match failed: no account for user %s", order.UserId)
 						continue
 					}
 
 					if acc.Currency == portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED {
-						log.Printf("Polling match failed: account has unspecified currency for user %s", order.UserId)
+						e.logger.Error(context.Background(), "Polling match failed: account has unspecified currency for user %s", order.UserId)
 						continue // just skip
 					}
 
@@ -174,7 +179,7 @@ func (e *Engine) pollOrders() {
 						if acc.Balance >= settlementAmount {
 							hasSufficientResources = true
 						} else {
-							log.Printf("Limit Order %s matched but insufficient funds (Required: %f %s). Rejecting.", order.OrderId, settlementAmount, acc.Currency)
+							e.logger.Info(context.Background(), "Limit Order %s matched but insufficient funds (Required: %f %s). Rejecting.", order.OrderId, settlementAmount, acc.Currency)
 							e.publishRejectedEvent(order, "Insufficient funds")
 						}
 					} else {
@@ -185,7 +190,7 @@ func (e *Engine) pollOrders() {
 						if e.checkHoldings(ctx, order.UserId, order.Symbol, order.Quantity) {
 							hasSufficientResources = true
 						} else {
-							log.Printf("Limit Order %s matched but insufficient holdings. Rejecting.", order.OrderId)
+							e.logger.Info(context.Background(), "Limit Order %s matched but insufficient holdings. Rejecting.", order.OrderId)
 							e.publishRejectedEvent(order, "Insufficient holdings")
 						}
 					}
@@ -211,7 +216,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		Symbol: order.Symbol,
 	})
 	if err != nil {
-		log.Printf("Failed to get stock quote for %s: %v", order.Symbol, err)
+		e.logger.Error(context.Background(), "Failed to get stock quote for %s: %v", order.Symbol, err)
 		return
 	}
 	currentPrice := resp.Data.LastPrice
@@ -221,7 +226,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		Symbol: order.Symbol,
 	})
 	if err != nil {
-		log.Printf("Failed to get stock metadata for %s: %v", order.Symbol, err)
+		e.logger.Error(context.Background(), "Failed to get stock metadata for %s: %v", order.Symbol, err)
 		return
 	}
 	stockCurrency := metaResp.Data.Currency
@@ -229,7 +234,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	// get investment account for user
 	acc, err := e.getInvestmentAccount(ctx, order.UserId)
 	if err != nil {
-		log.Printf("Order %s rejected: %v", order.OrderId, err)
+		e.logger.Error(context.Background(), "Order %s rejected: %v", order.OrderId, err)
 		e.publishRejectedEvent(order, "No investment account found")
 		return
 	}
@@ -237,7 +242,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	// calculate settlement
 	// lotta conversions going on here, for example string "USD" = CURRENCY_TYPE_USD for portfolio service
 	if acc.Currency == portfoliopb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED {
-		log.Printf("Order %s rejected: Account has unspecified currency", order.OrderId)
+		e.logger.Debug(context.Background(), "Order %s rejected: Account has unspecified currency", order.OrderId)
 		e.publishRejectedEvent(order, "Account has unspecified currency")
 		return
 	}
@@ -255,7 +260,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		if acc.Balance >= settlementAmount {
 			hasSufficientResources = true
 		} else {
-			log.Printf("Order %s rejected: Insufficient funds (Required: %f %s, Have: %f %s)",
+			e.logger.Debug(context.Background(), "Order %s rejected: Insufficient funds (Required: %f %s, Have: %f %s)",
 				order.OrderId, settlementAmount, acc.Currency, acc.Balance, acc.Currency)
 			e.publishRejectedEvent(order, fmt.Sprintf("Insufficient funds. Required: %f %s", settlementAmount, acc.Currency))
 			return
@@ -269,7 +274,7 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 		if e.checkHoldings(ctx, order.UserId, order.Symbol, order.Quantity) {
 			hasSufficientResources = true
 		} else {
-			log.Printf("Order %s rejected: Insufficient holdings", order.OrderId)
+			e.logger.Debug(context.Background(), "Order %s rejected: Insufficient holdings", order.OrderId)
 			e.publishRejectedEvent(order, "Insufficient holdings")
 			return
 		}
@@ -305,11 +310,11 @@ func (e *Engine) processOrder(order *orderpb.OrderCreatedEvent) {
 	} else {
 		// no match yet (limit order waiting for price target)
 		if order.Type == orderpb.OrderType_ORDER_TYPE_LIMIT {
-			log.Printf("Order %s not immediately filled. Adding to Order Book. Limit: %f, Current: %f",
+			e.logger.Debug(context.Background(), "Order %s not immediately filled. Adding to Order Book. Limit: %f, Current: %f",
 				order.OrderId, order.Price, currentPrice)
 			e.orderBook.Add(order)
 		} else {
-			log.Printf("Market Order %s not filled (unexpected).", order.OrderId)
+			e.logger.Debug(context.Background(), "Market Order %s not filled (unexpected).", order.OrderId)
 		}
 	}
 }
@@ -333,7 +338,7 @@ func (e *Engine) checkHoldings(ctx context.Context, userId string, symbol string
 	// first get accounts of current user
 	resp, err := e.portfolioClient.GetPortfolioSummary(ctx, &portfoliopb.GetPortfolioSummaryRequest{UserId: userId})
 	if err != nil {
-		log.Printf("Error getting accounts for holding check for user %s: %v", userId, err)
+		e.logger.Error(context.Background(), "Error getting accounts for holding check for user %s: %v", userId, err)
 		return false
 	}
 
@@ -365,17 +370,17 @@ func (e *Engine) publishRejectedEvent(order *orderpb.OrderCreatedEvent, reason s
 
 	data, err := proto.Marshal(rejectedEvent)
 	if err != nil {
-		log.Printf("Failed to marshal rejected event: %v", err)
+		e.logger.Debug(context.Background(), "Failed to marshal rejected event: %v", err)
 		return
 	}
 
 	_, err = e.natsClient.Publish("orders.rejected", data)
 	if err != nil {
-		log.Printf("Failed to publish orders.rejected for order %s: %v", order.OrderId, err)
+		e.logger.Debug(context.Background(), "Failed to publish orders.rejected for order %s: %v", order.OrderId, err)
 		return
 	}
 
-	log.Printf("Order %s REJECTED: %s", order.OrderId, reason)
+	e.logger.Info(context.Background(), "Order %s REJECTED: %s", order.OrderId, reason)
 }
 
 func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice float64, exchangeRate float64, settlementAmount float64, settlementCurrency string) {
@@ -394,15 +399,15 @@ func (e *Engine) publishFilledEvent(order *orderpb.OrderCreatedEvent, fillPrice 
 
 	data, err := proto.Marshal(filledEvent)
 	if err != nil {
-		log.Printf("Failed to marshal filled event: %v", err)
+		e.logger.Debug(context.Background(), "Failed to marshal filled event: %v", err)
 		return
 	}
 
 	_, err = e.natsClient.Publish("orders.filled", data)
 	if err != nil {
-		log.Printf("Failed to publish orders.filled for order %s: %v", order.OrderId, err)
+		e.logger.Debug(context.Background(), "Failed to publish orders.filled for order %s: %v", order.OrderId, err)
 		return
 	}
 
-	log.Printf("Order %s FILLED at %f %s (Settlement: %f %s)", order.OrderId, fillPrice, order.Symbol, settlementAmount, settlementCurrency)
+	e.logger.Info(context.Background(), "Order %s FILLED at %f %s (Settlement: %f %s)", order.OrderId, fillPrice, order.Symbol, settlementAmount, settlementCurrency)
 }

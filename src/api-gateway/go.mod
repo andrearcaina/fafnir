@@ -5,11 +5,12 @@ go 1.24.5
 require (
 	fafnir/shared v0.0.0-00010101000000-000000000000
 	github.com/99designs/gqlgen v0.17.85
-	github.com/go-chi/chi/v5 v5.2.3
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/vektah/gqlparser/v2 v2.5.31
+	golang.org/x/sync v0.19.0
 	google.golang.org/grpc v1.78.0
 )
 
@@ -31,7 +32,6 @@ require (
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/mod v0.31.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	golang.org/x/tools v0.40.0 // indirect

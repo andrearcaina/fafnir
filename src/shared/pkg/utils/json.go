@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	apperrors "fafnir/shared/pkg/errors"
-	"log"
 	"net/http"
 )
 
@@ -26,9 +25,7 @@ func DecodeJSON(r *http.Request, v interface{}) error {
 	}
 
 	defer func() {
-		if err := r.Body.Close(); err != nil {
-			log.Printf("Failed to close request body: %v", err)
-		}
+		_ = r.Body.Close()
 	}()
 
 	decoder := json.NewDecoder(r.Body)
@@ -47,16 +44,9 @@ func HandleError(w http.ResponseWriter, err error) {
 	var appErr *apperrors.AppError
 
 	if errors.As(err, &appErr) {
-		if appErr.Cause != nil {
-			log.Printf("AppError [%s]: %s (caused by: %v)", appErr.Code, appErr.Message, appErr.Cause)
-		} else {
-			log.Printf("AppError [%s]: %s", appErr.Code, appErr.Message)
-		}
-
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(appErr.HTTPStatus)
 		if _, err := w.Write(appErr.ToJSON()); err != nil {
-			log.Printf("Failed to write JSON response: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
