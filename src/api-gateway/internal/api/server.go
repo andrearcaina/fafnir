@@ -6,8 +6,9 @@ import (
 	"fafnir/api-gateway/graph/resolvers"
 	"fafnir/api-gateway/internal/config"
 	m "fafnir/api-gateway/internal/middleware"
-	"log"
 	"net/http"
+
+	"fafnir/shared/pkg/logger"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -22,12 +23,12 @@ import (
 )
 
 type Server struct {
-	HTTP *http.Server
+	HTTP   *http.Server
+	config *config.Config
+	logger *logger.Logger
 }
 
-func NewServer() *Server {
-	cfg := config.NewConfig()
-
+func NewServer(cfg *config.Config, logger *logger.Logger) *Server {
 	srv := handler.New(generated.NewExecutableSchema(
 		generated.Config{
 			Resolvers: &resolvers.Resolver{
@@ -55,7 +56,8 @@ func NewServer() *Server {
 
 	// global middlewares (chi default middlewares)
 	router.Use(
-		middleware.Logger,
+		// middleware.Logger,
+		logger.RequestLogger, // TODO: make it showcase actual graphql "endpoints"
 		middleware.Recoverer,
 	)
 
@@ -76,23 +78,30 @@ func NewServer() *Server {
 			Addr:    cfg.PORT,
 			Handler: router,
 		},
+		config: cfg,
+		logger: logger,
 	}
 }
 
 func (s *Server) Run() error {
-	log.Printf("Starting API gateway on port %s\n", s.HTTP.Addr)
-	return s.HTTP.ListenAndServe()
-}
+	s.logger.Info(context.Background(), "Starting auth service", "port", s.HTTP.Addr)
 
-func (s *Server) Close(ctx context.Context) error {
-	log.Println("Shutting down API gateway gracefully...")
-
-	err := s.HTTP.Shutdown(ctx)
-	if err != nil {
-		log.Printf("Error during graceful shutdown: %v\n", err)
+	if err := s.HTTP.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
 
-	log.Println("API gateway shutdown complete.")
+	return nil
+}
+
+func (s *Server) Close(ctx context.Context) error {
+	s.logger.Info(context.Background(), "Shutting down API gateway gracefully...")
+
+	err := s.HTTP.Shutdown(ctx)
+	if err != nil {
+		s.logger.Error(context.Background(), "Error during graceful shutdown", "error", err)
+		return err
+	}
+
+	s.logger.Info(context.Background(), "API gateway shutdown complete.")
 	return nil
 }

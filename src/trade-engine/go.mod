@@ -10,7 +10,10 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-require github.com/nats-io/nats.go v1.48.0
+require (
+	github.com/nats-io/nats.go v1.48.0
+	golang.org/x/sync v0.19.0
+)
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

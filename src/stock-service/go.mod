@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	fafnir/shared v0.0.0-00010101000000-000000000000
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/prometheus/client_golang v1.23.2

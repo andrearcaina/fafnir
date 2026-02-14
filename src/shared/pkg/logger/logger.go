@@ -5,8 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
 type Logger struct {
@@ -63,4 +66,43 @@ func (l *Logger) RequestLogger(next http.Handler) http.Handler {
 
 		next.ServeHTTP(ww, r)
 	})
+}
+
+// FieldExtractor is a function that extracts fields from a gRPC request and response to be included in the logs.
+// It returns a map of key-value pairs. If nil, no extra fields are logged.
+type FieldExtractor func(fullMethod string, req interface{}, resp interface{}) map[string]any
+
+func (l *Logger) NewGRPCLoggingInterceptor(extractor FieldExtractor) grpc.UnaryServerInterceptor {
+	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+		start := time.Now()
+
+		l.Debug(ctx, "gRPC Request", "method", info.FullMethod, "payload", req)
+
+		resp, err := handler(ctx, req)
+
+		duration := time.Since(start)
+		statusCode := status.Code(err)
+
+		args := []any{
+			"method", info.FullMethod,
+			"duration", duration.String(),
+			"status_code", statusCode.String(),
+		}
+
+		if extractor != nil {
+			fields := extractor(info.FullMethod, req, resp)
+			for k, v := range fields {
+				args = append(args, k, v)
+			}
+		}
+
+		if err != nil {
+			args = append(args, "error", err.Error())
+			l.Error(ctx, "gRPC Request Failed", args...)
+		} else {
+			l.Info(ctx, "gRPC Request Processed", args...)
+		}
+
+		return resp, err
+	}
 }

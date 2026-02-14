@@ -6,10 +6,10 @@ import (
 	"fafnir/security-service/internal/db"
 	"fafnir/security-service/internal/db/generated"
 	"fmt"
-	"log"
 
 	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/security"
+	"fafnir/shared/pkg/logger"
 	natsC "fafnir/shared/pkg/nats"
 
 	"github.com/google/uuid"
@@ -21,6 +21,7 @@ import (
 type SecurityHandler struct {
 	db         *db.Database
 	natsClient *natsC.NatsClient
+	logger     *logger.Logger
 	pb.UnimplementedSecurityServiceServer
 
 	// key: "userID:permission", value: true/false
@@ -29,15 +30,16 @@ type SecurityHandler struct {
 	permissionCache *lru.Cache[string, bool]
 }
 
-func NewSecurityHandler(database *db.Database, natsClient *natsC.NatsClient) *SecurityHandler {
+func NewSecurityHandler(database *db.Database, natsClient *natsC.NatsClient, logger *logger.Logger) *SecurityHandler {
 	cache, err := lru.New[string, bool](1000) // Cache size of 1000 entries
 	if err != nil {
-		log.Fatalf("Failed to create permission cache: %v", err)
+		logger.Error(context.Background(), "Failed to create permission cache", "error", err)
 	}
 
 	return &SecurityHandler{
 		db:              database,
 		natsClient:      natsClient,
+		logger:          logger,
 		permissionCache: cache,
 	}
 }
@@ -49,7 +51,7 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 
 	// if found in cache, return cached value
 	if hasPermission, found := h.permissionCache.Get(cachedKey); found {
-		log.Printf("Permission cache hit for key: %s", cachedKey)
+		h.logger.Debug(ctx, "Permission cache hit", "key", cachedKey)
 		return &pb.CheckPermissionResponse{
 			Permission: &pb.SecurityPermission{
 				HasPermission: hasPermission,
@@ -102,7 +104,7 @@ func (h *SecurityHandler) CheckPermission(ctx context.Context, req *pb.CheckPerm
 func (h *SecurityHandler) RegisterSubscribeHandlers() {
 	_, err := h.natsClient.QueueSubscribe("users.>", "security-service-main", "security-users-consumer", h.handleUserEvents)
 	if err != nil {
-		log.Fatal(err)
+		h.logger.Error(context.Background(), "Failed to subscribe to users.>", "error", err)
 	}
 }
 
@@ -122,7 +124,7 @@ func (h *SecurityHandler) handleUserEvents(msg *nats.Msg) {
 	}
 
 	if err != nil {
-		log.Printf("Failed to process %s: %v", msg.Subject, err)
+		h.logger.Error(context.Background(), "Failed to process message", "subject", msg.Subject, "error", err)
 		_ = msg.Nak() // retry later (negative ack)
 	} else {
 		_ = msg.Ack() // success (acknowledge message)
@@ -135,7 +137,7 @@ func (h *SecurityHandler) registerUser(msg *nats.Msg) error {
 	}
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
-		log.Printf("Error unmarshaling user registered event: %v", err)
+		h.logger.Error(context.Background(), "Error unmarshaling user registered event", "error", err)
 		return nil
 	}
 
@@ -148,11 +150,11 @@ func (h *SecurityHandler) registerUser(msg *nats.Msg) error {
 
 	_, err := h.db.GetQueries().InsertUserRoleWithID(context.Background(), params)
 	if err != nil {
-		log.Printf("Error creating user profile: %v", err)
+		h.logger.Error(context.Background(), "Error creating user profile", "error", err)
 		return err
 	}
 
-	log.Printf("User profile created for user ID: %s", uid)
+	h.logger.Info(context.Background(), "User profile created", "user_id", uid)
 	return nil
 }
 
@@ -162,7 +164,7 @@ func (h *SecurityHandler) deleteUser(msg *nats.Msg) error {
 	}
 
 	if err := json.Unmarshal(msg.Data, &userData); err != nil {
-		log.Printf("Error unmarshaling user deleted event: %v", err)
+		h.logger.Error(context.Background(), "Error unmarshaling user deleted event", "error", err)
 		return nil
 	}
 
@@ -170,10 +172,10 @@ func (h *SecurityHandler) deleteUser(msg *nats.Msg) error {
 
 	err := h.db.GetQueries().DeleteUserRoleWithID(context.Background(), uuid.MustParse(uid))
 	if err != nil {
-		log.Printf("Error deleting user roles: %v", err)
+		h.logger.Error(context.Background(), "Error deleting user roles", "error", err)
 		return err
 	}
 
-	log.Printf("User roles deleted for user ID: %s", uid)
+	h.logger.Info(context.Background(), "User roles deleted", "user_id", uid)
 	return nil
 }

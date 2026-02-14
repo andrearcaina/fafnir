@@ -3,44 +3,31 @@ package api
 import (
 	"context"
 	"fafnir/portfolio-service/internal/config"
-	"fafnir/portfolio-service/internal/db"
 	portfoliopb "fafnir/shared/pb/portfolio"
-	"fafnir/shared/pkg/nats"
-	"log"
+	"fafnir/shared/pkg/logger"
 	"net"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	grpcServer *grpc.Server
-	config     *config.Config
+	grpcServer    *grpc.Server
+	metricsServer *http.Server
+	config        *config.Config
+	logger        *logger.Logger
 }
 
-func NewServer() *Server {
-	cfg := config.NewConfig()
-
-	dbInstance, err := db.New(cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// create a nats client instance
-	natsClient, err := nats.New(cfg.NATS.URL, nil) // pass in nil logger for now (TODO: implement for gRPC)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	handler := NewPortfolioHandler(dbInstance, natsClient)
+func NewServer(cfg *config.Config, logger *logger.Logger, handler *PortfolioHandler) *Server {
 	handler.RegisterSubscribeHandlers()
 
-	// create gRPC server with logging interception and prometheus interception
+	// create gRPC server with logging interceptor and prometheus interceptor
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			loggingInterceptor,
+			logger.NewGRPCLoggingInterceptor(nil),
 			grpc_prometheus.UnaryServerInterceptor,
 		),
 		grpc.ChainStreamInterceptor(
@@ -56,23 +43,24 @@ func NewServer() *Server {
 	// enable handling of histogram metrics
 	grpc_prometheus.EnableHandlingTimeHistogram()
 
+	router := chi.NewRouter()
+	router.Handle("/metrics", promhttp.Handler())
+
+	metricsServer := &http.Server{
+		Addr:    ":9090",
+		Handler: router,
+	}
+
 	return &Server{
-		grpcServer: grpcServer,
-		config:     cfg,
+		grpcServer:    grpcServer,
+		metricsServer: metricsServer,
+		config:        cfg,
+		logger:        logger,
 	}
 }
 
-func (s *Server) Run() error {
-	// start metrics server
-	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		log.Printf("Starting metrics server on port :9090")
-		if err := http.ListenAndServe(":9090", nil); err != nil {
-			log.Printf("Metrics server error: %v", err)
-		}
-	}()
-
-	log.Printf("Starting gRPC portfolio service on port %s\n", s.config.PORT)
+func (s *Server) RunGRPCServer() error {
+	s.logger.Info(context.Background(), "Starting portfolio service", "port", s.config.PORT)
 
 	listener, err := net.Listen("tcp", s.config.PORT)
 	if err != nil {
@@ -82,9 +70,24 @@ func (s *Server) Run() error {
 	return s.grpcServer.Serve(listener)
 }
 
+func (s *Server) RunMetricsServer() error {
+	s.logger.Info(context.Background(), "Starting metrics server on port 9090")
+
+	if err := s.metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+	return nil
+}
+
 func (s *Server) Close(ctx context.Context) error {
-	log.Println("Shutting down portfolio service gracefully...")
+	s.logger.Info(context.Background(), "Shutting down portfolio service gracefully...")
+
 	s.grpcServer.GracefulStop()
-	log.Println("Portfolio service shutdown complete.")
+
+	if err := s.metricsServer.Shutdown(ctx); err != nil {
+		return err
+	}
+
+	s.logger.Info(context.Background(), "Portfolio service shutdown complete.")
 	return nil
 }

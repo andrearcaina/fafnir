@@ -2,31 +2,76 @@ package main
 
 import (
 	"context"
+	"fafnir/shared/pkg/logger"
+	"fafnir/shared/pkg/nats"
 	"fafnir/user-service/internal/api"
-	"log"
+	"fafnir/user-service/internal/config"
+	"fafnir/user-service/internal/db"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
-	server := api.NewServer()
-	//
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	// this starts the server in a goroutine so it can run concurrently (so that we can listen for OS signals)
-	// if we didn't do this, the server would block the main thread, and we wouldn't be able to listen for OS signals
-	go func() {
-		log.Fatal(server.Run())
-	}()
+	// instantiate custom logger (slog wrapper) for structured logging
+	logger := logger.New(nil)
 
-	// this sets up a channel to listen for OS signals when a user wants to stop the service (like Ctrl+C)
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
+	// instantiate the configuration (environment variables) for the service
+	cfg := config.NewConfig()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	// connect to user db by instantiating a new database connection
+	// and passing the config to it
+	db, err := db.New(cfg, logger)
+	if err != nil {
+		logger.Error(ctx, "Failed to initialize database", "error", err)
+		os.Exit(1)
+	}
 
-	log.Fatal(server.Close(ctx))
+	// create a nats client instance
+	natsClient, err := nats.New(cfg.NATS.URL, logger)
+	if err != nil {
+		logger.Error(ctx, "Failed to connect to NATS", "error", err)
+		os.Exit(1)
+	}
+
+	handler := api.NewUserHandler(db, natsClient, logger)
+
+	server := api.NewServer(cfg, db, logger, handler)
+
+	// use errgroup to manage the lifecycle of the server and handle graceful shutdown
+	g, ctx := errgroup.WithContext(ctx)
+
+	// start GRPC server
+	g.Go(func() error {
+		return server.RunGRPCServer()
+	})
+
+	// start metrics server
+	g.Go(func() error {
+		return server.RunMetricsServer()
+	})
+
+	// wait for shutdown signal
+	g.Go(func() error {
+		<-ctx.Done()
+
+		closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		return server.Close(closeCtx)
+	})
+
+	// wait for everything
+	if err := g.Wait(); err != nil {
+		logger.Error(context.Background(), "User service exited with error", "error", err)
+		os.Exit(1)
+	}
+
+	logger.Info(context.Background(), "User service exited cleanly")
 }

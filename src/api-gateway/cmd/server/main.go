@@ -3,29 +3,51 @@ package main
 import (
 	"context"
 	"fafnir/api-gateway/internal/api"
-	"log"
+	"fafnir/api-gateway/internal/config"
+	"fafnir/shared/pkg/logger"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
-	server := api.NewServer()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	// this starts the server in a goroutine so it can run concurrently (so that we can listen for OS signals)
-	// if we didn't do this, the server would block the main thread, and we wouldn't be able to listen for OS signals
-	go func() {
-		log.Fatal(server.Run())
-	}()
+	// instantiate custom logger (slog wrapper) for structured logging
+	logger := logger.New(nil)
 
-	// this sets up a channel to listen for OS signals when a user wants to stop the service (like Ctrl+C)
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
+	// instantiate the configuration (environment variables) for the service
+	cfg := config.NewConfig()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	server := api.NewServer(cfg, logger)
 
-	log.Fatal(server.Close(ctx))
+	// use errgroup to manage the lifecycle of the server and handle graceful shutdown
+	g, ctx := errgroup.WithContext(ctx)
+
+	// start server
+	g.Go(func() error {
+		return server.Run()
+	})
+
+	// wait for shutdown signal
+	g.Go(func() error {
+		<-ctx.Done()
+
+		closeCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		return server.Close(closeCtx)
+	})
+
+	// wait for everything
+	if err := g.Wait(); err != nil {
+		logger.Error(context.Background(), "API Gateway exited with error", "error", err)
+		os.Exit(1)
+	}
+
+	logger.Info(context.Background(), "API Gateway exited cleanly")
 }

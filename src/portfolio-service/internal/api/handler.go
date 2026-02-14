@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"fafnir/portfolio-service/internal/db"
 	"fafnir/portfolio-service/internal/db/generated"
 	basepb "fafnir/shared/pb/base"
 	orderpb "fafnir/shared/pb/order"
 	portfoliopb "fafnir/shared/pb/portfolio"
+	"fafnir/shared/pkg/logger"
 	natsC "fafnir/shared/pkg/nats"
 
 	"github.com/google/uuid"
@@ -20,15 +20,17 @@ import (
 )
 
 type PortfolioHandler struct {
-	db   *db.Database
-	nats *natsC.NatsClient
+	db     *db.Database
+	nats   *natsC.NatsClient
+	logger *logger.Logger
 	portfoliopb.UnimplementedPortfolioServiceServer
 }
 
-func NewPortfolioHandler(db *db.Database, nats *natsC.NatsClient) *PortfolioHandler {
+func NewPortfolioHandler(db *db.Database, nats *natsC.NatsClient, logger *logger.Logger) *PortfolioHandler {
 	return &PortfolioHandler{
-		db:   db,
-		nats: nats,
+		db:     db,
+		nats:   nats,
+		logger: logger,
 	}
 }
 
@@ -36,22 +38,22 @@ func (h *PortfolioHandler) RegisterSubscribeHandlers() {
 	_, err := h.nats.QueueSubscribe("orders.filled", "portfolio-service", "portfolio-service-durable", h.handleOrderFilled)
 
 	if err != nil {
-		log.Printf("Failed to subscribe to orders.filled: %v\n", err)
+		h.logger.Debug(context.Background(), "Failed to subscribe to orders.filled", "error", err)
 	}
 }
 
 func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 	var event orderpb.OrderFilledEvent
 	if err := proto.Unmarshal(msg.Data, &event); err != nil {
-		log.Printf("Failed to unmarshal OrderFilledEvent: %v", err)
+		h.logger.Debug(context.Background(), "Failed to unmarshal OrderFilledEvent", "error", err)
 		return
 	}
 
-	log.Printf("Processing OrderFilledEvent for order %s", event.OrderId)
+	h.logger.Info(context.Background(), "Processing OrderFilledEvent", "order_id", event.OrderId)
 
 	userId, err := uuid.Parse(event.UserId)
 	if err != nil {
-		log.Printf("Invalid user ID in event: %v", err)
+		h.logger.Debug(context.Background(), "Invalid user ID in event", "error", err)
 		return
 	}
 
@@ -134,7 +136,7 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 				return fmt.Errorf("failed to decrease holding (sell): %w", err)
 			}
 		default:
-			log.Printf("Order side unspecified/unknown for order %s. Skipping settlement.", event.OrderId)
+			h.logger.Debug(context.Background(), "Order side unspecified/unknown. Skipping settlement.", "order_id", event.OrderId)
 			return errors.New("order side unspecified/unknown")
 		}
 
@@ -165,12 +167,12 @@ func (h *PortfolioHandler) handleOrderFilled(msg *nats.Msg) {
 	})
 
 	if err != nil {
-		log.Printf("Settlement failed for order %s: %v", event.OrderId, err)
+		h.logger.Debug(context.Background(), "Settlement failed", "order_id", event.OrderId, "error", err)
 		// we ACK even on failure because we don't have a retry/DLQ mechanism yet
 		// and we want to avoid infinite redelivery loops that drain money
 		_ = msg.Ack()
 	} else {
-		log.Printf("Settlement successful for order %s", event.OrderId)
+		h.logger.Info(context.Background(), "Settlement successful", "order_id", event.OrderId)
 		_ = msg.Ack()
 	}
 }
@@ -225,7 +227,7 @@ func (h *PortfolioHandler) CreateAccount(ctx context.Context, req *portfoliopb.C
 	})
 
 	if err != nil {
-		log.Printf("Failed to insert account: %v", err)
+		h.logger.Error(ctx, "Failed to insert account", "error", err)
 		return &portfoliopb.CreateAccountResponse{
 			Code: basepb.ErrorCode_INTERNAL,
 		}, err
