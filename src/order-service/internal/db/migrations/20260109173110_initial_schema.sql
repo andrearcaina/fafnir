@@ -36,9 +36,9 @@ CREATE INDEX idx_orders_user_status ON orders(user_id, status);
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE IF EXISTS orders_fill;
 DROP TABLE IF EXISTS orders;
-DROP TABLE IF EXISTS order_fills;
-DROP TYPE IF EXISTS order_side;
-DROP TYPE IF EXISTS order_type;
 DROP TYPE IF EXISTS order_status;
+DROP TYPE IF EXISTS order_type;
+DROP TYPE IF EXISTS order_side;
 -- +goose StatementEnd

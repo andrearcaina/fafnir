@@ -9,11 +9,17 @@ import (
 	"context"
 	"fafnir/api-gateway/graph/model"
 	"fafnir/api-gateway/internal/middleware"
+	"fafnir/api-gateway/internal/rbac"
 )
 
 // GetProfileData is the resolver for the getProfileData field.
 func (r *queryResolver) GetProfileData(ctx context.Context) (*model.ProfileDataResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnProfile)
 	if err != nil {
 		return nil, err
 	}

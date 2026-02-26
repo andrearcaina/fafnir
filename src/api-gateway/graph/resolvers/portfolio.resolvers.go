@@ -9,11 +9,17 @@ import (
 	"context"
 	"fafnir/api-gateway/graph/model"
 	"fafnir/api-gateway/internal/middleware"
+	"fafnir/api-gateway/internal/rbac"
 )
 
 // CreateAccount is the resolver for the createAccount field.
 func (r *mutationResolver) CreateAccount(ctx context.Context, request model.CreateAccountRequest) (*model.CreateAccountResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnAccounts)
 	if err != nil {
 		return nil, err
 	}
@@ -32,6 +38,11 @@ func (r *mutationResolver) AddToWatchlist(ctx context.Context, request model.Add
 		return nil, err
 	}
 
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnWatchlist)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.AddToWatchlist(ctx, userID.String(), request)
 	if err != nil {
 		return nil, err
@@ -46,6 +57,11 @@ func (r *mutationResolver) RemoveFromWatchlist(ctx context.Context, request mode
 		return nil, err
 	}
 
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnWatchlist)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.RemoveFromWatchlist(ctx, userID.String(), request)
 	if err != nil {
 		return nil, err
@@ -55,11 +71,31 @@ func (r *mutationResolver) RemoveFromWatchlist(ctx context.Context, request mode
 
 // DeleteAccount is the resolver for the deleteAccount field.
 func (r *mutationResolver) DeleteAccount(ctx context.Context, accountID string) (bool, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnAccounts)
+	if err != nil {
+		return false, err
+	}
+
 	return r.PortfolioClient.DeleteAccount(ctx, accountID)
 }
 
 // Deposit is the resolver for the deposit field.
 func (r *mutationResolver) Deposit(ctx context.Context, request model.DepositRequest) (*model.DepositResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnAccounts)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.Deposit(ctx, request)
 	if err != nil {
 		return nil, err
@@ -69,6 +105,16 @@ func (r *mutationResolver) Deposit(ctx context.Context, request model.DepositReq
 
 // Transfer is the resolver for the transfer field.
 func (r *mutationResolver) Transfer(ctx context.Context, request model.TransferRequest) (*model.TransferResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnAccounts)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.Transfer(ctx, request)
 	if err != nil {
 		return nil, err
@@ -83,6 +129,11 @@ func (r *queryResolver) GetPortfolioSummary(ctx context.Context) (*model.GetPort
 		return nil, err
 	}
 
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnPortfolio)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.GetPortfolioSummary(ctx, userID.String())
 	if err != nil {
 		return nil, err
@@ -92,6 +143,16 @@ func (r *queryResolver) GetPortfolioSummary(ctx context.Context) (*model.GetPort
 
 // GetHoldings is the resolver for the getHoldings field.
 func (r *queryResolver) GetHoldings(ctx context.Context, request model.GetHoldingsRequest) (*model.GetHoldingsResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnPortfolio)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.GetHoldings(ctx, request)
 	if err != nil {
 		return nil, err
@@ -101,6 +162,16 @@ func (r *queryResolver) GetHoldings(ctx context.Context, request model.GetHoldin
 
 // GetHolding is the resolver for the getHolding field.
 func (r *queryResolver) GetHolding(ctx context.Context, request model.GetHoldingRequest) (*model.GetHoldingResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnPortfolio)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.GetHolding(ctx, request)
 	if err != nil {
 		return nil, err
@@ -115,6 +186,11 @@ func (r *queryResolver) GetWatchlist(ctx context.Context) (*model.GetWatchlistRe
 		return nil, err
 	}
 
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnWatchlist)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.GetWatchlist(ctx, userID.String())
 	if err != nil {
 		return nil, err
@@ -124,6 +200,16 @@ func (r *queryResolver) GetWatchlist(ctx context.Context) (*model.GetWatchlistRe
 
 // GetTransactions is the resolver for the getTransactions field.
 func (r *queryResolver) GetTransactions(ctx context.Context, request model.GetTransactionsRequest) (*model.GetTransactionsResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnPortfolio)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.PortfolioClient.GetTransactions(ctx, request)
 	if err != nil {
 		return nil, err

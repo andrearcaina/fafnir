@@ -52,7 +52,7 @@ CREATE TABLE transactions (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS audit;
+DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS watchlists;
 DROP TABLE IF EXISTS holdings;
 DROP TABLE IF EXISTS accounts;

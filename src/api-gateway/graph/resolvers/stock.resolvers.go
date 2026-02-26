@@ -8,14 +8,25 @@ package resolvers
 import (
 	"context"
 	"fafnir/api-gateway/graph/model"
-	"fmt"
+	"fafnir/api-gateway/internal/middleware"
+	"fafnir/api-gateway/internal/rbac"
 )
 
 // GetStockMetadata is the resolver for the getStockMetadata field.
 func (r *queryResolver) GetStockMetadata(ctx context.Context, symbol string) (*model.StockMetadataResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ViewStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.StockClient.GetStockMetadata(ctx, symbol)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get stock metadata: %w", err)
+		return nil, err
 	}
 
 	return &model.StockMetadataResponse{
@@ -26,9 +37,19 @@ func (r *queryResolver) GetStockMetadata(ctx context.Context, symbol string) (*m
 
 // GetStockQuote is the resolver for the getStockQuote field.
 func (r *queryResolver) GetStockQuote(ctx context.Context, symbol string) (*model.StockQuoteResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ViewStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.StockClient.GetStockQuote(ctx, symbol)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get stock quote: %w", err)
+		return nil, err
 	}
 
 	return &model.StockQuoteResponse{
@@ -39,9 +60,19 @@ func (r *queryResolver) GetStockQuote(ctx context.Context, symbol string) (*mode
 
 // GetStockHistoricalData is the resolver for the getStockHistoricalData field.
 func (r *queryResolver) GetStockHistoricalData(ctx context.Context, symbol string, period *string) (*model.StockHistoricalDataResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ViewStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.StockClient.GetStockHistoricalData(ctx, symbol, *period)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get stock historical data: %w", err)
+		return nil, err
 	}
 
 	return &model.StockHistoricalDataResponse{
@@ -52,9 +83,19 @@ func (r *queryResolver) GetStockHistoricalData(ctx context.Context, symbol strin
 
 // GetStockQuoteBatch is the resolver for the getStockQuoteBatch field.
 func (r *queryResolver) GetStockQuoteBatch(ctx context.Context, symbols []string) (*model.StockQuoteBatchResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ViewStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.StockClient.GetStockQuoteBatch(ctx, symbols)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get stock quote batch: %w", err)
+		return nil, err
 	}
 
 	return &model.StockQuoteBatchResponse{

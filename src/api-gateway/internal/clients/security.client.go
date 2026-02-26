@@ -3,6 +3,8 @@ package clients
 import (
 	"context"
 	"fafnir/api-gateway/graph/model"
+	"fafnir/api-gateway/internal/rbac"
+	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/security"
 
 	"google.golang.org/grpc"
@@ -33,6 +35,15 @@ func NewSecurityClient(address string) *SecurityClient {
 }
 
 func (c *SecurityClient) CheckPermission(ctx context.Context, userId string, permission string) (*model.HasPermissionResponse, error) {
+	if ok := rbac.IsValidPermission(permission); !ok {
+		return &model.HasPermissionResponse{
+			Data: &model.SecurityPermission{
+				HasPermission: false,
+			},
+			Code: basepb.ErrorCode_INVALID_ARGUMENT.String(),
+		}, nil
+	}
+
 	req := &pb.CheckPermissionRequest{
 		UserId:     userId,
 		Permission: permission,

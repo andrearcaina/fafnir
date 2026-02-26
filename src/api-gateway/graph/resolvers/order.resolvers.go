@@ -9,11 +9,17 @@ import (
 	"context"
 	"fafnir/api-gateway/graph/model"
 	"fafnir/api-gateway/internal/middleware"
+	"fafnir/api-gateway/internal/rbac"
 )
 
 // CreateOrder is the resolver for the createOrder field.
 func (r *mutationResolver) CreateOrder(ctx context.Context, request model.CreateOrderRequest) (*model.CreateOrderResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.OrderStocks)
 	if err != nil {
 		return nil, err
 	}
@@ -32,6 +38,11 @@ func (r *mutationResolver) CancelOrder(ctx context.Context, orderID string) (*mo
 		return nil, err
 	}
 
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.OrderStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.OrderClient.CancelOrder(ctx, orderID, userID.String())
 	if err != nil {
 		return nil, err
@@ -46,6 +57,11 @@ func (r *queryResolver) GetOrders(ctx context.Context) (*model.OrdersResponse, e
 		return nil, err
 	}
 
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.OrderStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.OrderClient.GetOrders(ctx, userID.String())
 	if err != nil {
 		return nil, err
@@ -55,6 +71,16 @@ func (r *queryResolver) GetOrders(ctx context.Context) (*model.OrdersResponse, e
 
 // GetOrderByOrderID is the resolver for the getOrderByOrderID field.
 func (r *queryResolver) GetOrderByOrderID(ctx context.Context, request model.GetOrderByIDRequest) (*model.GetOrderByIDResponse, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.OrderStocks)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := r.OrderClient.GetOrderByOrderID(ctx, request.OrderID)
 	if err != nil {
 		return nil, err
