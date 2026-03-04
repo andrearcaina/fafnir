@@ -76,11 +76,12 @@ func (s *Server) RunMetricsServer() error {
 	if err := s.metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
+
 	return nil
 }
 
 func (s *Server) Close(ctx context.Context) error {
-	s.logger.Info(context.Background(), "Shutting down portfolio service gracefully...")
+	s.logger.Info(ctx, "Shutting down portfolio service gracefully...")
 
 	s.grpcServer.GracefulStop()
 
@@ -88,6 +89,6 @@ func (s *Server) Close(ctx context.Context) error {
 		return err
 	}
 
-	s.logger.Info(context.Background(), "Portfolio service shutdown complete.")
+	s.logger.Info(ctx, "Portfolio service shutdown complete.")
 	return nil
 }

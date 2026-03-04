@@ -46,13 +46,13 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) Close(ctx context.Context) error {
-	s.Logger.Info(context.Background(), "Shutting down trade-engine gracefully...")
+	s.Logger.Info(ctx, "Shutting down trade-engine gracefully...")
 
 	err := s.HTTP.Shutdown(ctx)
 	if err != nil {
 		return err
 	}
 
-	s.Logger.Info(context.Background(), "Trade-engine shutdown complete.")
+	s.Logger.Info(ctx, "Trade-engine shutdown complete.")
 	return nil
 }

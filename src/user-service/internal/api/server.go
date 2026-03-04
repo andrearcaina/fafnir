@@ -6,7 +6,6 @@ import (
 	"fafnir/shared/pkg/logger"
 	"fafnir/user-service/internal/config"
 	"fafnir/user-service/internal/db"
-	"log"
 	"net"
 	"net/http"
 
@@ -92,7 +91,7 @@ func (s *Server) RunMetricsServer() error {
 }
 
 func (s *Server) Close(ctx context.Context) error {
-	s.logger.Info(context.Background(), "Shutting down user service gracefully...")
+	s.logger.Info(ctx, "Shutting down user service gracefully...")
 
 	s.grpcServer.GracefulStop()
 
@@ -100,6 +99,6 @@ func (s *Server) Close(ctx context.Context) error {
 		return err
 	}
 
-	log.Println("User service shutdown complete.")
+	s.logger.Info(ctx, "User service shut down gracefully")
 	return nil
 }

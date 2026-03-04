@@ -5,7 +5,6 @@ import (
 	"fafnir/order-service/internal/config"
 	pb "fafnir/shared/pb/order"
 	"fafnir/shared/pkg/logger"
-	"log"
 	"net"
 	"net/http"
 
@@ -78,11 +77,12 @@ func (s *Server) RunMetricsServer() error {
 	if err := s.metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
+
 	return nil
 }
 
 func (s *Server) Close(ctx context.Context) error {
-	s.logger.Info(context.Background(), "Shutting down order service gracefully...")
+	s.logger.Info(ctx, "Shutting down order service gracefully...")
 
 	s.grpcServer.GracefulStop()
 
@@ -90,6 +90,6 @@ func (s *Server) Close(ctx context.Context) error {
 		return err
 	}
 
-	log.Println("Order service shutdown complete.")
+	s.logger.Info(ctx, "Order service shutdown complete.")
 	return nil
 }

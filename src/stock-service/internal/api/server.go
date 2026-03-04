@@ -74,6 +74,7 @@ func (s *Server) RunMetricsServer() error {
 	if err := s.metricsServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
 	}
+
 	return nil
 }
 

@@ -84,7 +84,7 @@ func NewServer(cfg *config.Config, logger *logger.Logger) *Server {
 }
 
 func (s *Server) Run() error {
-	s.logger.Info(context.Background(), "Starting auth service", "port", s.HTTP.Addr)
+	s.logger.Info(context.Background(), "Starting API Gateway", "port", s.HTTP.Addr)
 
 	if err := s.HTTP.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		return err
@@ -94,7 +94,7 @@ func (s *Server) Run() error {
 }
 
 func (s *Server) Close(ctx context.Context) error {
-	s.logger.Info(context.Background(), "Shutting down API gateway gracefully...")
+	s.logger.Info(ctx, "Shutting down API Gateway gracefully...")
 
 	err := s.HTTP.Shutdown(ctx)
 	if err != nil {
@@ -102,6 +102,6 @@ func (s *Server) Close(ctx context.Context) error {
 		return err
 	}
 
-	s.logger.Info(context.Background(), "API gateway shutdown complete.")
+	s.logger.Info(ctx, "API Gateway shutdown complete.")
 	return nil
 }
