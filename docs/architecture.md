@@ -61,7 +61,7 @@ fafnir/
 ### Core Services
 
 | Service               | Description                                                      | Tech Stack                   | Ports           | Database          |
-| --------------------- | ---------------------------------------------------------------- | ---------------------------- | --------------- | ----------------- |
+|-----------------------|------------------------------------------------------------------|------------------------------|-----------------|-------------------|
 | **api-gateway**       | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi, promhttp | 8080 (public)   | -                 |
 | **auth-service**      | Authentication & JWT token management                            | Go, sqlc, go-chi, promhttp   | 8081 (internal) | auth_db           |
 | **security-service**  | Role-based access control and authorization                      | Go, sqlc, gRPC, promhttp     | 8082 (internal) | security_db       |
@@ -75,7 +75,7 @@ fafnir/
 ### Infrastructure Services
 
 | Service            | Description                                       | Ports           | Purpose          |
-| ------------------ | ------------------------------------------------- | --------------- | ---------------- |
+|--------------------|---------------------------------------------------|-----------------|------------------|
 | **postgres**       | Postgres database with per-service databases      | 5432 (internal) | Data persistence |
 | **redis**          | Redis caching for quick look up                   | 6379 (internal) | Caching          |
 | **prometheus**     | Metrics collection and monitoring                 | 9090 (dev only) | Observability    |
