@@ -12,8 +12,8 @@
 - **Backend-for-Frontend (BFF)**: Designed for tailored client experiences (this means the API Gateway is optimized for a singular frontend)
 - **API Gateway Pattern**: Single entry point for all client requests, routing to appropriate services
 - **Database per Service**: Each microservice manages its own database schema and data
-- **Event-Driven Architecture**: Asynchronous communication between services using NATS JetStream
-- **Service Isolation**: Internal services not exposed to public network (only API Gateway is public + Reverse Proxy to auth)
+- **Hybrid Architecture**: Check out the [communication patterns](#communication-patterns) section for more details on how services communicate with each other
+- **Service Isolation**: Internal services not exposed to public network (only API Gateway is public)
 - **Centralized Tooling**: Shared tests, tools, CLIs, and scripts for build and deployment automation
 
 ### Project Structure
@@ -38,12 +38,13 @@ fafnir/
 ├── src/                     # Source code for microservices
 │   ├── api-gateway/         # GraphQL API Gateway
 │   ├── auth-service/        # Authentication service
-│   ├── security-service/    # Authorization service
-│   ├── user-service/        # User management service
-│   ├── stock-service/       # Stock service
 │   ├── order-service/       # Order service
 │   ├── portfolio-service/   # Portfolio service
-│   └── shared/              # Shared libraries and utilities
+│   ├── security-service/    # Authorization service
+│   ├── shared/              # Shared libraries and utilities (logging, tools, etc.)
+│   ├── stock-service/       # Stock service
+│   ├── trade-engine/        # Trade engine service
+│   └── user-service/        # User management service
 ├── tests/                   # Testing suites
 │   ├── e2e/                 # End-to-end tests
 │   └── locust/              # Load testing with Locust
@@ -86,12 +87,12 @@ fafnir/
 
 ### Communication Patterns
 
-This architecture employs a combination of synchronous and asynchronous communication patterns:
+This architecture employs a combination of synchronous and asynchronous communication patterns. It is both event driven and request-response based, depending on the use case and service requirements.
 
 - **Synchronous Communication**: The API Gateway handles client requests and routes them to the appropriate microservices using REST or gRPC.
+  - This is used for request-response interactions where the client expects an immediate response, such as fetching user profiles or stock quotes.
 - **Asynchronous Communication**: Microservices communicate with each other using NATS JetStream for event-driven interactions, allowing for decoupled and scalable service interactions.
-
-It is both event driven and request-response based, depending on the use case and service requirements.
+  - This is used for scenarios like user registration events, order processing, and trade execution, where services can publish events to NATS and other services can subscribe to those events without needing to wait for an immediate response.
 
 Feel free to take a look at the [designs](designs/images) folder for visual representations of architecture, network, and data flow designs.
 
