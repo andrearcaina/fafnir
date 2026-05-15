@@ -15,13 +15,15 @@ It is designed to function as the backend for a stock trading simulator/platform
 
 For more detailed information, please refer to the documentation in the `docs/` directory, or visit the following links:
 
-| Guide                                | Description                         |
-| ------------------------------------ | ----------------------------------- |
-| [Architecture](docs/architecture.md) | Project structure, service overview |
-| [Development](docs/development.md)   | Setup, local dev, make commands     |
-| [Database](docs/database.md)         | Migrations, Goose, DB details       |
-| [GraphQL](docs/graphql.md)           | API schema, queries, mutations      |
-| [Designs](docs/designs)              | Excalidraw designs and images       |
+| Guide                                                | Description                              |
+|------------------------------------------------------|------------------------------------------|
+| [Architecture](docs/architecture.md)                 | Project structure, service overview      |
+| [Development](docs/development.md)                   | Setup, local dev, make commands          |
+| [Database](docs/database.md)                         | Migrations, Goose, DB details            |
+| [GraphQL](docs/graphql.md)                           | API schema, queries, mutations           |
+| [Designs](docs/designs)                              | Excalidraw designs and images            |
+| [DeepWiki](https://deepwiki.com/andrearcaina/fafnir) | AI-generated docs of fafnir (from Devin) |
+
 
 ## TODO
 
