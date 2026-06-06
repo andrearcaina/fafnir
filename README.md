@@ -22,7 +22,7 @@ For more detailed information, please refer to the documentation in the `docs/` 
 | [Database](docs/database.md)                         | Migrations, Goose, DB details            |
 | [GraphQL](docs/graphql.md)                           | API schema, queries, mutations           |
 | [Designs](docs/designs)                              | Excalidraw designs and images            |
-| [DeepWiki](https://deepwiki.com/andrearcaina/fafnir) | AI-generated docs of fafnir (from Devin) |
+| [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/andrearcaina/fafnir) | AI-generated docs of fafnir (from Devin) |
 
 
 ## TODO
