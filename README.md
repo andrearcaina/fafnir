@@ -1,19 +1,19 @@
 # fáfnir
 
-> The name "Fáfnir" is inspired from Norse mythology, and refers to a dwarf who transformed into a mythical Germanic dragon, so he can guard his treasure hoard of gold and such.
+> The name is inspired from Norse mythology, and refers to a dwarf named "Fáfnir" who transformed into a mythical Germanic dragon (a wyrm), so he can guard his treasure hoard of gold and such. He was later slain by Sigurd, but that's besides the point.
 
-This is a purely educational project that serves as a hands-on demonstration of building a modern codebase
-that explores microservices architecture, asynchronous event-driven design,
+This is an educational project that serves as a hands-on demonstration of building a modern codebase
+exploring microservices architecture, asynchronous event-driven design,
 and best practices for creating a scalable, distributed application.
 I do not intend to use this project for other purposes and is mostly
 a playground for my learning, experimentation, and exploration.
 
 Now for the application:
-It is designed to function as the backend for a stock trading simulator/platform, including services for user management, authentication, stock data retrieval, buy/sell operations, and security/permissions.
+It is designed to function as the backend for a stock trading simulator/platform, including microservices for user management, authentication, stock data retrieval, buy/sell operations, and security/permissions.
 
 ## Documentation
 
-For more detailed information, please refer to the documentation in the `docs/` directory, or visit the following links:
+For more detailed information, please refer to the documentation in the `docs/` directory, or visit the following links below:
 
 | Guide                                                | Description                              |
 |------------------------------------------------------|------------------------------------------|
