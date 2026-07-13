@@ -70,7 +70,7 @@ func NewServer(cfg *config.Config, logger *logger.Logger) *Server {
 	// prometheus endpoint for monitoring
 	router.Handle("/metrics", promhttp.Handler())
 	router.With(
-		m.ValidateAuth(cfg.ENV.JWT, true),
+		m.ValidateAuth(cfg.ENV.JWT),
 	).Handle("/graphql", srv)
 
 	return &Server{

@@ -23,17 +23,7 @@ func CheckAuth(authService *Service) func(next http.Handler) http.Handler {
 				return
 			}
 
-			csrfCookie, err := r.Cookie("csrf_token")
-			if err != nil {
-				err := apperrors.UnauthorizedError().
-					WithDetails("CSRF token not found in cookies")
-				utils.HandleError(w, err)
-				return
-			}
-
-			if csrfCookie.Value != utils.GetCSRFTokenFromRequest(r) {
-				err := apperrors.UnauthorizedError().
-					WithDetails("Invalid CSRF token")
+			if err := utils.ValidateCSRFToken(r); err != nil {
 				utils.HandleError(w, err)
 				return
 			}

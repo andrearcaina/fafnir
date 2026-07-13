@@ -38,6 +38,7 @@ type SeedUser struct {
 
 type SeedUserProfile struct {
 	ID        string `yaml:"user_id"`
+	Email     string `yaml:"email"`
 	FirstName string `yaml:"first_name"`
 	LastName  string `yaml:"last_name"`
 }
@@ -61,7 +62,7 @@ type SecuritySeedFile struct {
 
 func main() {
 	var serviceDB = flag.String("db", "", "Service DB to seed (auth, user, security, all)")
-	var configPath = flag.String("config", "../../infra/env/.env.dev", "Path to environment config file")
+	var configPath = flag.String("config", "../../../infra/env/.env.dev", "Path to environment config file")
 	var dataPath = flag.String("data", "./seed.yml", "Path to seed data file")
 	flag.Parse()
 
@@ -96,7 +97,7 @@ func run(config *Config) error {
 		for _, db := range []string{"auth", "user", "security"} {
 			config.ServiceDB = db
 			if err := run(config); err != nil {
-				return errors.New("failed to seed " + db + " service db")
+				return fmt.Errorf("failed to seed %s service db: %w", db, err)
 			}
 		}
 		return nil
@@ -134,8 +135,8 @@ func seedAuthService(config *Config) error {
 			return errors.New("failed to hash password")
 		}
 
-		query := `INSERT INTO users (id, email, password_hash, created_at, updated_at) 
-				  VALUES ($1, $2, $3, NOW(), NOW()) 
+		query := `INSERT INTO users (id, email, password_hash, created_at, updated_at)
+				  VALUES ($1, $2, $3, NOW(), NOW())
 				  ON CONFLICT (id) DO NOTHING`
 
 		_, err = db.ExecContext(ctx, query, uuid.MustParse(user.ID), user.Email, string(hashedPassword))
@@ -173,13 +174,20 @@ func seedUserService(config *Config) error {
 
 	ctx := context.Background()
 	for _, user := range seed.Users {
-		query := `INSERT INTO user_profiles (id, first_name, last_name, created_at, updated_at) 
-				  VALUES ($1, $2, $3, NOW(), NOW()) 
+		query := `INSERT INTO user_profiles (id, email, first_name, last_name, created_at, updated_at)
+				  VALUES ($1, $2, $3, $4, NOW(), NOW())
 				  ON CONFLICT (id) DO NOTHING`
 
-		_, err = db.ExecContext(ctx, query, uuid.MustParse(user.ID), user.FirstName, user.LastName)
+		_, err = db.ExecContext(
+			ctx,
+			query,
+			uuid.MustParse(user.ID),
+			user.Email,
+			user.FirstName,
+			user.LastName,
+		)
 		if err != nil {
-			return errors.New("failed to insert user profile")
+			return fmt.Errorf("failed to insert user profile: %w", err)
 		}
 
 		log.Printf("Seeded in User DB: Profile %s %s with ID %s\n", user.FirstName, user.LastName, user.ID)
@@ -212,7 +220,7 @@ func seedSecurityService(config *Config) error {
 
 	ctx := context.Background()
 	for _, user := range seed.Users {
-		query := `INSERT INTO users_roles (user_id, role_name) 
+		query := `INSERT INTO users_roles (user_id, role_name)
 				  VALUES ($1, $2)
 				  ON CONFLICT (user_id, role_name) DO NOTHING`
 

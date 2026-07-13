@@ -1,0 +1,15 @@
+mutation CreateOrder($request: CreateOrderRequest!) {
+  createOrder(request: $request) {
+    code
+    data {
+      id
+      symbol
+      side
+      type
+      status
+      quantity
+      price
+      createdAt
+    }
+  }
+}

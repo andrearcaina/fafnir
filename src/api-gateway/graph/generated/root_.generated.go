@@ -178,6 +178,7 @@ type ComplexityRoot struct {
 		GetStockMetadata       func(childComplexity int, symbol string) int
 		GetStockQuote          func(childComplexity int, symbol string) int
 		GetStockQuoteBatch     func(childComplexity int, symbols []string) int
+		GetSupportedStocks     func(childComplexity int) int
 		GetTransactions        func(childComplexity int, request model.GetTransactionsRequest) int
 		GetWatchlist           func(childComplexity int) int
 		Health                 func(childComplexity int) int
@@ -918,6 +919,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.GetStockQuoteBatch(childComplexity, args["symbols"].([]string)), true
 
+	case "Query.getSupportedStocks":
+		if e.complexity.Query.GetSupportedStocks == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSupportedStocks(childComplexity), true
+
 	case "Query.getTransactions":
 		if e.complexity.Query.GetTransactions == nil {
 			break
@@ -1592,7 +1600,8 @@ extend type Mutation {
     deleteAccount(accountId: String!): Boolean!
     deposit(request: DepositRequest!): DepositResponse!
     transfer(request: TransferRequest!): TransferResponse!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "../schemas/security.graphqls", Input: `input HasPermissionRequest {
     permission: String!
 }
@@ -1668,6 +1677,7 @@ type StockPriceData {
 }
 
 extend type Query {
+    getSupportedStocks: [String!]!
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
     getStockHistoricalData(

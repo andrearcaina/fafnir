@@ -1,0 +1,75 @@
+query Dashboard {
+  getProfileData {
+    code
+    data {
+      firstName
+      lastName
+      userId
+    }
+  }
+  getPortfolioSummary {
+    code
+    totalBalance
+    accounts {
+      id
+      accountNumber
+      type
+      currency
+      balance
+    }
+  }
+  getWatchlist {
+    code
+    data {
+      symbol
+      addedAt
+    }
+  }
+  getOrders {
+    code
+    count
+    data {
+      id
+      symbol
+      side
+      type
+      status
+      quantity
+      price
+      filledQuantity
+      avgFillPrice
+      createdAt
+    }
+  }
+}
+
+query MarketQuotes($symbols: [String!]!) {
+  getStockQuoteBatch(symbols: $symbols) {
+    code
+    data {
+      symbol
+      price
+      priceChange
+      priceChangePercent
+      volume
+      open
+      previousClose
+      marketCap
+      dayLow
+      dayHigh
+      yearLow
+      yearHigh
+    }
+  }
+}
+
+query StockHistory($symbol: String!, $period: String) {
+  getStockHistoricalData(symbol: $symbol, period: $period) {
+    code
+    data {
+      date
+      close
+      volume
+    }
+  }
+}

@@ -15,6 +15,12 @@ For authorization, the auth-service checks user roles and permissions to ensure 
 5. **Logout**: Users can log out, which will invalidate the JWT token and remove it from the HttpOnly cookie.
 6. **Account Deletion**: Users can delete their accounts, which will remove their data from all associated databases and invalidate any active JWT tokens.
 
+## CSRF Protection
+
+Authenticated requests use a double-submit CSRF token. The readable `csrf_token` cookie must be copied into the `X-CSRF-Token` header for unsafe HTTP methods such as `POST`, `PUT`, `PATCH`, and `DELETE`. Safe methods (`GET`, `HEAD`, and `OPTIONS`) do not require the header.
+
+GraphQL operations are transported over `POST`, so GraphQL clients must include the CSRF header for both queries and mutations sent with cookie authentication.
+
 ## Potential Future Enhancements
 - **OAuth2 Support**: Implement OAuth2 authentication with providers like Google, Facebook, etc.
 - **Password Reset**: Implement a password reset mechanism where users can request a password reset link.

@@ -96,7 +96,7 @@ func (r *mutationResolver) Deposit(ctx context.Context, request model.DepositReq
 		return nil, err
 	}
 
-	resp, err := r.PortfolioClient.Deposit(ctx, request)
+	resp, err := r.PortfolioClient.Deposit(ctx, userID.String(), request)
 	if err != nil {
 		return nil, err
 	}

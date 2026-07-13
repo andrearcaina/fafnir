@@ -218,7 +218,7 @@ func (c *PortfolioClient) GetTransactions(ctx context.Context, req model.GetTran
 	}, nil
 }
 
-func (c *PortfolioClient) Deposit(ctx context.Context, req model.DepositRequest) (model.DepositResponse, error) {
+func (c *PortfolioClient) Deposit(ctx context.Context, userID string, req model.DepositRequest) (model.DepositResponse, error) {
 	curr := pb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
 	if req.Currency == "USD" {
 		curr = pb.CurrencyType_CURRENCY_TYPE_USD
@@ -230,6 +230,7 @@ func (c *PortfolioClient) Deposit(ctx context.Context, req model.DepositRequest)
 		AccountId: req.AccountID,
 		Amount:    req.Amount,
 		Currency:  curr,
+		UserId:    userID,
 	})
 	if err != nil {
 		return model.DepositResponse{

@@ -36,6 +36,7 @@ type QueryResolver interface {
 	GetWatchlist(ctx context.Context) (*model.GetWatchlistResponse, error)
 	GetTransactions(ctx context.Context, request model.GetTransactionsRequest) (*model.GetTransactionsResponse, error)
 	CheckPermission(ctx context.Context, request model.HasPermissionRequest) (*model.HasPermissionResponse, error)
+	GetSupportedStocks(ctx context.Context) ([]string, error)
 	GetStockMetadata(ctx context.Context, symbol string) (*model.StockMetadataResponse, error)
 	GetStockQuote(ctx context.Context, symbol string) (*model.StockQuoteResponse, error)
 	GetStockHistoricalData(ctx context.Context, symbol string, period *string) (*model.StockHistoricalDataResponse, error)
@@ -995,6 +996,35 @@ func (ec *executionContext) fieldContext_Query_checkPermission(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_getSupportedStocks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getSupportedStocks,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetSupportedStocks(ctx)
+		},
+		nil,
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getSupportedStocks(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getStockMetadata(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1641,6 +1671,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_checkPermission(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSupportedStocks":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSupportedStocks(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

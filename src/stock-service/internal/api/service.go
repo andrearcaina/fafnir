@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fafnir/shared/pkg/errors"
 	"fafnir/shared/pkg/redis"
+	stockcatalog "fafnir/shared/pkg/stocks"
 	"fafnir/stock-service/internal/db"
 	"fafnir/stock-service/internal/db/generated"
 	"fafnir/stock-service/internal/dto"
@@ -52,7 +53,7 @@ func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.Sto
 }
 
 func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
-	if symbol == "" || !utils.GetValidStocks()[symbol] {
+	if symbol == "" || !stockcatalog.IsSupported(symbol) {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -93,7 +94,7 @@ func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQ
 }
 
 func (s *Service) getStockQuoteInternal(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
-	if symbol == "" || !utils.GetValidStocks()[symbol] {
+	if symbol == "" || !stockcatalog.IsSupported(symbol) {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -177,7 +178,7 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 
 	// check for invalid symbols
 	for _, symbol := range symbols {
-		if symbol == "" || !utils.GetValidStocks()[symbol] {
+		if symbol == "" || !stockcatalog.IsSupported(symbol) {
 			return nil, errors.BadRequestError("Invalid symbol").
 				WithDetails("The provided symbol " + symbol + " is invalid")
 		}
@@ -291,7 +292,7 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 
 func (s *Service) GetStockHistoricalData(ctx context.Context, symbol string, period string) ([]dto.StockHistoricalDataResponse, error) {
 	// check if symbol exists
-	if symbol == "" || !utils.GetValidStocks()[symbol] {
+	if symbol == "" || !stockcatalog.IsSupported(symbol) {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}

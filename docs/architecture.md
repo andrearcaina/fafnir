@@ -52,6 +52,7 @@ fafnir/
 │   ├── cli/                 # some dev CLIs
 │   │   └── seedctl/         # Database seeder
 │   └── scripts/             # Build and deployment scripts
+├── web/                     # React.js web frontend
 ├── .gitattributes
 ├── .gitignore
 ├── LICENSE
@@ -62,7 +63,7 @@ fafnir/
 ### Core Services
 
 | Service               | Description                                                      | Tech Stack                   | Ports           | Database          |
-|-----------------------|------------------------------------------------------------------|------------------------------|-----------------|-------------------|
+| --------------------- | ---------------------------------------------------------------- | ---------------------------- | --------------- | ----------------- |
 | **api-gateway**       | GraphQL API Gateway - Single entry point for all client requests | Go, gqlgen, go-chi, promhttp | 8080 (public)   | -                 |
 | **auth-service**      | Authentication & JWT token management                            | Go, sqlc, go-chi, promhttp   | 8081 (internal) | auth_db           |
 | **security-service**  | Role-based access control and authorization                      | Go, sqlc, gRPC, promhttp     | 8082 (internal) | security_db       |
@@ -76,7 +77,7 @@ fafnir/
 ### Infrastructure Services
 
 | Service            | Description                                       | Ports           | Purpose          |
-|--------------------|---------------------------------------------------|-----------------|------------------|
+| ------------------ | ------------------------------------------------- | --------------- | ---------------- |
 | **postgres**       | Postgres database with per-service databases      | 5432 (internal) | Data persistence |
 | **redis**          | Redis caching for quick look up                   | 6379 (internal) | Caching          |
 | **prometheus**     | Metrics collection and monitoring                 | 9090 (dev only) | Observability    |
@@ -85,14 +86,18 @@ fafnir/
 | **nats jetstream** | Persistent event streaming message broker         | 4222 (internal) | Event Streaming  |
 | **locust**         | Load testing tool for simulating concurrent users | 8089 (dev only) | Load testing     |
 
+### Web Architecture
+
+For more information on the web architecture, please refer to the [web architecture documentation](docs/web.md).
+
 ### Communication Patterns
 
 This architecture employs a combination of synchronous and asynchronous communication patterns. It is both event driven and request-response based, depending on the use case and service requirements.
 
 - **Synchronous Communication**: The API Gateway handles client requests and routes them to the appropriate microservices using REST or gRPC.
-  - This is used for request-response interactions where the client expects an immediate response, such as fetching user profiles or stock quotes.
+    - This is used for request-response interactions where the client expects an immediate response, such as fetching user profiles or stock quotes.
 - **Asynchronous Communication**: Microservices communicate with each other using NATS JetStream for event-driven interactions, allowing for decoupled and scalable service interactions.
-  - This is used for scenarios like user registration events, order processing, and trade execution, where services can publish events to NATS and other services can subscribe to those events without needing to wait for an immediate response.
+    - This is used for scenarios like user registration events, order processing, and trade execution, where services can publish events to NATS and other services can subscribe to those events without needing to wait for an immediate response.
 
 Feel free to take a look at the [designs](designs/images) folder for visual representations of architecture, network, and data flow designs.
 

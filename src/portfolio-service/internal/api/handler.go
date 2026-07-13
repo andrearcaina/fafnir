@@ -471,6 +471,12 @@ func (h *PortfolioHandler) Deposit(ctx context.Context, req *portfoliopb.Deposit
 			Code: basepb.ErrorCode_INVALID_ARGUMENT,
 		}, err
 	}
+	userId, err := uuid.Parse(req.UserId)
+	if err != nil {
+		return &portfoliopb.DepositResponse{
+			Code: basepb.ErrorCode_INVALID_ARGUMENT,
+		}, err
+	}
 
 	if req.Amount <= 0 {
 		return &portfoliopb.DepositResponse{
@@ -485,6 +491,9 @@ func (h *PortfolioHandler) Deposit(ctx context.Context, req *portfoliopb.Deposit
 		acc, err := q.GetAccountById(ctx, accountId)
 		if err != nil {
 			return err
+		}
+		if acc.UserID != userId {
+			return errors.New("account does not belong to authenticated user")
 		}
 
 		// simple currency check (reject mismatch)

@@ -1,0 +1,12 @@
+mutation CreatePortfolioAccount($request: CreateAccountRequest!) {
+  createAccount(request: $request) {
+    code
+    data {
+      id
+      accountNumber
+      type
+      currency
+      balance
+    }
+  }
+}

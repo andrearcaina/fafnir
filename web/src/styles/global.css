@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap");
+
+:root {
+  color-scheme: dark;
+  font-synthesis: none;
+  --app-bg: #0b0e0d;
+  --panel: #111513;
+  --panel-raised: #151a17;
+  --line: #242a26;
+  --muted: #929b95;
+  --accent: #74ff22;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+  background: var(--app-bg);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app-loading {
+  background: var(--app-bg);
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #0a0c0b;
+  font-weight: 800;
+  letter-spacing: -0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

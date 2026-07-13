@@ -1,0 +1,6 @@
+mutation DepositFunds($request: DepositRequest!) {
+  deposit(request: $request) {
+    code
+    newBalance
+  }
+}

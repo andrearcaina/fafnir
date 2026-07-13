@@ -10,7 +10,22 @@ import (
 	"fafnir/api-gateway/graph/model"
 	"fafnir/api-gateway/internal/middleware"
 	"fafnir/api-gateway/internal/rbac"
+	stockcatalog "fafnir/shared/pkg/stocks"
 )
+
+// GetSupportedStocks is the resolver for the getSupportedStocks field.
+func (r *queryResolver) GetSupportedStocks(ctx context.Context) ([]string, error) {
+	userID, err := middleware.GetUserIdFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ViewStocks); err != nil {
+		return nil, err
+	}
+
+	return stockcatalog.SupportedSymbols(), nil
+}
 
 // GetStockMetadata is the resolver for the getStockMetadata field.
 func (r *queryResolver) GetStockMetadata(ctx context.Context, symbol string) (*model.StockMetadataResponse, error) {

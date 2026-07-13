@@ -167,6 +167,7 @@ message DepositRequest {
   string account_id = 1;
   double amount = 2;
   CurrencyType currency = 3;
+  string user_id = 4;
 }
 
 message DepositResponse {

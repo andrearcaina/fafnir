@@ -1,0 +1,74 @@
+.auth-shell {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 16% 72%, rgba(105, 255, 25, 0.09), transparent 25%),
+    radial-gradient(circle at 82% 17%, rgba(105, 255, 25, 0.04), transparent 22%),
+    #0b0e0d;
+  overflow: hidden;
+}
+
+.auth-grid {
+  min-height: calc(100dvh - 102px);
+  align-items: center;
+  padding-bottom: 70px;
+}
+
+.auth-intro {
+  position: relative;
+}
+
+.auth-intro::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 240px;
+  left: 15%;
+  bottom: -230px;
+  border: 1px solid rgba(116, 255, 34, 0.13);
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  box-shadow: 0 0 90px rgba(116, 255, 34, 0.05);
+  pointer-events: none;
+}
+
+.eyebrow {
+  color: var(--accent);
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.auth-title {
+  font-size: clamp(3rem, 6.2vw, 5.9rem);
+  line-height: 0.98;
+  letter-spacing: -0.065em;
+  font-weight: 600;
+}
+
+.auth-card {
+  background: rgba(18, 22, 20, 0.92);
+  border: 1px solid var(--line);
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(20px);
+}
+
+.auth-card .mantine-Input-input {
+  background: #0d110f;
+  border-color: #29302b;
+  height: 46px;
+}
+
+@media (max-width: 47.99em) {
+  .auth-grid {
+    align-content: center;
+    padding-top: 32px;
+  }
+
+  .auth-intro {
+    padding-top: 18px;
+  }
+
+  .auth-intro .mantine-Group-root {
+    gap: 14px;
+  }
+}

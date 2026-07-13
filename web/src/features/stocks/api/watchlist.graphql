@@ -1,0 +1,11 @@
+mutation AddStockToWatchlist($request: AddToWatchlistRequest!) {
+  addToWatchlist(request: $request) {
+    code
+  }
+}
+
+mutation RemoveStockFromWatchlist($request: RemoveFromWatchlistRequest!) {
+  removeFromWatchlist(request: $request) {
+    code
+  }
+}

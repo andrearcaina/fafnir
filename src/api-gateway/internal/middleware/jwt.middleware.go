@@ -12,7 +12,7 @@ import (
 
 type contextKey string
 
-func ValidateAuth(jwtKey string, skipCSRF bool) func(next http.Handler) http.Handler {
+func ValidateAuth(jwtKey string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			jwtCookie, err := r.Cookie("auth_token")
@@ -23,21 +23,9 @@ func ValidateAuth(jwtKey string, skipCSRF bool) func(next http.Handler) http.Han
 				return
 			}
 
-			if !skipCSRF {
-				csrfCookie, err := r.Cookie("csrf_token")
-				if err != nil {
-					err := apperrors.UnauthorizedError().
-						WithDetails("CSRF token not found in cookies")
-					utils.HandleError(w, err)
-					return
-				}
-
-				if csrfCookie.Value != utils.GetCSRFTokenFromRequest(r) {
-					err := apperrors.UnauthorizedError().
-						WithDetails("Invalid CSRF token")
-					utils.HandleError(w, err)
-					return
-				}
+			if err := utils.ValidateCSRFToken(r); err != nil {
+				utils.HandleError(w, err)
+				return
 			}
 
 			token, err := utils.ParseJWTToken(jwtCookie.Value, jwtKey)
