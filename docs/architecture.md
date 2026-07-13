@@ -88,7 +88,7 @@ fafnir/
 
 ### Web Architecture
 
-For more information on the web architecture, please refer to the [web architecture documentation](docs/web.md).
+For more information on the web architecture, please refer to the [web architecture documentation](web.md).
 
 ### Communication Patterns
 

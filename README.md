@@ -9,21 +9,21 @@ I do not intend to use this project for other purposes and is mostly
 a playground for my learning, experimentation, and exploration.
 
 Now for the application:
-It is designed to function as the backend for a stock trading simulator/platform, including microservices for user management, authentication, stock data retrieval, buy/sell operations, and security/permissions.
+It is designed to function as a stock trading platform, allowing users to simulate trading stocks (up to 50 US stocks) in a controlled environment.
 
 ## Documentation
 
-For more detailed information, please refer to the documentation in the `docs/` directory, or visit the following links below:
+For more detailed information, please refer to the documentation in the [docs/](docs/) directory, or visit the following links below:
 
-| Guide                                                | Description                              |
-|------------------------------------------------------|------------------------------------------|
-| [Architecture](docs/architecture.md)                 | Project structure, service overview      |
-| [Development](docs/development.md)                   | Setup, local dev, make commands          |
-| [Database](docs/database.md)                         | Migrations, Goose, DB details            |
-| [GraphQL](docs/graphql.md)                           | API schema, queries, mutations           |
-| [Designs](docs/designs)                              | Excalidraw designs and images            |
+| Guide                                                                                       | Description                              |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| [Architecture](docs/architecture.md)                                                        | Project structure, service overview      |
+| [Web](docs/web.md)                                                                          | Web application structure and components |
+| [Development](docs/development.md)                                                          | Setup, local dev, make commands          |
+| [Database](docs/database.md)                                                                | Migrations, Goose, DB details            |
+| [GraphQL](docs/graphql.md)                                                                  | API schema, queries, mutations           |
+| [Designs](docs/designs)                                                                     | Excalidraw designs and images            |
 | [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/andrearcaina/fafnir) | AI-generated docs of fafnir (from Devin) |
-
 
 ## TODO
 
@@ -42,5 +42,6 @@ In no particular order:
 - [x] Explore centralizing logging with Elasticsearch ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
     - [x] Migrate to utilizing [Loki](https://grafana.com/oss/loki/) for both Minikube and docker-compose ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
     - [x] Migrate from `log` to `log/slog` for structured logging and better integration with [Loki](https://grafana.com/oss/loki/) ([issue #31](https://github.com/andrearcaina/fafnir/issues/31)).
+- [x] Implement a frontend for the stock trading simulator/platform (check [web/](web/)).
 - [ ] Implement a CI/CD pipeline for automated testing and Docker builds.
 - [ ] Production deployment via DigitalOcean and Traefik ([issue #22](https://github.com/andrearcaina/fafnir/issues/22)).
