@@ -80,6 +80,9 @@ func (r *mutationResolver) DeleteAccount(ctx context.Context, accountID string) 
 	if err != nil {
 		return false, err
 	}
+	if err := r.requireOwnedAccounts(ctx, userID.String(), accountID); err != nil {
+		return false, err
+	}
 
 	return r.PortfolioClient.DeleteAccount(ctx, accountID)
 }
@@ -95,6 +98,9 @@ func (r *mutationResolver) Deposit(ctx context.Context, request model.DepositReq
 	if err != nil {
 		return nil, err
 	}
+	if err := r.requireOwnedAccounts(ctx, userID.String(), request.AccountID); err != nil {
+		return nil, err
+	}
 
 	resp, err := r.PortfolioClient.Deposit(ctx, userID.String(), request)
 	if err != nil {
@@ -107,6 +113,9 @@ func (r *mutationResolver) Deposit(ctx context.Context, request model.DepositReq
 func (r *mutationResolver) Transfer(ctx context.Context, request model.TransferRequest) (*model.TransferResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if err := r.requireOwnedAccounts(ctx, userID.String(), request.FromAccountID, request.ToAccountID); err != nil {
 		return nil, err
 	}
 
@@ -147,6 +156,9 @@ func (r *queryResolver) GetHoldings(ctx context.Context, request model.GetHoldin
 	if err != nil {
 		return nil, err
 	}
+	if err := r.requireOwnedAccounts(ctx, userID.String(), request.AccountID); err != nil {
+		return nil, err
+	}
 
 	_, err = r.SecurityClient.CheckPermission(ctx, userID.String(), rbac.ManageOwnPortfolio)
 	if err != nil {
@@ -164,6 +176,9 @@ func (r *queryResolver) GetHoldings(ctx context.Context, request model.GetHoldin
 func (r *queryResolver) GetHolding(ctx context.Context, request model.GetHoldingRequest) (*model.GetHoldingResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if err := r.requireOwnedAccounts(ctx, userID.String(), request.AccountID); err != nil {
 		return nil, err
 	}
 
@@ -202,6 +217,9 @@ func (r *queryResolver) GetWatchlist(ctx context.Context) (*model.GetWatchlistRe
 func (r *queryResolver) GetTransactions(ctx context.Context, request model.GetTransactionsRequest) (*model.GetTransactionsResponse, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
 	if err != nil {
+		return nil, err
+	}
+	if err := r.requireOwnedAccounts(ctx, userID.String(), request.AccountID); err != nil {
 		return nil, err
 	}
 

@@ -178,10 +178,10 @@ type ComplexityRoot struct {
 		GetStockMetadata       func(childComplexity int, symbol string) int
 		GetStockQuote          func(childComplexity int, symbol string) int
 		GetStockQuoteBatch     func(childComplexity int, symbols []string) int
-		GetSupportedStocks     func(childComplexity int) int
 		GetTransactions        func(childComplexity int, request model.GetTransactionsRequest) int
 		GetWatchlist           func(childComplexity int) int
 		Health                 func(childComplexity int) int
+		SearchStocks           func(childComplexity int, query string, limit *int32) int
 	}
 
 	RemoveFromWatchlistResponse struct {
@@ -196,6 +196,7 @@ type ComplexityRoot struct {
 		Currency         func(childComplexity int) int
 		Exchange         func(childComplexity int) int
 		ExchangeFullName func(childComplexity int) int
+		InstrumentType   func(childComplexity int) int
 		Name             func(childComplexity int) int
 		Symbol           func(childComplexity int) int
 	}
@@ -223,14 +224,18 @@ type ComplexityRoot struct {
 	}
 
 	StockPriceData struct {
+		AsOf               func(childComplexity int) int
+		Currency           func(childComplexity int) int
 		DayHigh            func(childComplexity int) int
 		DayLow             func(childComplexity int) int
 		MarketCap          func(childComplexity int) int
+		MarketState        func(childComplexity int) int
 		Open               func(childComplexity int) int
 		PreviousClose      func(childComplexity int) int
 		Price              func(childComplexity int) int
 		PriceChange        func(childComplexity int) int
 		PriceChangePercent func(childComplexity int) int
+		Source             func(childComplexity int) int
 		Symbol             func(childComplexity int) int
 		Volume             func(childComplexity int) int
 		YearHigh           func(childComplexity int) int
@@ -245,6 +250,14 @@ type ComplexityRoot struct {
 	StockQuoteResponse struct {
 		Code func(childComplexity int) int
 		Data func(childComplexity int) int
+	}
+
+	StockSearchResult struct {
+		Exchange         func(childComplexity int) int
+		ExchangeFullName func(childComplexity int) int
+		InstrumentType   func(childComplexity int) int
+		Name             func(childComplexity int) int
+		Symbol           func(childComplexity int) int
 	}
 
 	Transaction struct {
@@ -919,13 +932,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.GetStockQuoteBatch(childComplexity, args["symbols"].([]string)), true
 
-	case "Query.getSupportedStocks":
-		if e.complexity.Query.GetSupportedStocks == nil {
-			break
-		}
-
-		return e.complexity.Query.GetSupportedStocks(childComplexity), true
-
 	case "Query.getTransactions":
 		if e.complexity.Query.GetTransactions == nil {
 			break
@@ -951,6 +957,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Health(childComplexity), true
+
+	case "Query.searchStocks":
+		if e.complexity.Query.SearchStocks == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchStocks_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchStocks(childComplexity, args["query"].(string), args["limit"].(*int32)), true
 
 	case "RemoveFromWatchlistResponse.code":
 		if e.complexity.RemoveFromWatchlistResponse.Code == nil {
@@ -986,6 +1004,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockData.ExchangeFullName(childComplexity), true
+
+	case "StockData.instrumentType":
+		if e.complexity.StockData.InstrumentType == nil {
+			break
+		}
+
+		return e.complexity.StockData.InstrumentType(childComplexity), true
 
 	case "StockData.name":
 		if e.complexity.StockData.Name == nil {
@@ -1092,6 +1117,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StockMetadataResponse.Data(childComplexity), true
 
+	case "StockPriceData.asOf":
+		if e.complexity.StockPriceData.AsOf == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.AsOf(childComplexity), true
+
+	case "StockPriceData.currency":
+		if e.complexity.StockPriceData.Currency == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.Currency(childComplexity), true
+
 	case "StockPriceData.dayHigh":
 		if e.complexity.StockPriceData.DayHigh == nil {
 			break
@@ -1112,6 +1151,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockPriceData.MarketCap(childComplexity), true
+
+	case "StockPriceData.marketState":
+		if e.complexity.StockPriceData.MarketState == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.MarketState(childComplexity), true
 
 	case "StockPriceData.open":
 		if e.complexity.StockPriceData.Open == nil {
@@ -1147,6 +1193,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockPriceData.PriceChangePercent(childComplexity), true
+
+	case "StockPriceData.source":
+		if e.complexity.StockPriceData.Source == nil {
+			break
+		}
+
+		return e.complexity.StockPriceData.Source(childComplexity), true
 
 	case "StockPriceData.symbol":
 		if e.complexity.StockPriceData.Symbol == nil {
@@ -1203,6 +1256,41 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.StockQuoteResponse.Data(childComplexity), true
+
+	case "StockSearchResult.exchange":
+		if e.complexity.StockSearchResult.Exchange == nil {
+			break
+		}
+
+		return e.complexity.StockSearchResult.Exchange(childComplexity), true
+
+	case "StockSearchResult.exchangeFullName":
+		if e.complexity.StockSearchResult.ExchangeFullName == nil {
+			break
+		}
+
+		return e.complexity.StockSearchResult.ExchangeFullName(childComplexity), true
+
+	case "StockSearchResult.instrumentType":
+		if e.complexity.StockSearchResult.InstrumentType == nil {
+			break
+		}
+
+		return e.complexity.StockSearchResult.InstrumentType(childComplexity), true
+
+	case "StockSearchResult.name":
+		if e.complexity.StockSearchResult.Name == nil {
+			break
+		}
+
+		return e.complexity.StockSearchResult.Name(childComplexity), true
+
+	case "StockSearchResult.symbol":
+		if e.complexity.StockSearchResult.Symbol == nil {
+			break
+		}
+
+		return e.complexity.StockSearchResult.Symbol(childComplexity), true
 
 	case "Transaction.accountId":
 		if e.complexity.Transaction.AccountID == nil {
@@ -1423,8 +1511,6 @@ input CreateOrderRequest {
     type: String!
     quantity: Float!
     price: Float
-    stopPrice: Float
-    status: String # optional, defaults to PENDING
 }
 
 input GetOrderByIDRequest {
@@ -1647,6 +1733,15 @@ type StockData {
     exchange: String!
     exchangeFullName: String!
     currency: String!
+    instrumentType: String!
+}
+
+type StockSearchResult {
+    symbol: String!
+    name: String!
+    exchange: String!
+    exchangeFullName: String!
+    instrumentType: String!
 }
 
 type StockHistoricalData {
@@ -1663,6 +1758,7 @@ type StockHistoricalData {
 
 type StockPriceData {
     symbol: String!
+    currency: String!
     price: Float!
     open: Float!
     previousClose: Float!
@@ -1674,10 +1770,13 @@ type StockPriceData {
     dayHigh: Float!
     yearHigh: Float!
     yearLow: Float!
+    source: String!
+    asOf: String!
+    marketState: String!
 }
 
 extend type Query {
-    getSupportedStocks: [String!]!
+    searchStocks(query: String!, limit: Int = 8): [StockSearchResult!]!
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
     getStockHistoricalData(

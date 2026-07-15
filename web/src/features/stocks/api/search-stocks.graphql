@@ -1,0 +1,9 @@
+query SearchStocks($query: String!, $limit: Int) {
+  searchStocks(query: $query, limit: $limit) {
+    symbol
+    name
+    exchange
+    exchangeFullName
+    instrumentType
+  }
+}

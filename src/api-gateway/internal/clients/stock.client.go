@@ -2,8 +2,11 @@ package clients
 
 import (
 	"context"
-	"fafnir/api-gateway/graph/model"
+	"fmt"
 	"strings"
+	"time"
+
+	"fafnir/api-gateway/graph/model"
 
 	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/stock"
@@ -35,6 +38,36 @@ func NewStockClient(address string) *StockClient {
 	}
 }
 
+func (c *StockClient) SearchStocks(ctx context.Context, query string, limit int) ([]*model.StockSearchResult, error) {
+	resp, err := c.client.SearchStocks(ctx, &pb.SearchStocksRequest{
+		Query: query,
+		Limit: int32(limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+	if resp.GetCode() != basepb.ErrorCode_OK {
+		return nil, fmt.Errorf("stock search returned %s", resp.GetCode().String())
+	}
+
+	results := make([]*model.StockSearchResult, 0, len(resp.Data))
+	for _, result := range resp.Data {
+		if result == nil {
+			continue
+		}
+
+		results = append(results, &model.StockSearchResult{
+			Symbol:           result.Symbol,
+			Name:             result.Name,
+			Exchange:         result.Exchange,
+			ExchangeFullName: result.ExchangeFullName,
+			InstrumentType:   result.InstrumentType,
+		})
+	}
+
+	return results, nil
+}
+
 func (c *StockClient) GetStockMetadata(ctx context.Context, symbol string) (model.StockMetadataResponse, error) {
 	req := &pb.GetStockMetadataRequest{
 		Symbol: symbol,
@@ -44,16 +77,11 @@ func (c *StockClient) GetStockMetadata(ctx context.Context, symbol string) (mode
 	if err != nil {
 		return model.StockMetadataResponse{
 			Data: nil,
-			Code: resp.GetCode().String(),
+			Code: basepb.ErrorCode_INTERNAL.String(),
 		}, err
 	}
 
-	if resp.GetCode() == basepb.ErrorCode_INVALID_ARGUMENT {
-		return model.StockMetadataResponse{
-			Data: nil,
-			Code: resp.GetCode().String(),
-		}, nil
-	} else if resp.GetCode() == basepb.ErrorCode_INTERNAL {
+	if resp.GetCode() != basepb.ErrorCode_OK || resp.GetData() == nil {
 		return model.StockMetadataResponse{
 			Data: nil,
 			Code: resp.GetCode().String(),
@@ -67,6 +95,7 @@ func (c *StockClient) GetStockMetadata(ctx context.Context, symbol string) (mode
 			Currency:         resp.GetData().GetCurrency(),
 			Exchange:         resp.GetData().GetExchange(),
 			ExchangeFullName: resp.GetData().GetExchangeFullName(),
+			InstrumentType:   resp.GetData().GetInstrumentType(),
 		},
 		Code: resp.GetCode().String(),
 	}, nil
@@ -81,16 +110,11 @@ func (c *StockClient) GetStockQuote(ctx context.Context, symbol string) (model.S
 	if err != nil {
 		return model.StockQuoteResponse{
 			Data: nil,
-			Code: resp.GetCode().String(),
+			Code: basepb.ErrorCode_INTERNAL.String(),
 		}, err
 	}
 
-	if resp.GetCode() == basepb.ErrorCode_INVALID_ARGUMENT {
-		return model.StockQuoteResponse{
-			Data: nil,
-			Code: resp.GetCode().String(),
-		}, nil
-	} else if resp.GetCode() == basepb.ErrorCode_INTERNAL {
+	if resp.GetCode() != basepb.ErrorCode_OK || resp.GetData() == nil {
 		return model.StockQuoteResponse{
 			Data: nil,
 			Code: resp.GetCode().String(),
@@ -98,20 +122,7 @@ func (c *StockClient) GetStockQuote(ctx context.Context, symbol string) (model.S
 	}
 
 	return model.StockQuoteResponse{
-		Data: &model.StockPriceData{
-			Symbol:             resp.GetData().GetSymbol(),
-			Price:              resp.GetData().GetLastPrice(),
-			Open:               resp.GetData().GetOpenPrice(),
-			PreviousClose:      resp.GetData().GetPreviousClose(),
-			DayLow:             resp.GetData().GetDayLow(),
-			DayHigh:            resp.GetData().GetDayHigh(),
-			YearLow:            resp.GetData().GetYearLow(),
-			YearHigh:           resp.GetData().GetYearHigh(),
-			Volume:             resp.GetData().GetVolume(),
-			MarketCap:          resp.GetData().GetMarketCap(),
-			PriceChange:        resp.GetData().GetChange(),
-			PriceChangePercent: resp.GetData().GetChangePct(),
-		},
+		Data: quoteToModel(resp.GetData()),
 		Code: resp.GetCode().String(),
 	}, nil
 }
@@ -125,16 +136,11 @@ func (c *StockClient) GetStockQuoteBatch(ctx context.Context, symbols []string) 
 	if err != nil {
 		return model.StockQuoteBatchResponse{
 			Data: nil,
-			Code: resp.GetCode().String(),
+			Code: basepb.ErrorCode_INTERNAL.String(),
 		}, err
 	}
 
-	if resp.GetCode() == basepb.ErrorCode_INVALID_ARGUMENT {
-		return model.StockQuoteBatchResponse{
-			Data: nil,
-			Code: resp.GetCode().String(),
-		}, nil
-	} else if resp.GetCode() == basepb.ErrorCode_INTERNAL {
+	if resp.GetCode() != basepb.ErrorCode_OK {
 		return model.StockQuoteBatchResponse{
 			Data: nil,
 			Code: resp.GetCode().String(),
@@ -143,26 +149,45 @@ func (c *StockClient) GetStockQuoteBatch(ctx context.Context, symbols []string) 
 
 	var stockPrices []*model.StockPriceData
 	for _, stock := range resp.GetData() {
-		stockPrices = append(stockPrices, &model.StockPriceData{
-			Symbol:             stock.GetSymbol(),
-			Price:              stock.GetLastPrice(),
-			Open:               stock.GetOpenPrice(),
-			PreviousClose:      stock.GetPreviousClose(),
-			DayLow:             stock.GetDayLow(),
-			DayHigh:            stock.GetDayHigh(),
-			YearLow:            stock.GetYearLow(),
-			YearHigh:           stock.GetYearHigh(),
-			Volume:             stock.GetVolume(),
-			MarketCap:          stock.GetMarketCap(),
-			PriceChange:        stock.GetChange(),
-			PriceChangePercent: stock.GetChangePct(),
-		})
+		if mapped := quoteToModel(stock); mapped != nil {
+			stockPrices = append(stockPrices, mapped)
+		}
 	}
 
 	return model.StockQuoteBatchResponse{
 		Data: stockPrices,
 		Code: resp.GetCode().String(),
 	}, nil
+}
+
+func quoteToModel(stock *pb.StockQuote) *model.StockPriceData {
+	if stock == nil {
+		return nil
+	}
+
+	asOf := ""
+	if stock.AsOf != nil {
+		asOf = stock.AsOf.AsTime().Format(time.RFC3339)
+	}
+
+	return &model.StockPriceData{
+		Symbol:             stock.GetSymbol(),
+		Currency:           stock.GetCurrency(),
+		Price:              stock.GetLastPrice(),
+		Open:               stock.GetOpenPrice(),
+		PreviousClose:      stock.GetPreviousClose(),
+		DayLow:             stock.GetDayLow(),
+		DayHigh:            stock.GetDayHigh(),
+		YearLow:            stock.GetYearLow(),
+		YearHigh:           stock.GetYearHigh(),
+		Volume:             stock.GetVolume(),
+		MarketCap:          stock.GetMarketCap(),
+		PriceChange:        stock.GetChange(),
+		PriceChangePercent: stock.GetChangePct(),
+		Source:             stock.GetSource(),
+		AsOf:               asOf,
+		MarketState:        stock.GetMarketState(),
+	}
 }
 
 func (c *StockClient) GetStockHistoricalData(ctx context.Context, symbol string, period string) (model.StockHistoricalDataResponse, error) {
@@ -175,16 +200,11 @@ func (c *StockClient) GetStockHistoricalData(ctx context.Context, symbol string,
 	if err != nil {
 		return model.StockHistoricalDataResponse{
 			Data: nil,
-			Code: resp.GetCode().String(),
+			Code: basepb.ErrorCode_INTERNAL.String(),
 		}, err
 	}
 
-	if resp.GetCode() == basepb.ErrorCode_INVALID_ARGUMENT {
-		return model.StockHistoricalDataResponse{
-			Data: nil,
-			Code: resp.GetCode().String(),
-		}, nil
-	} else if resp.GetCode() == basepb.ErrorCode_INTERNAL {
+	if resp.GetCode() != basepb.ErrorCode_OK {
 		return model.StockHistoricalDataResponse{
 			Data: nil,
 			Code: resp.GetCode().String(),
@@ -193,6 +213,9 @@ func (c *StockClient) GetStockHistoricalData(ctx context.Context, symbol string,
 
 	var historicalData []*model.StockHistoricalData
 	for _, stockData := range resp.GetData() {
+		if stockData == nil {
+			continue
+		}
 		historicalData = append(historicalData, &model.StockHistoricalData{
 			Symbol:             stockData.GetSymbol(),
 			Date:               stockData.GetDate(),

@@ -174,6 +174,35 @@ func (ec *executionContext) fieldContext_StockData_currency(_ context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _StockData_instrumentType(ctx context.Context, field graphql.CollectedField, obj *model.StockData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockData_instrumentType,
+		func(ctx context.Context) (any, error) {
+			return obj.InstrumentType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockData_instrumentType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _StockHistoricalData_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockHistoricalData) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -576,6 +605,8 @@ func (ec *executionContext) fieldContext_StockMetadataResponse_data(_ context.Co
 				return ec.fieldContext_StockData_exchangeFullName(ctx, field)
 			case "currency":
 				return ec.fieldContext_StockData_currency(ctx, field)
+			case "instrumentType":
+				return ec.fieldContext_StockData_instrumentType(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StockData", field.Name)
 		},
@@ -600,6 +631,35 @@ func (ec *executionContext) _StockPriceData_symbol(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext_StockPriceData_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockPriceData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockPriceData_currency(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_currency,
+		func(ctx context.Context) (any, error) {
+			return obj.Currency, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockPriceData_currency(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "StockPriceData",
 		Field:      field,
@@ -931,6 +991,93 @@ func (ec *executionContext) fieldContext_StockPriceData_yearLow(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _StockPriceData_source(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_source,
+		func(ctx context.Context) (any, error) {
+			return obj.Source, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockPriceData_source(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockPriceData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockPriceData_asOf(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_asOf,
+		func(ctx context.Context) (any, error) {
+			return obj.AsOf, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockPriceData_asOf(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockPriceData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockPriceData_marketState(ctx context.Context, field graphql.CollectedField, obj *model.StockPriceData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockPriceData_marketState,
+		func(ctx context.Context) (any, error) {
+			return obj.MarketState, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockPriceData_marketState(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockPriceData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _StockQuoteBatchResponse_code(ctx context.Context, field graphql.CollectedField, obj *model.StockQuoteBatchResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -986,6 +1133,8 @@ func (ec *executionContext) fieldContext_StockQuoteBatchResponse_data(_ context.
 			switch field.Name {
 			case "symbol":
 				return ec.fieldContext_StockPriceData_symbol(ctx, field)
+			case "currency":
+				return ec.fieldContext_StockPriceData_currency(ctx, field)
 			case "price":
 				return ec.fieldContext_StockPriceData_price(ctx, field)
 			case "open":
@@ -1008,6 +1157,12 @@ func (ec *executionContext) fieldContext_StockQuoteBatchResponse_data(_ context.
 				return ec.fieldContext_StockPriceData_yearHigh(ctx, field)
 			case "yearLow":
 				return ec.fieldContext_StockPriceData_yearLow(ctx, field)
+			case "source":
+				return ec.fieldContext_StockPriceData_source(ctx, field)
+			case "asOf":
+				return ec.fieldContext_StockPriceData_asOf(ctx, field)
+			case "marketState":
+				return ec.fieldContext_StockPriceData_marketState(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StockPriceData", field.Name)
 		},
@@ -1070,6 +1225,8 @@ func (ec *executionContext) fieldContext_StockQuoteResponse_data(_ context.Conte
 			switch field.Name {
 			case "symbol":
 				return ec.fieldContext_StockPriceData_symbol(ctx, field)
+			case "currency":
+				return ec.fieldContext_StockPriceData_currency(ctx, field)
 			case "price":
 				return ec.fieldContext_StockPriceData_price(ctx, field)
 			case "open":
@@ -1092,8 +1249,159 @@ func (ec *executionContext) fieldContext_StockQuoteResponse_data(_ context.Conte
 				return ec.fieldContext_StockPriceData_yearHigh(ctx, field)
 			case "yearLow":
 				return ec.fieldContext_StockPriceData_yearLow(ctx, field)
+			case "source":
+				return ec.fieldContext_StockPriceData_source(ctx, field)
+			case "asOf":
+				return ec.fieldContext_StockPriceData_asOf(ctx, field)
+			case "marketState":
+				return ec.fieldContext_StockPriceData_marketState(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StockPriceData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockSearchResult_symbol(ctx context.Context, field graphql.CollectedField, obj *model.StockSearchResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockSearchResult_symbol,
+		func(ctx context.Context) (any, error) {
+			return obj.Symbol, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockSearchResult_symbol(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockSearchResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockSearchResult_name(ctx context.Context, field graphql.CollectedField, obj *model.StockSearchResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockSearchResult_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockSearchResult_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockSearchResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockSearchResult_exchange(ctx context.Context, field graphql.CollectedField, obj *model.StockSearchResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockSearchResult_exchange,
+		func(ctx context.Context) (any, error) {
+			return obj.Exchange, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockSearchResult_exchange(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockSearchResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockSearchResult_exchangeFullName(ctx context.Context, field graphql.CollectedField, obj *model.StockSearchResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockSearchResult_exchangeFullName,
+		func(ctx context.Context) (any, error) {
+			return obj.ExchangeFullName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockSearchResult_exchangeFullName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockSearchResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StockSearchResult_instrumentType(ctx context.Context, field graphql.CollectedField, obj *model.StockSearchResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_StockSearchResult_instrumentType,
+		func(ctx context.Context) (any, error) {
+			return obj.InstrumentType, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_StockSearchResult_instrumentType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StockSearchResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1144,6 +1452,11 @@ func (ec *executionContext) _StockData(ctx context.Context, sel ast.SelectionSet
 			}
 		case "currency":
 			out.Values[i] = ec._StockData_currency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "instrumentType":
+			out.Values[i] = ec._StockData_instrumentType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1347,6 +1660,11 @@ func (ec *executionContext) _StockPriceData(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "currency":
+			out.Values[i] = ec._StockPriceData_currency(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "price":
 			out.Values[i] = ec._StockPriceData_price(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -1399,6 +1717,21 @@ func (ec *executionContext) _StockPriceData(ctx context.Context, sel ast.Selecti
 			}
 		case "yearLow":
 			out.Values[i] = ec._StockPriceData_yearLow(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "source":
+			out.Values[i] = ec._StockPriceData_source(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "asOf":
+			out.Values[i] = ec._StockPriceData_asOf(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "marketState":
+			out.Values[i] = ec._StockPriceData_marketState(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1507,6 +1840,65 @@ func (ec *executionContext) _StockQuoteResponse(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var stockSearchResultImplementors = []string{"StockSearchResult"}
+
+func (ec *executionContext) _StockSearchResult(ctx context.Context, sel ast.SelectionSet, obj *model.StockSearchResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stockSearchResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StockSearchResult")
+		case "symbol":
+			out.Values[i] = ec._StockSearchResult_symbol(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._StockSearchResult_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "exchange":
+			out.Values[i] = ec._StockSearchResult_exchange(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "exchangeFullName":
+			out.Values[i] = ec._StockSearchResult_exchangeFullName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "instrumentType":
+			out.Values[i] = ec._StockSearchResult_instrumentType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -1581,6 +1973,60 @@ func (ec *executionContext) marshalNStockQuoteResponse2ᚖfafnirᚋapiᚑgateway
 		return graphql.Null
 	}
 	return ec._StockQuoteResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNStockSearchResult2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockSearchResultᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.StockSearchResult) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNStockSearchResult2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockSearchResult(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNStockSearchResult2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockSearchResult(ctx context.Context, sel ast.SelectionSet, v *model.StockSearchResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._StockSearchResult(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOStockData2ᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockData(ctx context.Context, sel ast.SelectionSet, v *model.StockData) graphql.Marshaler {

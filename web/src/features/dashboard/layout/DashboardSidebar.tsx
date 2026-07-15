@@ -69,7 +69,7 @@ export function DashboardSidebar({
             <NavLink
               key={account.id}
               label={account.type.toLowerCase()}
-              description={`${account.currency} ${formatMoney(account.balance)}`}
+              description={formatMoney(account.balance, account.currency)}
               leftSection={
                 <ThemeIcon variant="light" color="gray" radius="md">
                   <IconWallet size={16} />

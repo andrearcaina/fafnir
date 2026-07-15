@@ -15,12 +15,17 @@ import (
 const cancelOrder = `-- name: CancelOrder :one
 UPDATE orders
 SET status = 'canceled', updated_at = NOW()
-WHERE id = $1 AND status = 'pending'
+WHERE id = $1 AND user_id = $2 AND status = 'pending'
 RETURNING id, user_id, symbol, side, type, status, quantity, filled_quantity, price, stop_price, avg_fill_price, created_at, updated_at
 `
 
-func (q *Queries) CancelOrder(ctx context.Context, id uuid.UUID) (Order, error) {
-	row := q.db.QueryRow(ctx, cancelOrder, id)
+type CancelOrderParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) CancelOrder(ctx context.Context, arg CancelOrderParams) (Order, error) {
+	row := q.db.QueryRow(ctx, cancelOrder, arg.ID, arg.UserID)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -40,13 +45,46 @@ func (q *Queries) CancelOrder(ctx context.Context, id uuid.UUID) (Order, error) 
 	return i, err
 }
 
-const getOrderById = `-- name: GetOrderById :one
+const getOrderByIdAndUserId = `-- name: GetOrderByIdAndUserId :one
 SELECT id, user_id, symbol, side, type, status, quantity, filled_quantity, price, stop_price, avg_fill_price, created_at, updated_at FROM orders
-WHERE id = $1 LIMIT 1
+WHERE id = $1 AND user_id = $2
+LIMIT 1
 `
 
-func (q *Queries) GetOrderById(ctx context.Context, id uuid.UUID) (Order, error) {
-	row := q.db.QueryRow(ctx, getOrderById, id)
+type GetOrderByIdAndUserIdParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) GetOrderByIdAndUserId(ctx context.Context, arg GetOrderByIdAndUserIdParams) (Order, error) {
+	row := q.db.QueryRow(ctx, getOrderByIdAndUserId, arg.ID, arg.UserID)
+	var i Order
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Symbol,
+		&i.Side,
+		&i.Type,
+		&i.Status,
+		&i.Quantity,
+		&i.FilledQuantity,
+		&i.Price,
+		&i.StopPrice,
+		&i.AvgFillPrice,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getOrderByIdForUpdate = `-- name: GetOrderByIdForUpdate :one
+SELECT id, user_id, symbol, side, type, status, quantity, filled_quantity, price, stop_price, avg_fill_price, created_at, updated_at FROM orders
+WHERE id = $1
+FOR UPDATE
+`
+
+func (q *Queries) GetOrderByIdForUpdate(ctx context.Context, id uuid.UUID) (Order, error) {
+	row := q.db.QueryRow(ctx, getOrderByIdForUpdate, id)
 	var i Order
 	err := row.Scan(
 		&i.ID,
@@ -156,7 +194,7 @@ func (q *Queries) InsertOrder(ctx context.Context, arg InsertOrderParams) (Order
 const rejectOrder = `-- name: RejectOrder :one
 UPDATE orders
 SET status = 'rejected', updated_at = NOW()
-WHERE id = $1
+WHERE id = $1 AND status = 'pending'
 RETURNING id, user_id, symbol, side, type, status, quantity, filled_quantity, price, stop_price, avg_fill_price, created_at, updated_at
 `
 
@@ -185,7 +223,7 @@ const updateOrderStatus = `-- name: UpdateOrderStatus :one
 UPDATE orders
 SET filled_quantity = $2, avg_fill_price = $3,
     status = $4, updated_at = NOW()
-WHERE id = $1
+WHERE id = $1 AND status = 'pending'
 RETURNING id, user_id, symbol, side, type, status, quantity, filled_quantity, price, stop_price, avg_fill_price, created_at, updated_at
 `
 

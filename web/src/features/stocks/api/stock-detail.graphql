@@ -1,0 +1,34 @@
+query StockDetails($symbol: String!) {
+  getStockMetadata(symbol: $symbol) {
+    code
+    data {
+      symbol
+      name
+      exchange
+      exchangeFullName
+      currency
+      instrumentType
+    }
+  }
+  getStockQuote(symbol: $symbol) {
+    code
+    data {
+      symbol
+      currency
+      price
+      priceChange
+      priceChangePercent
+      volume
+      open
+      previousClose
+      marketCap
+      dayLow
+      dayHigh
+      yearLow
+      yearHigh
+      source
+      asOf
+      marketState
+    }
+  }
+}

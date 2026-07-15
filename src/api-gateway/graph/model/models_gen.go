@@ -37,13 +37,11 @@ type CreateAccountResponse struct {
 }
 
 type CreateOrderRequest struct {
-	Symbol    string   `json:"symbol"`
-	Side      string   `json:"side"`
-	Type      string   `json:"type"`
-	Quantity  float64  `json:"quantity"`
-	Price     *float64 `json:"price,omitempty"`
-	StopPrice *float64 `json:"stopPrice,omitempty"`
-	Status    *string  `json:"status,omitempty"`
+	Symbol   string   `json:"symbol"`
+	Side     string   `json:"side"`
+	Type     string   `json:"type"`
+	Quantity float64  `json:"quantity"`
+	Price    *float64 `json:"price,omitempty"`
 }
 
 type CreateOrderResponse struct {
@@ -186,6 +184,7 @@ type StockData struct {
 	Exchange         string `json:"exchange"`
 	ExchangeFullName string `json:"exchangeFullName"`
 	Currency         string `json:"currency"`
+	InstrumentType   string `json:"instrumentType"`
 }
 
 type StockHistoricalData struct {
@@ -212,6 +211,7 @@ type StockMetadataResponse struct {
 
 type StockPriceData struct {
 	Symbol             string  `json:"symbol"`
+	Currency           string  `json:"currency"`
 	Price              float64 `json:"price"`
 	Open               float64 `json:"open"`
 	PreviousClose      float64 `json:"previousClose"`
@@ -223,6 +223,9 @@ type StockPriceData struct {
 	DayHigh            float64 `json:"dayHigh"`
 	YearHigh           float64 `json:"yearHigh"`
 	YearLow            float64 `json:"yearLow"`
+	Source             string  `json:"source"`
+	AsOf               string  `json:"asOf"`
+	MarketState        string  `json:"marketState"`
 }
 
 type StockQuoteBatchResponse struct {
@@ -233,6 +236,14 @@ type StockQuoteBatchResponse struct {
 type StockQuoteResponse struct {
 	Code string          `json:"code"`
 	Data *StockPriceData `json:"data,omitempty"`
+}
+
+type StockSearchResult struct {
+	Symbol           string `json:"symbol"`
+	Name             string `json:"name"`
+	Exchange         string `json:"exchange"`
+	ExchangeFullName string `json:"exchangeFullName"`
+	InstrumentType   string `json:"instrumentType"`
 }
 
 type Transaction struct {

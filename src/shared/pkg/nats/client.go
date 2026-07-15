@@ -75,6 +75,11 @@ func (c *NatsClient) Publish(subject string, data []byte) (*nats.PubAck, error) 
 	return c.js.Publish(subject, data)
 }
 
+// PublishWithID is Publish, but with a message ID (to ensure idempotency)
+func (c *NatsClient) PublishWithID(subject string, messageID string, data []byte) (*nats.PubAck, error) {
+	return c.js.Publish(subject, data, nats.MsgId(messageID))
+}
+
 // Subscribe to a subject (broadcast to all subscribers -> fan-out, not load balanced)
 func (c *NatsClient) Subscribe(subject string, handler nats.MsgHandler) (*nats.Subscription, error) {
 	return c.js.Subscribe(subject, handler)

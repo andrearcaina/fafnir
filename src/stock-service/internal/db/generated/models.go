@@ -27,6 +27,7 @@ type StockMetadatum struct {
 	Exchange         string `json:"exchange"`
 	ExchangeFullName string `json:"exchange_full_name"`
 	Currency         string `json:"currency"`
+	InstrumentType   string `json:"instrument_type"`
 }
 
 type StockQuote struct {
@@ -43,4 +44,7 @@ type StockQuote struct {
 	YearLow            float64            `json:"year_low"`
 	YearHigh           float64            `json:"year_high"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+	Source             string             `json:"source"`
+	AsOf               pgtype.Timestamptz `json:"as_of"`
+	MarketState        string             `json:"market_state"`
 }

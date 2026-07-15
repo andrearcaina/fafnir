@@ -3,37 +3,65 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
+	"strings"
+	"sync"
+	"time"
+
 	"fafnir/shared/pkg/errors"
 	"fafnir/shared/pkg/redis"
-	stockcatalog "fafnir/shared/pkg/stocks"
 	"fafnir/stock-service/internal/db"
 	"fafnir/stock-service/internal/db/generated"
 	"fafnir/stock-service/internal/dto"
-	"fafnir/stock-service/internal/fmp"
+	"fafnir/stock-service/internal/provider"
 	"fafnir/stock-service/internal/utils"
-	"log"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/singleflight"
 )
 
 type Service struct {
 	db           *db.Database
 	redis        *redis.Cache
-	fmp          *fmp.Client
+	marketData   provider.MarketData
+	symbolSearch provider.SymbolSearcher
+	quoteTTL     time.Duration
 	requestGroup singleflight.Group
 }
 
-func NewStockService(database *db.Database, redis *redis.Cache, fmp *fmp.Client) *Service {
+func NewStockService(database *db.Database, redis *redis.Cache, marketData provider.MarketData, symbolSearch provider.SymbolSearcher, quoteTTL time.Duration) *Service {
 	return &Service{
-		db:    database,
-		redis: redis,
-		fmp:   fmp,
+		db:           database,
+		redis:        redis,
+		marketData:   marketData,
+		symbolSearch: symbolSearch,
+		quoteTTL:     quoteTTL,
 	}
 }
 
+func (s *Service) SearchStocks(ctx context.Context, query string, limit int) ([]dto.StockSearchResult, error) {
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return nil, errors.BadRequestError("Invalid search query").
+			WithDetails("The search query is empty")
+	}
+	if limit <= 0 || limit > 20 {
+		limit = 8
+	}
+
+	results, err := s.symbolSearch.SearchStocks(ctx, query, limit)
+	if err != nil {
+		return nil, errors.InternalError("Failed to search stocks").WithDetails(err.Error())
+	}
+
+	return results, nil
+}
+
 func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
-	key := "metadata: " + symbol
+	symbol = normalizeSymbol(symbol)
+	key := "metadata:" + symbol
 
 	// use singleflight to prevent duplicate requests for the same symbol (during high concurrency scenarios)
 	v, err, _ := s.requestGroup.Do(key, func() (interface{}, error) {
@@ -53,7 +81,7 @@ func (s *Service) GetStockMetadata(ctx context.Context, symbol string) (*dto.Sto
 }
 
 func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
-	if symbol == "" || !stockcatalog.IsSupported(symbol) {
+	if !isValidSymbol(symbol) {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -64,17 +92,18 @@ func (s *Service) getStockMetadataInternal(ctx context.Context, symbol string) (
 		return utils.ConvertStockMetadataToDTO(stockMetadata), nil // if it exists, return it
 	}
 
-	fmpStockMetadata, err := s.getStockMetadataFromFMP(ctx, symbol)
+	providerMetadata, err := s.getStockMetadataFromProvider(ctx, symbol)
 	if err != nil {
-		return nil, errors.InternalError("Could not fetch stock metadata from FMP API").
-			WithDetails("Error fetching stock metadata from FMP")
+		return nil, errors.InternalError("Could not fetch stock metadata").
+			WithDetails(err.Error())
 	}
 
-	return fmpStockMetadata, nil
+	return providerMetadata, nil
 }
 
 func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
-	key := "quote: " + symbol
+	symbol = normalizeSymbol(symbol)
+	key := "quote:" + symbol
 
 	// use singleflight to prevent duplicate requests for the same symbol (during high concurrency scenarios)
 	v, err, _ := s.requestGroup.Do(key, func() (interface{}, error) {
@@ -94,7 +123,7 @@ func (s *Service) GetStockQuote(ctx context.Context, symbol string) (*dto.StockQ
 }
 
 func (s *Service) getStockQuoteInternal(ctx context.Context, symbol string) (*dto.StockQuoteResponse, error) {
-	if symbol == "" || !stockcatalog.IsSupported(symbol) {
+	if !isValidSymbol(symbol) {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -103,71 +132,81 @@ func (s *Service) getStockQuoteInternal(ctx context.Context, symbol string) (*dt
 	cached, err := s.redis.Get(ctx, symbol)
 	if err == nil && cached != "" {
 		var stock dto.StockQuoteResponse
-		if err := json.Unmarshal([]byte(cached), &stock); err == nil {
+		if err := json.Unmarshal([]byte(cached), &stock); err == nil && stock.Currency != "" && s.quoteIsFresh(stock.FetchedAt) {
 			return &stock, nil
 		}
 	}
 
-	// if not found in cache, check postgresql database
+	// PostgreSQL is a recovery cache, not the source of truth for current prices.
+	// Only return a database quote while it is still inside the freshness window.
 	stockQuote, err := s.db.GetQueries().GetStockQuoteBySymbol(ctx, symbol)
-	// if found in database, populate redis cache and return
-	if err == nil {
+	if err == nil && s.quoteIsFresh(stockQuote.UpdatedAt.Time) {
 		stock := utils.ConvertStockQuoteToDTO(stockQuote)
+		metadata, metadataErr := s.db.GetQueries().GetStockMetadataBySymbol(ctx, symbol)
+		if metadataErr == nil && metadata.Currency != "" {
+			stock.Currency = metadata.Currency
 
-		// populate redis cache for future requests
-		data, _ := json.Marshal(stock)
-		err := s.redis.Set(ctx, symbol, string(data))
-		if err != nil {
-			log.Println("Warning: Failed to cache stock quote from database: " + err.Error()) // don't fail the request if caching fails
+			s.cacheQuote(ctx, symbol, &stock)
+
+			return &stock, nil
 		}
-
-		return &stock, nil
 	}
 
-	// if not found in redis + database, call fmp client to get stock quote
-	fmpStockQuote, err := s.fmp.GetStockQuote(symbol)
+	providerQuote, err := s.marketData.GetStockQuote(ctx, symbol)
 	if err != nil {
 		return nil, errors.InternalError("Failed to fetch stock quote").
-			WithDetails("Error calling FMP API: " + err.Error())
+			WithDetails(err.Error())
+	}
+	providerQuote.Symbol = normalizeSymbol(providerQuote.Symbol)
+	if providerQuote.Symbol != symbol {
+		return nil, errors.InternalError("Failed to fetch stock quote").
+			WithDetails("The market data provider returned a different symbol")
+	}
+	if providerQuote.Currency == "" {
+		metadata, metadataErr := s.GetStockMetadata(ctx, symbol)
+		if metadataErr != nil || metadata.Currency == "" {
+			return nil, errors.InternalError("Failed to determine quote currency").
+				WithDetails("The market data provider returned a quote without a currency")
+		}
+		providerQuote.Currency = metadata.Currency
 	}
 
 	params := generated.InsertOrUpdateStockQuoteParams{
-		Symbol:             fmpStockQuote.Symbol,
-		LastPrice:          fmpStockQuote.LastPrice,
-		OpenPrice:          fmpStockQuote.OpenPrice,
-		PreviousClosePrice: fmpStockQuote.PreviousClose,
-		DayHigh:            fmpStockQuote.DayHigh,
-		DayLow:             fmpStockQuote.DayLow,
-		YearHigh:           fmpStockQuote.YearHigh,
-		YearLow:            fmpStockQuote.YearLow,
-		Volume:             fmpStockQuote.Volume,
-		MarketCap:          fmpStockQuote.MarketCap,
-		PriceChange:        fmpStockQuote.Change,
-		PriceChangePct:     fmpStockQuote.ChangePct,
+		Symbol:             providerQuote.Symbol,
+		LastPrice:          providerQuote.LastPrice,
+		OpenPrice:          providerQuote.OpenPrice,
+		PreviousClosePrice: providerQuote.PreviousClose,
+		DayHigh:            providerQuote.DayHigh,
+		DayLow:             providerQuote.DayLow,
+		YearHigh:           providerQuote.YearHigh,
+		YearLow:            providerQuote.YearLow,
+		Volume:             providerQuote.Volume,
+		MarketCap:          providerQuote.MarketCap,
+		PriceChange:        providerQuote.Change,
+		PriceChangePct:     providerQuote.ChangePct,
+		Source:             providerQuote.Source,
+		AsOf:               pgtype.Timestamptz{Time: providerQuote.AsOf, Valid: true},
+		MarketState:        providerQuote.MarketState,
 	}
 
 	// before storing stock quote in database, ensure stock metadata exists
 	_, err = s.db.GetQueries().GetStockMetadataBySymbol(ctx, symbol)
 	if err != nil {
-		_, err = s.getStockMetadataFromFMP(ctx, symbol) // store stock metadata from FMP
+		_, err = s.getStockMetadataFromProvider(ctx, symbol)
 		if err != nil {
-			log.Println("Warning: Failed to populate stock metadata from FMP: " + err.Error())
+			log.Println("Warning: Failed to populate stock metadata: " + err.Error())
 		}
 	}
 
 	// populate postgresql table with stock quote (or update if it already exists)
 	_, err = s.db.GetQueries().InsertOrUpdateStockQuote(ctx, params)
 	if err != nil {
-		log.Println("Warning: Failed to store stock quote from FMP to database: " + err.Error())
+		log.Println("Warning: Failed to store stock quote in database: " + err.Error())
 	}
 
-	data, _ := json.Marshal(fmpStockQuote)
-	err = s.redis.Set(ctx, symbol, string(data))
-	if err != nil {
-		log.Println("Warning: Failed to cache stock quote from FMP: " + err.Error())
-	}
+	s.cacheQuote(ctx, symbol, providerQuote)
 
-	return fmpStockQuote, nil
+	return providerQuote, nil
 }
 
 func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*dto.StockQuoteResponse, error) {
@@ -176,123 +215,58 @@ func (s *Service) GetStockQuoteBatch(ctx context.Context, symbols []string) ([]*
 			WithDetails("The provided symbols list is empty")
 	}
 
-	// check for invalid symbols
-	for _, symbol := range symbols {
-		if symbol == "" || !stockcatalog.IsSupported(symbol) {
+	normalizedSymbols := make([]string, len(symbols))
+	for index, symbol := range symbols {
+		normalizedSymbols[index] = normalizeSymbol(symbol)
+		if !isValidSymbol(normalizedSymbols[index]) {
 			return nil, errors.BadRequestError("Invalid symbol").
-				WithDetails("The provided symbol " + symbol + " is invalid")
+				WithDetails("The provided symbol " + normalizedSymbols[index] + " is invalid")
 		}
 	}
 
-	result := make(map[string]*dto.StockQuoteResponse)
-	missingSymbols := make([]string, 0)
+	quotes := make([]*dto.StockQuoteResponse, len(normalizedSymbols))
+	group, groupCtx := errgroup.WithContext(ctx)
+	group.SetLimit(8)
+	var fetchErrors []error
+	var fetchErrorsMu sync.Mutex
 
-	// first, try get from redis cache
-	// use redis MGET for batch retrieval
-	cachedResults, err := s.redis.MGet(ctx, symbols)
-	if err == nil {
-		for i, cached := range cachedResults {
-			// for each symbol, check if it was found in cache
-			symbol := symbols[i]
-
-			// if found in cache, unmarshal and add to result
-			if cachedStr, ok := cached.(string); ok {
-				var stock dto.StockQuoteResponse
-				if err := json.Unmarshal([]byte(cachedStr), &stock); err == nil {
-					result[symbol] = &stock
-					continue
-				}
-			}
-
-			missingSymbols = append(missingSymbols, symbol)
-		}
-	} else {
-		// if Redis fails entirely, fetch everything from DB
-		missingSymbols = symbols
-	}
-
-	if len(missingSymbols) == 0 {
-		return utils.ConvertMapToSlice(result, symbols), nil
-	}
-
-	// for missing symbols, try get from database
-	for _, symbol := range missingSymbols {
-		stockQuote, err := s.db.GetQueries().GetStockQuoteBySymbol(ctx, symbol)
-		if err == nil {
-			stock := utils.ConvertStockQuoteToDTO(stockQuote)
-			result[symbol] = &stock
-
-			// populate redis cache for future requests
-			data, _ := json.Marshal(stock)
-			err := s.redis.Set(ctx, symbol, string(data))
+	for index, symbol := range normalizedSymbols {
+		group.Go(func() error {
+			quote, err := s.GetStockQuote(groupCtx, symbol)
 			if err != nil {
-				log.Println("Warning: Failed to cache stock quote from database: " + err.Error())
+				fetchErrorsMu.Lock()
+				fetchErrors = append(fetchErrors, fmt.Errorf("fetch quote for %s: %w", symbol, err))
+				fetchErrorsMu.Unlock()
+				return nil
 			}
-			continue
-		}
+
+			quotes[index] = quote
+			return nil
+		})
 	}
 
-	// check which symbols are still missing
-	stillMissingSymbols := make([]string, 0)
-	for _, symbol := range missingSymbols {
-		if _, exists := result[symbol]; !exists {
-			stillMissingSymbols = append(stillMissingSymbols, symbol)
+	_ = group.Wait()
+
+	availableQuotes := make([]*dto.StockQuoteResponse, 0, len(quotes))
+	for _, quote := range quotes {
+		if quote != nil {
+			availableQuotes = append(availableQuotes, quote)
 		}
 	}
-
-	// for still missing symbols, call fmp client
-	for _, symbol := range stillMissingSymbols {
-		fmpStockQuote, err := s.fmp.GetStockQuote(symbol)
-		if err != nil {
-			log.Println("Warning: Failed to fetch stock quote from FMP for symbol " + symbol + ": " + err.Error())
-			continue
-		}
-
-		params := generated.InsertOrUpdateStockQuoteParams{
-			Symbol:             fmpStockQuote.Symbol,
-			LastPrice:          fmpStockQuote.LastPrice,
-			OpenPrice:          fmpStockQuote.OpenPrice,
-			PreviousClosePrice: fmpStockQuote.PreviousClose,
-			DayHigh:            fmpStockQuote.DayHigh,
-			DayLow:             fmpStockQuote.DayLow,
-			YearHigh:           fmpStockQuote.YearHigh,
-			YearLow:            fmpStockQuote.YearLow,
-			Volume:             fmpStockQuote.Volume,
-			MarketCap:          fmpStockQuote.MarketCap,
-			PriceChange:        fmpStockQuote.Change,
-			PriceChangePct:     fmpStockQuote.ChangePct,
-		}
-
-		// before storing stock quote in database, ensure stock metadata exists
-		_, err = s.db.GetQueries().GetStockMetadataBySymbol(ctx, symbol)
-		if err != nil {
-			_, err = s.getStockMetadataFromFMP(ctx, symbol) // store stock metadata from FMP
-			if err != nil {
-				log.Println("Warning: Failed to populate stock metadata from FMP: " + err.Error())
-			}
-		}
-
-		// populate postgresql table with stock quote (or update if it already exists)
-		_, err = s.db.GetQueries().InsertOrUpdateStockQuote(ctx, params)
-		if err != nil {
-			log.Println("Warning: Failed to store stock quote from FMP to database: " + err.Error())
-		}
-
-		data, _ := json.Marshal(fmpStockQuote)
-		err = s.redis.Set(ctx, symbol, string(data))
-		if err != nil {
-			log.Println("Warning: Failed to cache stock quote from FMP: " + err.Error())
-		}
-
-		result[symbol] = fmpStockQuote
+	if len(availableQuotes) == 0 && len(fetchErrors) > 0 {
+		return nil, fetchErrors[0]
+	}
+	for _, err := range fetchErrors {
+		log.Printf("Warning: %v", err)
 	}
 
-	return utils.ConvertMapToSlice(result, symbols), nil
+	return availableQuotes, nil
 }
 
 func (s *Service) GetStockHistoricalData(ctx context.Context, symbol string, period string) ([]dto.StockHistoricalDataResponse, error) {
+	symbol = normalizeSymbol(symbol)
 	// check if symbol exists
-	if symbol == "" || !stockcatalog.IsSupported(symbol) {
+	if !isValidSymbol(symbol) {
 		return nil, errors.BadRequestError("Invalid symbol").
 			WithDetails("The provided symbol is empty")
 	}
@@ -342,24 +316,23 @@ func (s *Service) GetStockHistoricalData(ctx context.Context, symbol string, per
 		}
 	}
 
-	// if not found in database, call fmp client
-	fmpStockHistoricalData, err := s.fmp.GetStockHistoricalData(symbol, from, to)
+	providerHistory, err := s.marketData.GetStockHistoricalData(ctx, symbol, from, to)
 	if err != nil {
 		return nil, errors.InternalError("Failed to fetch historical stock data").
-			WithDetails("Error calling FMP API: " + err.Error())
+			WithDetails(err.Error())
 	}
 
 	// check if stock metadata exists before storing historical data
 	_, err = s.db.GetQueries().GetStockMetadataBySymbol(ctx, symbol)
 	if err != nil {
-		_, err = s.getStockMetadataFromFMP(ctx, symbol) // store stock metadata from FMP
+		_, err = s.getStockMetadataFromProvider(ctx, symbol)
 		if err != nil {
-			log.Println("Warning: Failed to populate stock metadata from FMP: " + err.Error())
+			log.Println("Warning: Failed to populate stock metadata: " + err.Error())
 		}
 	}
 
 	// store historical data in database
-	for _, data := range fmpStockHistoricalData {
+	for _, data := range providerHistory {
 		sym := pgtype.Text{String: data.Symbol, Valid: true}
 		date := pgtype.Date{Time: utils.ParseDate(data.Date), Valid: true}
 
@@ -377,33 +350,67 @@ func (s *Service) GetStockHistoricalData(ctx context.Context, symbol string, per
 
 		_, err := s.db.GetQueries().InsertStockHistoricalData(ctx, params)
 		if err != nil {
-			log.Println("Warning: Failed to store historical stock data from FMP to database: " + err.Error())
+			log.Println("Warning: Failed to store historical stock data: " + err.Error())
 		}
 	}
 
-	return fmpStockHistoricalData, nil
+	return providerHistory, nil
 }
 
-func (s *Service) getStockMetadataFromFMP(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
-	fmpStockMetadata, err := s.fmp.GetStockMetadata(symbol)
+func (s *Service) getStockMetadataFromProvider(ctx context.Context, symbol string) (*dto.StockMetadataResponse, error) {
+	providerMetadata, err := s.marketData.GetStockMetadata(ctx, symbol)
 	if err != nil {
-		log.Printf("Error fetching stock metadata from FMP for symbol %s: %v\n", symbol, err)
+		log.Printf("Error fetching stock metadata for symbol %s: %v\n", symbol, err)
 		return nil, errors.InternalError("Failed to fetch stock metadata").
-			WithDetails("Error calling FMP API: " + err.Error())
+			WithDetails(err.Error())
+	}
+	providerMetadata.Symbol = normalizeSymbol(providerMetadata.Symbol)
+	if providerMetadata.Symbol != symbol || providerMetadata.Currency == "" || providerMetadata.InstrumentType == "" {
+		return nil, errors.InternalError("Failed to fetch stock metadata").
+			WithDetails("The market data provider returned incomplete metadata")
 	}
 
 	params := generated.CreateStockMetadataParams{
-		Symbol:           fmpStockMetadata.Symbol,
-		Name:             fmpStockMetadata.Name,
-		Currency:         fmpStockMetadata.Currency,
-		Exchange:         fmpStockMetadata.Exchange,
-		ExchangeFullName: fmpStockMetadata.ExchangeFullName,
+		Symbol:           providerMetadata.Symbol,
+		Name:             providerMetadata.Name,
+		Currency:         providerMetadata.Currency,
+		Exchange:         providerMetadata.Exchange,
+		ExchangeFullName: providerMetadata.ExchangeFullName,
+		InstrumentType:   providerMetadata.InstrumentType,
 	}
 
 	_, err = s.db.GetQueries().CreateStockMetadata(ctx, params)
 	if err != nil {
-		log.Println("Warning: Failed to store stock metadata from FMP to database: " + err.Error())
+		log.Println("Warning: Failed to store stock metadata: " + err.Error())
 	}
 
-	return fmpStockMetadata, nil
+	return providerMetadata, nil
+}
+
+func normalizeSymbol(symbol string) string {
+	return strings.ToUpper(strings.TrimSpace(symbol))
+}
+
+func isValidSymbol(symbol string) bool {
+	return len(symbol) > 0 && len(symbol) <= 32 && !strings.ContainsAny(symbol, " \t\r\n")
+}
+
+func (s *Service) quoteIsFresh(fetchedAt time.Time) bool {
+	if fetchedAt.IsZero() {
+		return false
+	}
+
+	age := time.Since(fetchedAt)
+	return age >= -time.Minute && age <= s.quoteTTL
+}
+
+func (s *Service) cacheQuote(ctx context.Context, symbol string, quote *dto.StockQuoteResponse) {
+	data, err := json.Marshal(quote)
+	if err != nil {
+		log.Printf("Warning: Failed to encode %s quote for cache: %v", symbol, err)
+		return
+	}
+	if err := s.redis.Set(ctx, symbol, string(data)); err != nil {
+		log.Printf("Warning: Failed to cache %s quote: %v", symbol, err)
+	}
 }

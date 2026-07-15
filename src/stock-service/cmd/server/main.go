@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"fafnir/shared/pkg/logger"
 	"fafnir/shared/pkg/redis"
 	"fafnir/stock-service/internal/api"
 	"fafnir/stock-service/internal/config"
 	"fafnir/stock-service/internal/db"
-	"fafnir/stock-service/internal/fmp"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+	"fafnir/stock-service/internal/provider"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -32,6 +33,7 @@ func main() {
 		logger.Error(ctx, "Failed to initialize database", "error", err)
 		os.Exit(1)
 	}
+	defer db.Close()
 
 	// create redis cache
 	redisCache, err := redis.New(cfg.Cache, logger)
@@ -39,15 +41,27 @@ func main() {
 		logger.Error(ctx, "Failed to initialize redis", "error", err)
 		os.Exit(1)
 	}
+	defer redisCache.Close()
 
-	// create FMP client
-	fmpClient, err := fmp.New(cfg.FMP.APIKey)
+	fmpProvider := provider.NewFMP(cfg.FMP.APIKey, cfg.FMP.Timeout)
+	defer func() {
+		if err := fmpProvider.Close(); err != nil {
+			logger.Error(context.Background(), "Failed to close FMP provider", "error", err)
+		}
+	}()
+	yahooProvider, err := provider.NewYahoo(cfg.YahooTimeout)
 	if err != nil {
-		logger.Error(ctx, "Failed to initialize FMP client", "error", err)
+		logger.Error(ctx, "Failed to initialize Yahoo Finance provider", "error", err)
 		os.Exit(1)
 	}
+	defer yahooProvider.Close()
 
-	stockService := api.NewStockService(db, redisCache, fmpClient)
+	marketData := provider.NewChain(
+		yahooProvider,
+		fmpProvider,
+	)
+
+	stockService := api.NewStockService(db, redisCache, marketData, yahooProvider, cfg.QuoteTTL)
 	stockHandler := api.NewStockHandler(stockService, logger)
 
 	server := api.NewServer(cfg, logger, stockHandler)

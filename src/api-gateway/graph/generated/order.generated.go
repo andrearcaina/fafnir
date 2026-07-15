@@ -790,7 +790,7 @@ func (ec *executionContext) unmarshalInputCreateOrderRequest(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"symbol", "side", "type", "quantity", "price", "stopPrice", "status"}
+	fieldsInOrder := [...]string{"symbol", "side", "type", "quantity", "price"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -832,20 +832,6 @@ func (ec *executionContext) unmarshalInputCreateOrderRequest(ctx context.Context
 				return it, err
 			}
 			it.Price = data
-		case "stopPrice":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stopPrice"))
-			data, err := ec.unmarshalOFloat2ᚖfloat64(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.StopPrice = data
-		case "status":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Status = data
 		}
 	}
 

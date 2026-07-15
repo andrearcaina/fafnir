@@ -88,6 +88,7 @@ export function Dashboard({ user }: { user: User }) {
             <StockDetailPage
               symbol={activeSymbol}
               quote={data.activeQuote}
+              metadata={data.activeMetadata}
               chartData={data.chartData}
               chartLoading={data.isChartLoading}
               period={period}
@@ -129,7 +130,7 @@ export function Dashboard({ user }: { user: User }) {
         size="md"
         overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       >
-        <OrderTicket defaultSymbol={activeSymbol} onComplete={completeOrder} />
+        <OrderTicket defaultSymbol={activeSymbol} currency={data.activeMetadata?.currency} onComplete={completeOrder} />
       </Drawer>
       <DepositDialog
         opened={depositOpened}

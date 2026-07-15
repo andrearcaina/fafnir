@@ -1,6 +1,12 @@
--- name: GetOrderById :one
+-- name: GetOrderByIdAndUserId :one
 SELECT * FROM orders
-WHERE id = $1 LIMIT 1;
+WHERE id = $1 AND user_id = $2
+LIMIT 1;
+
+-- name: GetOrderByIdForUpdate :one
+SELECT * FROM orders
+WHERE id = $1
+FOR UPDATE;
 
 -- name: GetOrdersByUserId :many
 SELECT * FROM orders
@@ -16,17 +22,17 @@ RETURNING *;
 UPDATE orders
 SET filled_quantity = $2, avg_fill_price = $3,
     status = $4, updated_at = NOW()
-WHERE id = $1
+WHERE id = $1 AND status = 'pending'
 RETURNING *;
 
 -- name: CancelOrder :one
 UPDATE orders
 SET status = 'canceled', updated_at = NOW()
-WHERE id = $1 AND status = 'pending'
+WHERE id = $1 AND user_id = $2 AND status = 'pending'
 RETURNING *;
 
 -- name: RejectOrder :one
 UPDATE orders
 SET status = 'rejected', updated_at = NOW()
-WHERE id = $1
+WHERE id = $1 AND status = 'pending'
 RETURNING *;

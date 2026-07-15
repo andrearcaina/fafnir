@@ -1,7 +1,7 @@
 import { notifications } from "@mantine/notifications";
 import { useMutation } from "@tanstack/react-query";
 import { CreateOrderDocument } from "../../../gql/graphql";
-import { graphQLClient } from "../../../lib/api";
+import { graphQLClient, requireOK } from "../../../lib/api";
 
 export interface CreateOrderValues {
   symbol: string;
@@ -17,8 +17,11 @@ interface UseCreateOrderOptions {
 
 export function useCreateOrder({ onSuccess }: UseCreateOrderOptions) {
   return useMutation({
-    mutationFn: (values: CreateOrderValues) =>
-      graphQLClient.request(CreateOrderDocument, { request: values }),
+    mutationFn: async (values: CreateOrderValues) => {
+      const response = await graphQLClient.request(CreateOrderDocument, { request: values });
+      requireOK(response.createOrder.code, "Order submission");
+      return response;
+    },
     onSuccess: (_data, values) => {
       notifications.show({
         color: "lime",

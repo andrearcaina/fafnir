@@ -81,7 +81,7 @@ func (r *queryResolver) GetOrderByOrderID(ctx context.Context, request model.Get
 		return nil, err
 	}
 
-	resp, err := r.OrderClient.GetOrderByOrderID(ctx, request.OrderID)
+	resp, err := r.OrderClient.GetOrderByOrderID(ctx, request.OrderID, userID.String())
 	if err != nil {
 		return nil, err
 	}

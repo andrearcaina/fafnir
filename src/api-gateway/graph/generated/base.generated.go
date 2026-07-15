@@ -36,7 +36,7 @@ type QueryResolver interface {
 	GetWatchlist(ctx context.Context) (*model.GetWatchlistResponse, error)
 	GetTransactions(ctx context.Context, request model.GetTransactionsRequest) (*model.GetTransactionsResponse, error)
 	CheckPermission(ctx context.Context, request model.HasPermissionRequest) (*model.HasPermissionResponse, error)
-	GetSupportedStocks(ctx context.Context) ([]string, error)
+	SearchStocks(ctx context.Context, query string, limit *int32) ([]*model.StockSearchResult, error)
 	GetStockMetadata(ctx context.Context, symbol string) (*model.StockMetadataResponse, error)
 	GetStockQuote(ctx context.Context, symbol string) (*model.StockQuoteResponse, error)
 	GetStockHistoricalData(ctx context.Context, symbol string, period *string) (*model.StockHistoricalDataResponse, error)
@@ -248,6 +248,22 @@ func (ec *executionContext) field_Query_getTransactions_args(ctx context.Context
 		return nil, err
 	}
 	args["request"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_searchStocks_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["query"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint32)
+	if err != nil {
+		return nil, err
+	}
+	args["limit"] = arg1
 	return args, nil
 }
 
@@ -996,31 +1012,55 @@ func (ec *executionContext) fieldContext_Query_checkPermission(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getSupportedStocks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_searchStocks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_getSupportedStocks,
+		ec.fieldContext_Query_searchStocks,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().GetSupportedStocks(ctx)
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().SearchStocks(ctx, fc.Args["query"].(string), fc.Args["limit"].(*int32))
 		},
 		nil,
-		ec.marshalNString2ᚕstringᚄ,
+		ec.marshalNStockSearchResult2ᚕᚖfafnirᚋapiᚑgatewayᚋgraphᚋmodelᚐStockSearchResultᚄ,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getSupportedStocks(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_searchStocks(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "symbol":
+				return ec.fieldContext_StockSearchResult_symbol(ctx, field)
+			case "name":
+				return ec.fieldContext_StockSearchResult_name(ctx, field)
+			case "exchange":
+				return ec.fieldContext_StockSearchResult_exchange(ctx, field)
+			case "exchangeFullName":
+				return ec.fieldContext_StockSearchResult_exchangeFullName(ctx, field)
+			case "instrumentType":
+				return ec.fieldContext_StockSearchResult_instrumentType(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StockSearchResult", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_searchStocks_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -1683,7 +1723,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getSupportedStocks":
+		case "searchStocks":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -1692,7 +1732,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getSupportedStocks(ctx, field)
+				res = ec._Query_searchStocks(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

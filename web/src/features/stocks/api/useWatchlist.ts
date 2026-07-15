@@ -4,7 +4,7 @@ import {
   AddStockToWatchlistDocument,
   RemoveStockFromWatchlistDocument,
 } from "../../../gql/graphql";
-import { graphQLClient } from "../../../lib/api";
+import { graphQLClient, requireOK } from "../../../lib/api";
 
 export function useWatchlist(symbol: string, isSaved: boolean) {
   const queryClient = useQueryClient();
@@ -12,15 +12,17 @@ export function useWatchlist(symbol: string, isSaved: boolean) {
   const mutation = useMutation({
     mutationFn: async () => {
       if (isSaved) {
-        await graphQLClient.request(RemoveStockFromWatchlistDocument, {
+        const response = await graphQLClient.request(RemoveStockFromWatchlistDocument, {
           request: { symbol },
         });
+        requireOK(response.removeFromWatchlist.code, "Watchlist removal");
         return;
       }
 
-      await graphQLClient.request(AddStockToWatchlistDocument, {
+      const response = await graphQLClient.request(AddStockToWatchlistDocument, {
         request: { symbol },
       });
+      requireOK(response.addToWatchlist.code, "Watchlist update");
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["dashboard"] });

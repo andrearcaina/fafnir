@@ -1,8 +1,10 @@
-import { Badge, Button, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
-import { IconArrowLeft, IconPlus, IconUser } from "@tabler/icons-react";
+import { useState } from "react";
+import { Badge, Button, Group, Modal, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { IconArrowLeft, IconPlus, IconTrash, IconUser } from "@tabler/icons-react";
 import { formatMoney, toTitleCase } from "../../../lib/formatters";
 import type { User } from "../../../lib/api";
 import type { Account, Profile } from "../../../types/domain";
+import { useDeleteUser } from "../../auth/api/useDeleteUser";
 
 interface SettingsPageProps {
   user: User;
@@ -13,6 +15,9 @@ interface SettingsPageProps {
 }
 
 export function SettingsPage({ user, profile, accounts, onBack, onCreateAccount }: SettingsPageProps) {
+  const [deleteOpened, setDeleteOpened] = useState(false);
+  const deleteUser = useDeleteUser();
+
   return (
     <Stack gap="xl">
       <div>
@@ -42,13 +47,35 @@ export function SettingsPage({ user, profile, accounts, onBack, onCreateAccount 
           {accounts.map((account) => (
             <Paper className="panel" p="lg" key={account.id}>
               <Group justify="space-between"><Text fw={650}>{toTitleCase(account.type)}</Text><Badge variant="light" color="gray">{account.currency}</Badge></Group>
-              <Text fz="xl" fw={650} mt="lg">{formatMoney(account.balance)}</Text>
+              <Text fz="xl" fw={650} mt="lg">{formatMoney(account.balance, account.currency)}</Text>
               <Text c="dimmed" size="xs" mt={4}>•••• {account.accountNumber.slice(-4)}</Text>
             </Paper>
           ))}
         </SimpleGrid>
         {!accounts.length && <Paper className="panel" p="xl" mt="md"><Text fw={600}>No accounts yet</Text><Text c="dimmed" size="sm" mt={4}>Open one to start trading with simulated funds.</Text></Paper>}
       </div>
+
+      <Paper className="panel" p="xl" withBorder style={{ borderColor: "var(--mantine-color-red-8)" }}>
+        <Group justify="space-between" align="flex-start">
+          <div>
+            <Text fw={650} c="red.4">Delete Fafnir account</Text>
+            <Text c="dimmed" size="sm" mt={4}>Permanently remove your login and sign out.</Text>
+          </div>
+          <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={() => setDeleteOpened(true)}>
+            Delete profile
+          </Button>
+        </Group>
+      </Paper>
+
+      <Modal opened={deleteOpened} onClose={() => setDeleteOpened(false)} title="Delete your Fafnir account?" centered>
+        <Stack>
+          <Text>This action cannot be undone. Your authentication account will be permanently deleted.</Text>
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setDeleteOpened(false)}>Keep my account</Button>
+            <Button color="red" loading={deleteUser.isPending} onClick={() => deleteUser.mutate()}>Delete permanently</Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }

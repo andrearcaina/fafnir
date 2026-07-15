@@ -20,8 +20,6 @@ input CreateOrderRequest {
     type: String!
     quantity: Float!
     price: Float
-    stopPrice: Float
-    status: String # optional, defaults to PENDING
 }
 
 input GetOrderByIDRequest {

@@ -34,7 +34,7 @@ export function DepositDialog({ opened, accounts, onClose }: DepositDialogProps)
           onChange={setAccountId}
           data={accounts.map((item) => ({
             value: item.id,
-            label: `${toTitleCase(item.type)} · ${formatMoney(item.balance)} ${item.currency}`,
+            label: `${toTitleCase(item.type)} · ${formatMoney(item.balance, item.currency)}`,
           }))}
         />
         <NumberInput label="Amount" prefix="$" min={1} decimalScale={2} value={amount} onChange={setAmount} />
@@ -44,7 +44,7 @@ export function DepositDialog({ opened, accounts, onClose }: DepositDialogProps)
           loading={deposit.isPending}
           onClick={() => account && deposit.mutate({ accountId: account.id, amount: Number(amount), currency: account.currency })}
         >
-          Deposit {formatMoney(Number(amount) || 0)}
+          Deposit {formatMoney(Number(amount) || 0, account?.currency)}
         </Button>
       </Stack>
     </Modal>

@@ -3,10 +3,12 @@ syntax = "proto3";
 package stock;
 
 import "base.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "fafnir/shared/pb/stock;pb";
 
 service StockService {
+  rpc SearchStocks(SearchStocksRequest) returns (SearchStocksResponse);
   rpc GetStockMetadata(GetStockMetadataRequest) returns (GetStockMetadataResponse);
   rpc GetStockQuote(GetStockQuoteRequest) returns (GetStockQuoteResponse);
   rpc GetStockHistoricalData(GetStockHistoricalDataRequest) returns (GetStockHistoricalDataResponse);
@@ -19,6 +21,15 @@ message StockMetadata {
   string currency = 3;
   string exchange = 4;
   string exchange_full_name = 5;
+  string instrument_type = 6;
+}
+
+message StockSearchResult {
+  string symbol = 1;
+  string name = 2;
+  string exchange = 3;
+  string exchange_full_name = 4;
+  string instrument_type = 5;
 }
 
 message StockQuote {
@@ -34,6 +45,10 @@ message StockQuote {
   double market_cap = 10;
   double change = 11;
   double change_pct = 12;
+  string source = 13;
+  google.protobuf.Timestamp as_of = 14;
+  string market_state = 15;
+  string currency = 16;
 }
 
 message StockHistoricalData {
@@ -50,6 +65,16 @@ message StockHistoricalData {
 
 message GetStockMetadataRequest {
   string symbol = 1;
+}
+
+message SearchStocksRequest {
+  string query = 1;
+  int32 limit = 2;
+}
+
+message SearchStocksResponse {
+  repeated StockSearchResult data = 1;
+  base.ErrorCode code = 2;
 }
 
 message GetStockQuoteRequest {

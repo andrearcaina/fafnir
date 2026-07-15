@@ -1,6 +1,11 @@
 package resolvers
 
-import "fafnir/api-gateway/internal/clients"
+import (
+	"context"
+	"errors"
+
+	"fafnir/api-gateway/internal/clients"
+)
 
 //go:generate go run github.com/99designs/gqlgen generate
 
@@ -14,4 +19,16 @@ type Resolver struct {
 	StockClient     *clients.StockClient
 	OrderClient     *clients.OrderClient
 	PortfolioClient *clients.PortfolioClient
+}
+
+func (r *Resolver) requireOwnedAccounts(ctx context.Context, userID string, accountIDs ...string) error {
+	owned, err := r.PortfolioClient.OwnsAccounts(ctx, userID, accountIDs...)
+	if err != nil {
+		return err
+	}
+	if !owned {
+		return errors.New("portfolio account not found")
+	}
+
+	return nil
 }

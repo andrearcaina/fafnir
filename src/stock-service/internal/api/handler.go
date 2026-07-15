@@ -2,10 +2,13 @@ package api
 
 import (
 	"context"
+
 	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/stock"
 	"fafnir/shared/pkg/errors"
 	"fafnir/shared/pkg/logger"
+
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type StockHandler struct {
@@ -19,6 +22,33 @@ func NewStockHandler(stockService *Service, logger *logger.Logger) *StockHandler
 		stockService: stockService,
 		logger:       logger,
 	}
+}
+
+func (h *StockHandler) SearchStocks(ctx context.Context, req *pb.SearchStocksRequest) (*pb.SearchStocksResponse, error) {
+	results, err := h.stockService.SearchStocks(ctx, req.Query, int(req.Limit))
+	if err != nil {
+		if errors.Is(err, errors.BadRequestError("")) {
+			return &pb.SearchStocksResponse{Code: basepb.ErrorCode_INVALID_ARGUMENT}, nil
+		}
+		if errors.Is(err, errors.InternalError("")) {
+			return &pb.SearchStocksResponse{Code: basepb.ErrorCode_INTERNAL}, nil
+		}
+
+		return nil, err
+	}
+
+	data := make([]*pb.StockSearchResult, 0, len(results))
+	for _, result := range results {
+		data = append(data, &pb.StockSearchResult{
+			Symbol:           result.Symbol,
+			Name:             result.Name,
+			Exchange:         result.Exchange,
+			ExchangeFullName: result.ExchangeFullName,
+			InstrumentType:   result.InstrumentType,
+		})
+	}
+
+	return &pb.SearchStocksResponse{Data: data, Code: basepb.ErrorCode_OK}, nil
 }
 
 // GetStockMetadata implements the gRPC GetStockMetadata method
@@ -49,6 +79,7 @@ func (h *StockHandler) GetStockMetadata(ctx context.Context, req *pb.GetStockMet
 			Currency:         metadata.Currency,
 			Exchange:         metadata.Exchange,
 			ExchangeFullName: metadata.ExchangeFullName,
+			InstrumentType:   metadata.InstrumentType,
 		},
 		Code: basepb.ErrorCode_OK,
 	}, nil
@@ -87,6 +118,10 @@ func (h *StockHandler) GetStockQuote(ctx context.Context, req *pb.GetStockQuoteR
 			MarketCap:     quote.MarketCap,
 			Change:        quote.Change,
 			ChangePct:     quote.ChangePct,
+			Source:        quote.Source,
+			AsOf:          timestamppb.New(quote.AsOf),
+			MarketState:   quote.MarketState,
+			Currency:      quote.Currency,
 		},
 		Code: basepb.ErrorCode_OK,
 	}, nil
@@ -126,6 +161,10 @@ func (h *StockHandler) GetStockQuoteBatch(ctx context.Context, req *pb.GetStockQ
 			MarketCap:     quote.MarketCap,
 			Change:        quote.Change,
 			ChangePct:     quote.ChangePct,
+			Source:        quote.Source,
+			AsOf:          timestamppb.New(quote.AsOf),
+			MarketState:   quote.MarketState,
+			Currency:      quote.Currency,
 		})
 	}
 

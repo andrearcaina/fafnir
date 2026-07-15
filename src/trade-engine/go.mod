@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.5
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
+	resty.dev/v3 v3.0.0-beta.6
 )
 
 require (

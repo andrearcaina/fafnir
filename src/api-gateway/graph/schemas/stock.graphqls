@@ -26,6 +26,15 @@ type StockData {
     exchange: String!
     exchangeFullName: String!
     currency: String!
+    instrumentType: String!
+}
+
+type StockSearchResult {
+    symbol: String!
+    name: String!
+    exchange: String!
+    exchangeFullName: String!
+    instrumentType: String!
 }
 
 type StockHistoricalData {
@@ -42,6 +51,7 @@ type StockHistoricalData {
 
 type StockPriceData {
     symbol: String!
+    currency: String!
     price: Float!
     open: Float!
     previousClose: Float!
@@ -53,10 +63,13 @@ type StockPriceData {
     dayHigh: Float!
     yearHigh: Float!
     yearLow: Float!
+    source: String!
+    asOf: String!
+    marketState: String!
 }
 
 extend type Query {
-    getSupportedStocks: [String!]!
+    searchStocks(query: String!, limit: Int = 8): [StockSearchResult!]!
     getStockMetadata(symbol: String!): StockMetadataResponse!
     getStockQuote(symbol: String!): StockQuoteResponse!
     getStockHistoricalData(

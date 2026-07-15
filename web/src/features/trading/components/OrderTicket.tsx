@@ -16,11 +16,11 @@ import { useCreateOrder } from "../api/useCreateOrder";
 
 interface OrderTicketProps {
   defaultSymbol: string;
+  currency?: string;
   onComplete: () => void;
 }
 
-export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
-  const [symbol, setSymbol] = useState(defaultSymbol);
+export function OrderTicket({ defaultSymbol, currency, onComplete }: OrderTicketProps) {
   const [side, setSide] = useState("BUY");
   const [type, setType] = useState("MARKET");
   const [quantity, setQuantity] = useState<number | string>(1);
@@ -28,13 +28,13 @@ export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
   const createOrder = useCreateOrder({ onSuccess: onComplete });
 
   const canSubmit =
-    symbol.trim().length > 0 &&
+    defaultSymbol.length > 0 &&
     Number(quantity) > 0 &&
     (type === "MARKET" || Number(price) > 0);
 
   const submit = () => {
     createOrder.mutate({
-      symbol: symbol.toUpperCase(),
+      symbol: defaultSymbol,
       side,
       type,
       quantity: Number(quantity),
@@ -61,9 +61,8 @@ export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
       />
       <TextInput
         label="Symbol"
-        value={symbol}
-        onChange={(event) => setSymbol(event.currentTarget.value)}
-        styles={{ input: { textTransform: "uppercase" } }}
+        value={defaultSymbol}
+        readOnly
       />
       <Select
         label="Order type"
@@ -72,7 +71,6 @@ export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
         data={[
           { value: "MARKET", label: "Market" },
           { value: "LIMIT", label: "Limit" },
-          { value: "STOP", label: "Stop" },
         ]}
       />
       <NumberInput
@@ -84,8 +82,8 @@ export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
       />
       {type !== "MARKET" && (
         <NumberInput
-          label={type === "STOP" ? "Stop price" : "Limit price"}
-          prefix="$"
+          label="Limit price"
+          prefix={currency ? `${currency} ` : undefined}
           min={0.01}
           decimalScale={2}
           value={price}
@@ -97,7 +95,7 @@ export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
         <Text c="dimmed">Estimated value</Text>
         <Text fw={650}>
           {price && quantity
-            ? formatMoney(Number(price) * Number(quantity))
+            ? formatMoney(Number(price) * Number(quantity), currency)
             : "Calculated at market"}
         </Text>
       </Group>
@@ -108,7 +106,7 @@ export function OrderTicket({ defaultSymbol, onComplete }: OrderTicketProps) {
         loading={createOrder.isPending}
         onClick={submit}
       >
-        {toTitleCase(side)} {symbol.toUpperCase() || "stock"}
+        {toTitleCase(side)} {defaultSymbol || "stock"}
       </Button>
     </Stack>
   );
