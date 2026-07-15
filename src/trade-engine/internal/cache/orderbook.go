@@ -3,11 +3,27 @@ package cache
 import (
 	"context"
 	"encoding/json"
-	"fafnir/shared/pkg/redis"
+	"errors"
 	"fmt"
-	"log"
 
 	orderpb "fafnir/shared/pb/order"
+	"fafnir/shared/pkg/redis"
+)
+
+const (
+	activeSymbolsKey = "orderbook:v2:active_symbols"
+	addOrderScript   = `
+redis.call("HSET", KEYS[1], ARGV[1], ARGV[2])
+redis.call("SADD", KEYS[2], ARGV[3])
+return 1
+`
+	removeOrderScript = `
+local removed = redis.call("HDEL", KEYS[1], ARGV[1])
+if redis.call("HLEN", KEYS[1]) == 0 then
+    redis.call("SREM", KEYS[2], ARGV[2])
+end
+return removed
+`
 )
 
 type OrderBook struct {
@@ -15,108 +31,112 @@ type OrderBook struct {
 }
 
 func NewOrderBook(client *redis.Cache) *OrderBook {
-	return &OrderBook{
-		client: client,
-	}
+	return &OrderBook{client: client}
 }
 
-func (o *OrderBook) Add(order *orderpb.OrderCreatedEvent) {
-	ctx := context.Background()
-	// serializing order to JSON (simple, human readable)
+func (o *OrderBook) Add(ctx context.Context, order *orderpb.OrderCreatedEvent) error {
 	data, err := json.Marshal(order)
 	if err != nil {
-		log.Printf("Failed to marshal order %s: %v", order.OrderId, err)
-		return
+		return fmt.Errorf("marshal order %s: %w", order.OrderId, err)
 	}
 
-	// add to symbol's order list
-	// add symbol to active symbols set
-	key := fmt.Sprintf("orders:%s", order.Symbol)
-	if err := o.client.RPush(ctx, key, string(data)); err != nil {
-		log.Printf("Failed to push order to redis: %v", err)
-		return
+	key := ordersKey(order.Symbol)
+	if _, err := o.client.Eval(
+		ctx,
+		addOrderScript,
+		[]string{key, activeSymbolsKey},
+		order.OrderId,
+		string(data),
+		order.Symbol,
+	); err != nil {
+		return fmt.Errorf("store order %s: %w", order.OrderId, err)
 	}
 
-	if err := o.client.SAdd(ctx, "active_symbols", order.Symbol); err != nil {
-		log.Printf("Failed to add symbol to active set: %v", err)
-	}
+	return nil
 }
 
-func (o *OrderBook) MGet() []string {
-	ctx := context.Background()
-	symbols, err := o.client.SMembers(ctx, "active_symbols")
-
+func (o *OrderBook) Symbols(ctx context.Context) ([]string, error) {
+	symbols, err := o.client.SMembers(ctx, activeSymbolsKey)
 	if err != nil {
-		log.Printf("Failed to get active symbols: %v", err)
-		return []string{}
+		return nil, fmt.Errorf("list active symbols: %w", err)
 	}
 
-	return symbols
+	return symbols, nil
 }
 
-func (o *OrderBook) Evaluate(symbol string, currentPrice float64) []*orderpb.OrderCreatedEvent {
-	ctx := context.Background()
-	key := fmt.Sprintf("orders:%s", symbol)
-
-	// fetch all orders
-	// not the most efficient, but it works for now
-	rawOrders, err := o.client.LRange(ctx, key, 0, -1)
+func (o *OrderBook) ClaimMatched(ctx context.Context, symbol string, currentPrice float64) ([]*orderpb.OrderCreatedEvent, error) {
+	key := ordersKey(symbol)
+	rawOrders, err := o.client.HGetAll(ctx, key)
 	if err != nil {
-		log.Printf("Failed to get orders for %s: %v", symbol, err)
-		return nil
+		return nil, fmt.Errorf("list orders for %s: %w", symbol, err)
 	}
 
-	if len(rawOrders) == 0 {
-		// remove from active set if empty
-		o.client.SRem(ctx, "active_symbols", symbol)
-		return nil
-	}
-
-	var filled []*orderpb.OrderCreatedEvent
-	var remaining []*orderpb.OrderCreatedEvent
-
-	for _, raw := range rawOrders {
+	matched := make([]*orderpb.OrderCreatedEvent, 0)
+	for orderID, rawOrder := range rawOrders {
 		var order orderpb.OrderCreatedEvent
-		if err := json.Unmarshal([]byte(raw.(string)), &order); err != nil {
-			log.Printf("Failed to unmarshal order: %v", err)
+		if err := json.Unmarshal([]byte(rawOrder), &order); err != nil {
+			_, removeErr := o.remove(ctx, symbol, orderID)
+			return nil, errors.Join(
+				fmt.Errorf("unmarshal order %s: %w", orderID, err),
+				removeErr,
+			)
+		}
+
+		if !matchesLimit(&order, currentPrice) {
 			continue
 		}
 
-		shouldFill := false
-		switch order.Side {
-		case orderpb.OrderSide_ORDER_SIDE_BUY:
-			if currentPrice <= order.Price {
-				shouldFill = true
-			}
-		case orderpb.OrderSide_ORDER_SIDE_SELL:
-			if currentPrice >= order.Price {
-				shouldFill = true
-			}
+		removed, err := o.remove(ctx, symbol, orderID)
+		if err != nil {
+			return nil, fmt.Errorf("claim order %s: %w", orderID, err)
 		}
-
-		if shouldFill {
-			filled = append(filled, &order)
-		} else {
-			remaining = append(remaining, &order)
+		if removed == 1 {
+			matched = append(matched, &order)
 		}
 	}
 
-	// rewrite the list if any matched
-	if len(filled) > 0 {
-		// clear list
-		o.client.Del(ctx, key)
+	return matched, nil
+}
 
-		// push back remaining
-		if len(remaining) > 0 {
-			for _, order := range remaining {
-				data, _ := json.Marshal(order)
-				o.client.RPush(ctx, key, string(data))
-			}
-		} else {
-			// no remaining orders, remove from active set
-			o.client.SRem(ctx, "active_symbols", symbol)
-		}
+func (o *OrderBook) Remove(ctx context.Context, symbol string, orderID string) error {
+	if _, err := o.remove(ctx, symbol, orderID); err != nil {
+		return fmt.Errorf("remove order %s: %w", orderID, err)
 	}
 
-	return filled
+	return nil
+}
+
+func (o *OrderBook) remove(ctx context.Context, symbol string, orderID string) (int64, error) {
+	result, err := o.client.Eval(
+		ctx,
+		removeOrderScript,
+		[]string{ordersKey(symbol), activeSymbolsKey},
+		orderID,
+		symbol,
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	removed, ok := result.(int64)
+	if !ok {
+		return 0, fmt.Errorf("unexpected Redis result %T", result)
+	}
+
+	return removed, nil
+}
+
+func ordersKey(symbol string) string {
+	return fmt.Sprintf("orderbook:v2:orders:%s", symbol)
+}
+
+func matchesLimit(order *orderpb.OrderCreatedEvent, currentPrice float64) bool {
+	switch order.Side {
+	case orderpb.OrderSide_ORDER_SIDE_BUY:
+		return currentPrice <= order.Price
+	case orderpb.OrderSide_ORDER_SIDE_SELL:
+		return currentPrice >= order.Price
+	default:
+		return false
+	}
 }

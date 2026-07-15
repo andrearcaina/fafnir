@@ -1,9 +1,10 @@
-import { Badge, ScrollArea, Table, Text } from "@mantine/core";
+import { ActionIcon, Badge, ScrollArea, Table, Text, Tooltip } from "@mantine/core";
+import { IconEye } from "@tabler/icons-react";
 import { EmptyState } from "../../../components/feedback/EmptyState";
-import { formatDate, formatMoney, toTitleCase } from "../../../lib/formatters";
+import { formatDate, formatDecimal, toTitleCase } from "../../../lib/formatters";
 import type { Order } from "../../../types/domain";
 
-export function OrdersTable({ orders }: { orders: Order[] }) {
+export function OrdersTable({ orders, onSelect }: { orders: Order[]; onSelect?: (orderId: string) => void }) {
   if (!orders.length) {
     return (
       <EmptyState
@@ -25,6 +26,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             <Table.Th>Price</Table.Th>
             <Table.Th>Status</Table.Th>
             <Table.Th ta="right">Submitted</Table.Th>
+            {onSelect && <Table.Th ta="right">Details</Table.Th>}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -42,7 +44,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
               </Table.Td>
               <Table.Td>{toTitleCase(order.type)}</Table.Td>
               <Table.Td>{order.quantity}</Table.Td>
-              <Table.Td>{order.price ? formatMoney(order.price) : "Market"}</Table.Td>
+              <Table.Td>{order.price ? formatDecimal(order.price) : "Market"}</Table.Td>
               <Table.Td>
                 <Badge color={getStatusColor(order.status)} variant="light" size="sm">
                   {toTitleCase(order.status)}
@@ -51,6 +53,15 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
               <Table.Td ta="right" c="dimmed">
                 {formatDate(order.createdAt)}
               </Table.Td>
+              {onSelect && (
+                <Table.Td ta="right">
+                  <Tooltip label="View order">
+                    <ActionIcon variant="subtle" onClick={() => onSelect(order.id)} aria-label={`View ${order.symbol} order`}>
+                      <IconEye size={17} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Table.Td>
+              )}
             </Table.Tr>
           ))}
         </Table.Tbody>
@@ -61,6 +72,6 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
 
 function getStatusColor(status: string) {
   if (status === "FILLED") return "lime";
-  if (status === "CANCELLED" || status === "REJECTED") return "red";
+  if (status === "CANCELED" || status === "REJECTED") return "red";
   return "yellow";
 }

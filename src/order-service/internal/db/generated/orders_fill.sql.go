@@ -12,10 +12,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const insertOrderFilled = `-- name: InsertOrderFilled :one
+const insertOrderFilled = `-- name: InsertOrderFilled :exec
 INSERT INTO orders_fill (order_id, fill_quantity, fill_price, filled_at)
 VALUES ($1, $2, $3, $4)
-RETURNING id, order_id, fill_quantity, fill_price, filled_at
+ON CONFLICT (order_id) DO NOTHING
 `
 
 type InsertOrderFilledParams struct {
@@ -25,20 +25,12 @@ type InsertOrderFilledParams struct {
 	FilledAt     pgtype.Timestamptz `json:"filled_at"`
 }
 
-func (q *Queries) InsertOrderFilled(ctx context.Context, arg InsertOrderFilledParams) (OrdersFill, error) {
-	row := q.db.QueryRow(ctx, insertOrderFilled,
+func (q *Queries) InsertOrderFilled(ctx context.Context, arg InsertOrderFilledParams) error {
+	_, err := q.db.Exec(ctx, insertOrderFilled,
 		arg.OrderID,
 		arg.FillQuantity,
 		arg.FillPrice,
 		arg.FilledAt,
 	)
-	var i OrdersFill
-	err := row.Scan(
-		&i.ID,
-		&i.OrderID,
-		&i.FillQuantity,
-		&i.FillPrice,
-		&i.FilledAt,
-	)
-	return i, err
+	return err
 }

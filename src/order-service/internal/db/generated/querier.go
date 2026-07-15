@@ -11,11 +11,12 @@ import (
 )
 
 type Querier interface {
-	CancelOrder(ctx context.Context, id uuid.UUID) (Order, error)
-	GetOrderById(ctx context.Context, id uuid.UUID) (Order, error)
+	CancelOrder(ctx context.Context, arg CancelOrderParams) (Order, error)
+	GetOrderByIdAndUserId(ctx context.Context, arg GetOrderByIdAndUserIdParams) (Order, error)
+	GetOrderByIdForUpdate(ctx context.Context, id uuid.UUID) (Order, error)
 	GetOrdersByUserId(ctx context.Context, userID uuid.UUID) ([]Order, error)
 	InsertOrder(ctx context.Context, arg InsertOrderParams) (Order, error)
-	InsertOrderFilled(ctx context.Context, arg InsertOrderFilledParams) (OrdersFill, error)
+	InsertOrderFilled(ctx context.Context, arg InsertOrderFilledParams) error
 	RejectOrder(ctx context.Context, id uuid.UUID) (Order, error)
 	UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusParams) (Order, error)
 }

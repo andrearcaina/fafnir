@@ -30,7 +30,6 @@ export function DashboardContent({
     case "Portfolio":
       return (
         <PortfolioSection
-          totalBalance={data.totalBalance}
           accounts={data.accounts}
           loading={data.isLoading}
         />
@@ -49,7 +48,6 @@ export function DashboardContent({
       return (
         <OverviewSection
           loading={data.isLoading}
-          totalBalance={data.totalBalance}
           accounts={data.accounts}
           quotes={data.marketQuotes}
           orders={data.orders}

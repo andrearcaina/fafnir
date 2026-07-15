@@ -49,7 +49,7 @@ export function WatchlistSection({
             </Text>
             <Group justify="space-between" mt={4}>
               <Text fz="xl" fw={650}>
-                {formatMoney(quote.price)}
+                {formatMoney(quote.price, quote.currency)}
               </Text>
               <Text c="dimmed" size="xs">
                 Vol {formatCompactNumber(quote.volume)}

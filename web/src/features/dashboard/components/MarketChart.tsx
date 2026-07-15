@@ -33,12 +33,12 @@ export function MarketChart({
               {symbol}
             </Text>
             <Badge variant="light" color="gray" size="sm">
-              NASDAQ
+              {quote?.currency || "Currency unavailable"}
             </Badge>
           </Group>
           <Group gap="sm" mt={6} align="baseline">
             <Text fz="xl" fw={650}>
-              {quote ? formatMoney(quote.price) : "—"}
+              {quote ? formatMoney(quote.price, quote.currency) : "—"}
             </Text>
             {quote && <PriceChange value={quote.priceChangePercent} />}
           </Group>
@@ -65,10 +65,10 @@ export function MarketChart({
           gridAxis="none"
           yAxisProps={{
             domain: ["auto", "auto"],
-            tickFormatter: (value) => `$${Number(value).toFixed(0)}`,
+            tickFormatter: (value) => formatMoney(Number(value), quote?.currency),
           }}
           tooltipProps={{
-            content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} />,
+            content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} currency={quote?.currency} />,
           }}
         />
       ) : (
@@ -84,9 +84,11 @@ export function MarketChart({
 function ChartTooltip({
   label,
   payload,
+  currency,
 }: {
   label?: React.ReactNode;
   payload?: readonly { value?: unknown }[];
+  currency?: string;
 }) {
   return (
     <Paper withBorder shadow="md" p="sm">
@@ -94,7 +96,7 @@ function ChartTooltip({
         {label}
       </Text>
       <Text fw={650}>
-        {payload?.[0]?.value !== undefined ? formatMoney(Number(payload[0].value)) : "—"}
+        {payload?.[0]?.value !== undefined ? formatMoney(Number(payload[0].value), currency) : "—"}
       </Text>
     </Paper>
   );

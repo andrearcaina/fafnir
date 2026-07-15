@@ -1,5 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Center, Loader } from "@mantine/core";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { NotFoundPage } from "./components/feedback/NotFoundPage";
 import { useSession } from "./features/auth/api/useSession";
 
 const AuthPage = lazy(() =>
@@ -16,7 +18,22 @@ export function App() {
 
   return (
     <Suspense fallback={<AppLoader />}>
-      {session.data ? <Dashboard user={session.data} /> : <AuthPage />}
+      <Routes>
+        {session.data ? (
+          <>
+            <Route path="/" element={<Dashboard user={session.data} />} />
+            <Route path="/settings" element={<Dashboard user={session.data} />} />
+            <Route path="/stocks/:symbol" element={<Dashboard user={session.data} />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/settings" element={<Navigate to="/" replace />} />
+            <Route path="/stocks/:symbol" element={<Navigate to="/" replace />} />
+          </>
+        )}
+        <Route path="*" element={<NotFoundPage authenticated={Boolean(session.data)} />} />
+      </Routes>
     </Suspense>
   );
 }

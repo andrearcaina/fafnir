@@ -3,9 +3,10 @@ package redis
 import (
 	"context"
 	"errors"
-	"fafnir/shared/pkg/logger"
 	"fmt"
 	"time"
+
+	"fafnir/shared/pkg/logger"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -107,6 +108,14 @@ func (c *Cache) LRange(ctx context.Context, key string, start, stop int64) ([]in
 	}
 
 	return interfaces, nil
+}
+
+func (c *Cache) HGetAll(ctx context.Context, key string) (map[string]string, error) {
+	return c.client.HGetAll(ctx, key).Result()
+}
+
+func (c *Cache) Eval(ctx context.Context, script string, keys []string, args ...interface{}) (interface{}, error) {
+	return c.client.Eval(ctx, script, keys, args...).Result()
 }
 
 // SAdd: add to set (random order)

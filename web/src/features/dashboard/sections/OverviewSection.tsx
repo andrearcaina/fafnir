@@ -1,5 +1,5 @@
 import { Button, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
-import { formatMoney } from "../../../lib/formatters";
+import { formatAccountBalances } from "../../../lib/formatters";
 import { OrdersTable } from "../../orders/components/OrdersTable";
 import { MarketChart } from "../components/MarketChart";
 import { MarketList } from "../components/MarketList";
@@ -8,7 +8,6 @@ import type { Account, ChartPeriod, ChartPoint, Order, Quote } from "../types";
 
 interface OverviewSectionProps {
   loading: boolean;
-  totalBalance: number;
   accounts: Account[];
   quotes: Quote[];
   orders: Order[];
@@ -24,7 +23,6 @@ interface OverviewSectionProps {
 
 export function OverviewSection({
   loading,
-  totalBalance,
   accounts,
   quotes,
   orders,
@@ -37,9 +35,9 @@ export function OverviewSection({
   onPeriodChange,
   onTrade,
 }: OverviewSectionProps) {
-  const buyingPower = accounts.reduce((sum, account) => sum + account.balance, 0);
+  const accountBalances = formatAccountBalances(accounts);
   const openOrders = orders.filter(
-    (order) => !["FILLED", "CANCELLED"].includes(order.status),
+    (order) => !["FILLED", "CANCELED", "REJECTED"].includes(order.status),
   ).length;
 
   return (
@@ -47,14 +45,14 @@ export function OverviewSection({
       <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
         <MetricCard
           label="Total balance"
-          value={formatMoney(totalBalance)}
+          value={accountBalances}
           detail={`${accounts.length} account${accounts.length === 1 ? "" : "s"}`}
           loading={loading}
           featured
         />
         <MetricCard
           label="Buying power"
-          value={formatMoney(buyingPower)}
+          value={accountBalances}
           detail="Available to trade"
           loading={loading}
         />

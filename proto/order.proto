@@ -63,6 +63,7 @@ message OrderFill {
 
 message GetOrderByIdRequest {
   string order_id = 1;
+  string user_id = 2;
 }
 
 message GetOrderByIdResponse {

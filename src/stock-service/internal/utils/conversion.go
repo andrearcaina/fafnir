@@ -19,6 +19,10 @@ func ConvertStockQuoteToDTO(dbQuote generated.StockQuote) dto.StockQuoteResponse
 		MarketCap:     dbQuote.MarketCap,
 		Change:        dbQuote.PriceChange,
 		ChangePct:     dbQuote.PriceChangePct,
+		Source:        dbQuote.Source,
+		AsOf:          dbQuote.AsOf.Time,
+		FetchedAt:     dbQuote.UpdatedAt.Time,
+		MarketState:   dbQuote.MarketState,
 	}
 }
 
@@ -29,6 +33,7 @@ func ConvertStockMetadataToDTO(dbMetadata generated.StockMetadatum) *dto.StockMe
 		Currency:         dbMetadata.Currency,
 		Exchange:         dbMetadata.Exchange,
 		ExchangeFullName: dbMetadata.ExchangeFullName,
+		InstrumentType:   dbMetadata.InstrumentType,
 	}
 }
 

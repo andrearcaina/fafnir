@@ -1,9 +1,11 @@
 package config
 
 import (
-	"fafnir/shared/pkg/redis"
 	"fmt"
 	"os"
+	"time"
+
+	"fafnir/shared/pkg/redis"
 )
 
 type Config struct {
@@ -12,6 +14,7 @@ type Config struct {
 	StockService StockServiceConfig
 	Portfolio    PortfolioServiceConfig
 	Cache        redis.CacheConfig
+	FX           FXConfig
 }
 
 type NatsConfig struct {
@@ -28,6 +31,12 @@ type PortfolioServiceConfig struct {
 	URL string
 }
 
+type FXConfig struct {
+	BaseURL string
+	Timeout time.Duration
+	TTL     time.Duration
+}
+
 func New() *Config {
 	return &Config{
 		PORT:         fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
@@ -35,7 +44,35 @@ func New() *Config {
 		StockService: newStockServiceConfig(),
 		Portfolio:    newPortfolioServiceConfig(),
 		Cache:        newRedisConfig(),
+		FX:           newFXConfig(),
 	}
+}
+
+func newFXConfig() FXConfig {
+	baseURL := os.Getenv("FX_API_URL")
+	if baseURL == "" {
+		baseURL = "https://api.frankfurter.dev"
+	}
+
+	return FXConfig{
+		BaseURL: baseURL,
+		Timeout: durationFromEnv("FX_TIMEOUT", 5*time.Second),
+		TTL:     durationFromEnv("FX_CACHE_TTL", 12*time.Hour),
+	}
+}
+
+func durationFromEnv(name string, fallback time.Duration) time.Duration {
+	value := os.Getenv(name)
+	if value == "" {
+		return fallback
+	}
+
+	duration, err := time.ParseDuration(value)
+	if err != nil || duration <= 0 {
+		return fallback
+	}
+
+	return duration
 }
 
 func newNatsConfig() NatsConfig {

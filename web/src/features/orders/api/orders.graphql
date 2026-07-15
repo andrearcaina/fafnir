@@ -1,0 +1,30 @@
+query OrderDetails($orderId: String!) {
+  getOrderByOrderID(request: { orderId: $orderId }) {
+    code
+    data {
+      id
+      symbol
+      side
+      type
+      status
+      quantity
+      price
+      stopPrice
+      filledQuantity
+      avgFillPrice
+      createdAt
+      updatedAt
+    }
+  }
+}
+
+mutation CancelOrder($orderId: String!) {
+  cancelOrder(orderId: $orderId) {
+    code
+    data {
+      id
+      status
+      updatedAt
+    }
+  }
+}

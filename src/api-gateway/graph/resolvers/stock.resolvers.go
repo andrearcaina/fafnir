@@ -10,11 +10,10 @@ import (
 	"fafnir/api-gateway/graph/model"
 	"fafnir/api-gateway/internal/middleware"
 	"fafnir/api-gateway/internal/rbac"
-	stockcatalog "fafnir/shared/pkg/stocks"
 )
 
-// GetSupportedStocks is the resolver for the getSupportedStocks field.
-func (r *queryResolver) GetSupportedStocks(ctx context.Context) ([]string, error) {
+// SearchStocks is the resolver for the searchStocks field.
+func (r *queryResolver) SearchStocks(ctx context.Context, query string, limit *int32) ([]*model.StockSearchResult, error) {
 	userID, err := middleware.GetUserIdFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -24,7 +23,12 @@ func (r *queryResolver) GetSupportedStocks(ctx context.Context) ([]string, error
 		return nil, err
 	}
 
-	return stockcatalog.SupportedSymbols(), nil
+	resultLimit := 8
+	if limit != nil {
+		resultLimit = int(*limit)
+	}
+
+	return r.StockClient.SearchStocks(ctx, query, resultLimit)
 }
 
 // GetStockMetadata is the resolver for the getStockMetadata field.
@@ -85,7 +89,12 @@ func (r *queryResolver) GetStockHistoricalData(ctx context.Context, symbol strin
 		return nil, err
 	}
 
-	resp, err := r.StockClient.GetStockHistoricalData(ctx, symbol, *period)
+	requestedPeriod := "1M"
+	if period != nil {
+		requestedPeriod = *period
+	}
+
+	resp, err := r.StockClient.GetStockHistoricalData(ctx, symbol, requestedPeriod)
 	if err != nil {
 		return nil, err
 	}

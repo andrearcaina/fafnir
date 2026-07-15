@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { DashboardDocument, MarketQuotesDocument, StockHistoryDocument } from "../../../gql/graphql";
+import { DashboardDocument, MarketQuotesDocument, StockDetailsDocument, StockHistoryDocument } from "../../../gql/graphql";
 import { graphQLClient } from "../../../lib/api";
 import { formatShortDate } from "../../../lib/formatters";
 import { isPresent } from "../../../lib/predicates";
@@ -34,6 +34,12 @@ export function useDashboardData(activeSymbol: string, period: ChartPeriod) {
       graphQLClient.request(StockHistoryDocument, { symbol: activeSymbol, period }),
   });
 
+  const stockDetailsQuery = useQuery({
+    queryKey: ["stock-details", activeSymbol],
+    queryFn: () => graphQLClient.request(StockDetailsDocument, { symbol: activeSymbol }),
+    refetchInterval: MARKET_REFRESH_INTERVAL,
+  });
+
   const data = dashboardQuery.data;
   const quotes = (quotesQuery.data?.getStockQuoteBatch.data ?? []).filter(isPresent);
   const orders = (data?.getOrders.data ?? []).filter(isPresent);
@@ -49,18 +55,21 @@ export function useDashboardData(activeSymbol: string, period: ChartPeriod) {
 
   return {
     profile: data?.getProfileData.data ?? undefined,
-    totalBalance: data?.getPortfolioSummary.totalBalance ?? 0,
     accounts,
     quotes,
     marketQuotes: quotes.filter((quote) => DEFAULT_MARKET_SYMBOLS.includes(quote.symbol)),
     orders,
     watchlistSymbols,
-    activeQuote: quotes.find((quote) => quote.symbol === activeSymbol) ?? quotes[0],
+    activeQuote:
+      stockDetailsQuery.data?.getStockQuote.data ??
+      quotes.find((quote) => quote.symbol === activeSymbol) ??
+      quotes[0],
+    activeMetadata: stockDetailsQuery.data?.getStockMetadata.data ?? undefined,
     chartData,
     isLoading: dashboardQuery.isPending || quotesQuery.isPending,
     isChartLoading: historyQuery.isPending,
-    isRefreshing: dashboardQuery.isFetching || quotesQuery.isFetching,
-    error: dashboardQuery.error ?? quotesQuery.error,
-    refresh: () => Promise.all([dashboardQuery.refetch(), quotesQuery.refetch()]),
+    isRefreshing: dashboardQuery.isFetching || quotesQuery.isFetching || stockDetailsQuery.isFetching,
+    error: dashboardQuery.error ?? quotesQuery.error ?? stockDetailsQuery.error,
+    refresh: () => Promise.all([dashboardQuery.refetch(), quotesQuery.refetch(), stockDetailsQuery.refetch()]),
   };
 }

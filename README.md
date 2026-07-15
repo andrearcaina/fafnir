@@ -9,7 +9,7 @@ I do not intend to use this project for other purposes and is mostly
 a playground for my learning, experimentation, and exploration.
 
 Now for the application:
-It is designed to function as a stock trading platform, allowing users to simulate trading stocks (up to 50 US stocks) in a controlled environment.
+It is designed to function as a stock trading platform, allowing users to simulate trading stocks in a controlled environment.
 
 ## Documentation
 

@@ -2,6 +2,9 @@ package clients
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	"fafnir/api-gateway/graph/model"
 	basepb "fafnir/shared/pb/base"
 	pb "fafnir/shared/pb/portfolio"
@@ -12,6 +15,28 @@ import (
 
 type PortfolioClient struct {
 	client pb.PortfolioServiceClient
+}
+
+func (c *PortfolioClient) OwnsAccounts(ctx context.Context, userID string, accountIDs ...string) (bool, error) {
+	resp, err := c.client.GetPortfolioSummary(ctx, &pb.GetPortfolioSummaryRequest{UserId: userID})
+	if err != nil {
+		return false, fmt.Errorf("get portfolio summary: %w", err)
+	}
+	if resp.GetCode() != basepb.ErrorCode_OK {
+		return false, fmt.Errorf("get portfolio summary: portfolio service returned %s", resp.GetCode().String())
+	}
+
+	owned := make(map[string]struct{}, len(resp.Accounts))
+	for _, account := range resp.Accounts {
+		owned[account.GetId()] = struct{}{}
+	}
+	for _, accountID := range accountIDs {
+		if _, ok := owned[accountID]; !ok {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
 
 func NewPortfolioClient(url string) *PortfolioClient {
@@ -201,13 +226,18 @@ func (c *PortfolioClient) GetTransactions(ctx context.Context, req model.GetTran
 
 	var txs []*model.Transaction
 	for _, t := range resp.Transactions {
+		var referenceID *string
+		if t.ReferenceId != "" {
+			referenceID = &t.ReferenceId
+		}
+
 		txs = append(txs, &model.Transaction{
 			ID:          t.Id,
 			AccountID:   t.AccountId,
-			Type:        t.Type.String(),
+			Type:        strings.TrimPrefix(t.Type.String(), "TRANSACTION_TYPE_"),
 			Amount:      t.Amount,
 			Description: t.Description,
-			ReferenceID: &t.ReferenceId,
+			ReferenceID: referenceID,
 			CreatedAt:   t.CreatedAt.AsTime().String(),
 		})
 	}
@@ -277,8 +307,8 @@ func convertAccountToModel(acc *pb.Account) *model.Account {
 		ID:            acc.Id,
 		UserID:        acc.UserId,
 		AccountNumber: acc.AccountNumber,
-		Type:          acc.Type.String(),
-		Currency:      acc.Currency.String(),
+		Type:          strings.TrimPrefix(acc.Type.String(), "ACCOUNT_TYPE_"),
+		Currency:      strings.TrimPrefix(acc.Currency.String(), "CURRENCY_TYPE_"),
 		Balance:       acc.Balance,
 		CreatedAt:     acc.CreatedAt.AsTime().String(),
 		UpdatedAt:     acc.UpdatedAt.AsTime().String(),

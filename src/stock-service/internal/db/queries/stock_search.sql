@@ -8,18 +8,18 @@ SELECT * FROM stock_metadata WHERE name ILIKE '%' || $1 || '%' LIMIT $2 OFFSET $
 SELECT * FROM stock_quote WHERE symbol = $1;
 
 -- name: CreateStockMetadata :one
-INSERT INTO stock_metadata (symbol, name, exchange, exchange_full_name, currency)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO stock_metadata (symbol, name, exchange, exchange_full_name, currency, instrument_type)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: InsertOrUpdateStockQuote :one
 INSERT INTO stock_quote (
     symbol, open_price, last_price, previous_close_price, price_change, price_change_pct,
-    volume, market_cap, day_low, day_high, year_low, year_high, updated_at
+    volume, market_cap, day_low, day_high, year_low, year_high, source, as_of, market_state, updated_at
 )
 VALUES (
     $1, $2, $3, $4, $5, $6,
-    $7, $8, $9, $10, $11, $12, NOW()
+    $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW()
 )
 ON CONFLICT (symbol) DO UPDATE SET
     open_price = EXCLUDED.open_price,
@@ -33,6 +33,9 @@ ON CONFLICT (symbol) DO UPDATE SET
     day_high = EXCLUDED.day_high,
     year_low = EXCLUDED.year_low,
     year_high = EXCLUDED.year_high,
+    source = EXCLUDED.source,
+    as_of = EXCLUDED.as_of,
+    market_state = EXCLUDED.market_state,
     updated_at = NOW()
 RETURNING *;
 

@@ -63,7 +63,7 @@ export function MarketList({ quotes, activeSymbol, loading, onSelect }: MarketLi
                   </div>
                   <div className="quote-price">
                     <Text fw={600} size="sm">
-                      {formatMoney(quote.price)}
+                      {formatMoney(quote.price, quote.currency)}
                     </Text>
                     <PriceChange value={quote.priceChangePercent} compact />
                   </div>

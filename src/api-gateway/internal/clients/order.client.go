@@ -66,13 +66,12 @@ func (c *OrderClient) InsertOrder(ctx context.Context, userID string, input mode
 	type_ := pb.OrderType(typeVal)
 
 	req := &pb.InsertOrderRequest{
-		UserId:    userID,
-		Symbol:    input.Symbol,
-		Side:      side,
-		Type:      type_,
-		Quantity:  input.Quantity,
-		Price:     safeFloat(input.Price),
-		StopPrice: safeFloat(input.StopPrice),
+		UserId:   userID,
+		Symbol:   input.Symbol,
+		Side:     side,
+		Type:     type_,
+		Quantity: input.Quantity,
+		Price:    safeFloat(input.Price),
 	}
 
 	resp, err := c.client.InsertOrder(ctx, req)
@@ -139,9 +138,10 @@ func (c *OrderClient) GetOrders(ctx context.Context, userID string) (model.Order
 	}, nil
 }
 
-func (c *OrderClient) GetOrderByOrderID(ctx context.Context, orderID string) (model.GetOrderByIDResponse, error) {
+func (c *OrderClient) GetOrderByOrderID(ctx context.Context, orderID string, userID string) (model.GetOrderByIDResponse, error) {
 	req := &pb.GetOrderByIdRequest{
 		OrderId: orderID,
+		UserId:  userID,
 	}
 
 	resp, err := c.client.GetOrderById(ctx, req)
@@ -172,9 +172,9 @@ func mapProtoToModel(o *pb.Order) *model.Order {
 		ID:             o.Id,
 		UserID:         o.UserId,
 		Symbol:         o.Symbol,
-		Side:           o.Side.String(),
-		Type:           o.Type.String(),
-		Status:         o.Status.String(),
+		Side:           strings.TrimPrefix(o.Side.String(), "ORDER_SIDE_"),
+		Type:           strings.TrimPrefix(o.Type.String(), "ORDER_TYPE_"),
+		Status:         strings.TrimPrefix(o.Status.String(), "ORDER_STATUS_"),
 		Quantity:       o.Quantity,
 		Price:          o.Price,
 		StopPrice:      o.StopPrice,

@@ -1,0 +1,51 @@
+query AccountActivity($accountId: String!) {
+  getHoldings(request: { accountId: $accountId }) {
+    code
+    data {
+      id
+      accountId
+      symbol
+      quantity
+      avgCost
+      createdAt
+      updatedAt
+    }
+  }
+  getTransactions(request: { accountId: $accountId }) {
+    code
+    data {
+      id
+      accountId
+      type
+      amount
+      description
+      referenceId
+      createdAt
+    }
+  }
+}
+
+query HoldingDetails($accountId: String!, $symbol: String!) {
+  getHolding(request: { accountId: $accountId, symbol: $symbol }) {
+    code
+    data {
+      id
+      accountId
+      symbol
+      quantity
+      avgCost
+      createdAt
+      updatedAt
+    }
+  }
+}
+
+mutation TransferFunds($request: TransferRequest!) {
+  transfer(request: $request) {
+    code
+  }
+}
+
+mutation DeletePortfolioAccount($accountId: String!) {
+  deleteAccount(accountId: $accountId)
+}

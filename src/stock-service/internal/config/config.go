@@ -1,16 +1,20 @@
 package config
 
 import (
-	"fafnir/shared/pkg/redis"
 	"fmt"
 	"os"
+	"time"
+
+	"fafnir/shared/pkg/redis"
 )
 
 type Config struct {
-	PORT  string
-	DB    PostgresConfig
-	FMP   FMPConfig
-	Cache redis.CacheConfig
+	PORT         string
+	DB           PostgresConfig
+	FMP          FMPConfig
+	Cache        redis.CacheConfig
+	QuoteTTL     time.Duration
+	YahooTimeout time.Duration
 }
 
 type PostgresConfig struct {
@@ -23,16 +27,33 @@ type PostgresConfig struct {
 }
 
 type FMPConfig struct {
-	APIKey string
+	APIKey  string
+	Timeout time.Duration
 }
 
 func NewConfig() *Config {
 	return &Config{
-		PORT:  fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
-		DB:    newPostgresConfig(),
-		FMP:   newFMPConfig(),
-		Cache: newRedisConfig(),
+		PORT:         fmt.Sprintf(":%s", os.Getenv("SERVICE_PORT")),
+		DB:           newPostgresConfig(),
+		FMP:          newFMPConfig(),
+		Cache:        newRedisConfig(),
+		QuoteTTL:     durationFromEnv("QUOTE_TTL", time.Minute),
+		YahooTimeout: durationFromEnv("YAHOO_TIMEOUT", 10*time.Second),
 	}
+}
+
+func durationFromEnv(name string, fallback time.Duration) time.Duration {
+	value := os.Getenv(name)
+	if value == "" {
+		return fallback
+	}
+
+	duration, err := time.ParseDuration(value)
+	if err != nil || duration <= 0 {
+		return fallback
+	}
+
+	return duration
 }
 
 func newPostgresConfig() PostgresConfig {
@@ -62,7 +83,8 @@ func newFMPConfig() FMPConfig {
 	apiKey := os.Getenv("FMP_API_KEY")
 
 	return FMPConfig{
-		APIKey: apiKey,
+		APIKey:  apiKey,
+		Timeout: durationFromEnv("FMP_TIMEOUT", 5*time.Second),
 	}
 }
 
