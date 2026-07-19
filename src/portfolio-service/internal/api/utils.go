@@ -129,13 +129,6 @@ func numericToFloat(n pgtype.Numeric) float64 {
 	return f.Float64
 }
 
-func floatToNumericNullIfZero(f float64) pgtype.Numeric {
-	if f == 0 {
-		return pgtype.Numeric{Valid: false}
-	}
-	return floatToNumeric(f)
-}
-
 func convertTime(t pgtype.Timestamptz) *timestamppb.Timestamp {
 	if !t.Valid {
 		return nil

@@ -91,23 +91,6 @@ func convertOrderType(t generated.OrderType) pb.OrderType {
 	}
 }
 
-func convertOrderStatusToDB(s pb.OrderStatus) generated.OrderStatus {
-	switch s {
-	case pb.OrderStatus_ORDER_STATUS_PENDING:
-		return generated.OrderStatusPending
-	case pb.OrderStatus_ORDER_STATUS_PARTIAL_FILL:
-		return generated.OrderStatusPartiallyFilled
-	case pb.OrderStatus_ORDER_STATUS_FILLED:
-		return generated.OrderStatusFilled
-	case pb.OrderStatus_ORDER_STATUS_CANCELED:
-		return generated.OrderStatusCanceled
-	case pb.OrderStatus_ORDER_STATUS_REJECTED:
-		return generated.OrderStatusRejected
-	default:
-		return generated.OrderStatusPending
-	}
-}
-
 func convertOrderStatus(s generated.OrderStatus) pb.OrderStatus {
 	switch s {
 	case generated.OrderStatusPending:

@@ -55,18 +55,20 @@ func NewPortfolioClient(url string) *PortfolioClient {
 
 func (c *PortfolioClient) CreateAccount(ctx context.Context, userID string, req model.CreateAccountRequest) (model.CreateAccountResponse, error) {
 	accType := pb.AccountType_ACCOUNT_TYPE_UNSPECIFIED
-	if req.Type == "SAVINGS" {
+	switch req.Type {
+	case "SAVINGS":
 		accType = pb.AccountType_ACCOUNT_TYPE_SAVINGS
-	} else if req.Type == "INVESTMENT" {
+	case "INVESTMENT":
 		accType = pb.AccountType_ACCOUNT_TYPE_INVESTMENT
-	} else if req.Type == "CHEQUING" {
+	case "CHEQUING":
 		accType = pb.AccountType_ACCOUNT_TYPE_CHEQUING
 	}
 
 	curr := pb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
-	if req.Currency == "USD" {
+	switch req.Currency {
+	case "USD":
 		curr = pb.CurrencyType_CURRENCY_TYPE_USD
-	} else if req.Currency == "CAD" {
+	case "CAD":
 		curr = pb.CurrencyType_CURRENCY_TYPE_CAD
 	}
 
@@ -250,9 +252,10 @@ func (c *PortfolioClient) GetTransactions(ctx context.Context, req model.GetTran
 
 func (c *PortfolioClient) Deposit(ctx context.Context, userID string, req model.DepositRequest) (model.DepositResponse, error) {
 	curr := pb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
-	if req.Currency == "USD" {
+	switch req.Currency {
+	case "USD":
 		curr = pb.CurrencyType_CURRENCY_TYPE_USD
-	} else if req.Currency == "CAD" {
+	case "CAD":
 		curr = pb.CurrencyType_CURRENCY_TYPE_CAD
 	}
 
@@ -276,9 +279,10 @@ func (c *PortfolioClient) Deposit(ctx context.Context, userID string, req model.
 
 func (c *PortfolioClient) Transfer(ctx context.Context, req model.TransferRequest) (model.TransferResponse, error) {
 	curr := pb.CurrencyType_CURRENCY_TYPE_UNSPECIFIED
-	if req.Currency == "USD" {
+	switch req.Currency {
+	case "USD":
 		curr = pb.CurrencyType_CURRENCY_TYPE_USD
-	} else if req.Currency == "CAD" {
+	case "CAD":
 		curr = pb.CurrencyType_CURRENCY_TYPE_CAD
 	}
 

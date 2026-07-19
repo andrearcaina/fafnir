@@ -14,6 +14,26 @@ default: help
 help:
 	@echo "Usage: make <target> [options]"
 
+# ------------------------------
+# Go Operations
+# ------------------------------
+
+check: tidy lint vet
+
+tidy:
+	@echo "Running go mod tidy..."
+	@cd src/api-gateway && go mod tidy
+	@cd src/auth-service && go mod tidy
+	@cd src/security-service && go mod tidy
+	@cd src/user-service && go mod tidy
+	@cd src/stock-service && go mod tidy
+	@cd src/order-service && go mod tidy
+	@cd src/portfolio-service && go mod tidy
+	@cd src/trade-engine && go mod tidy
+	@cd src/shared && go mod tidy
+	@cd tools/cli/seedctl && go mod tidy
+	@echo "Tidy completed successfully."
+
 lint:
 	@echo "Running linter..."
 	@echo "Linting api-gateway:" && golangci-lint run ./src/api-gateway/...
