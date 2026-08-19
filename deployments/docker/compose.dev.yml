@@ -1,4 +1,15 @@
 services:
+    portainer:
+        image: portainer/portainer-ce:lts
+        container_name: portainer
+        restart: always
+        ports:
+            - "9443:9443"
+            - "8000:8000"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - portainerdata:/data
+
     db:
         build:
             context: ../../
@@ -320,6 +331,7 @@ services:
 volumes:
     pgdata:
     natsdata:
+    portainerdata:
 
 networks:
     fafnir-network:
