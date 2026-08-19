@@ -118,6 +118,9 @@ docker-logs:
 docker-nats:
 	./tools/scripts/docker.sh nats
 
+docker-restart:
+	./tools/scripts/docker.sh restart $(container)
+
 docker-rm-volumes:
 	./tools/scripts/docker.sh rm-volumes
 

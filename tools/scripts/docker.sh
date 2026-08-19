@@ -33,11 +33,17 @@ case "$1" in
     $COMPOSE_CMD $BASE_FILES logs --tail=100 -f ${2:+"$2"} ;;
   nats)
     docker run --network fafnir-network --rm -it natsio/nats-box ;;
+  restart)
+    if [ -n "$2" ]; then
+    $COMPOSE_CMD $MONITORING_FILES restart "$2"
+    else
+    $COMPOSE_CMD $MONITORING_FILES restart
+    fi ;;
   rm-volumes)
     docker volume rm fafnir_pgdata fafnir_prom_data 2>/dev/null || true ;;
   prune)
     docker images --format "{{.Repository}}" | grep -E '^(fafnir-|prom/|grafana/)' | xargs -r docker rmi 2>/dev/null || true
     docker builder prune -a -f ;;
   *)
-    echo "Usage: $0 {service|build|prod|run [monitoring]|start|pause|stop|status|logs [service]|nats|rm-volumes|prune}"
+    echo "Usage: $0 {service|build|prod|run [monitoring]|start|pause|stop|status|logs [service]|nats|restart [container]|rm-volumes|prune}"
 esac
