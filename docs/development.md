@@ -2,10 +2,10 @@
 
 ## Prerequisites before Starting
 
-- **Go 1.24.5+** - For microservices development
+- **Go 1.26.7+** - For microservices development
 - For local orchestration, there's two main ways to do it:
     - **Docker & Docker Compose** - For containerized development
-    - **Minikube, kubectl & helm** - For local cluster and container orchestration (requires docker though)
+    - **kind, kubectl & helm** - For local cluster and container orchestration (requires Docker)
 - **GNU Make** - For DevOps automation scripts
 
 ## Setup Development Environment
@@ -37,23 +37,34 @@
     - Using Kubernetes
         ```bash
         make docker-build              # Build docker images
-        make kube-start                # Start Minikube cluster
-        make kube-deploy               # Deploy services to Minikube
-        make kube-forward pod=ps       # Port forward Postgres service
+        make kube-start                # Start the kind cluster
+        make kube-deploy               # Install Fafnir, dependencies, and Traefik
+        make kube-forward pod=ps       # Forward PostgreSQL for host-side migrations
 
         # Open a new terminal
         make migrate-up                # Run database migrations
-        make kube-tunnel               # Create tunnel to access services via load balancer
+        make seed db=all                 # Seed auth, user, and security databases
+
+        # In another terminal, start the frontend with Vite
+        cd web
+        cp .env.example .env
+        npm install
+        npm run dev
         ```
 4. **Access Services**
 
-    Grafana and Prometheus will be available if you started the monitoring stack (`make docker-run monitoring=true`).
+    The Kubernetes setup exposes the API through Traefik at `http://localhost`.
+    The frontend runs separately through Vite at `http://localhost:5173`.
+    Grafana and Prometheus are not currently included in the Kubernetes chart;
+    they are available through Docker Compose with `make docker-run monitoring=true`.
 
     | Service         | URL                                                            | Description                        |
     | --------------- | -------------------------------------------------------------- | ---------------------------------- |
-    | **API Gateway** | [http://localhost:8080](http://localhost:8080)                 | Main entrypoint (GraphQL and REST) |
-    | **Grafana**     | [http://localhost:3000](http://localhost:3000)                 | Monitoring dashboard               |
-    | **Prometheus**  | [http://localhost:9090/metrics](http://localhost:9090/metrics) | Metrics collection                 |
+    | **Web**         | [http://localhost:5173](http://localhost:5173)                 | Vite development frontend          |
+    | **API Gateway** | [http://localhost](http://localhost)                           | Main entrypoint (GraphQL and REST) |
+    | **GraphQL**     | [http://localhost/graphql](http://localhost/graphql)           | GraphQL API endpoint               |
+    | **Grafana**     | [http://localhost:3000](http://localhost:3000)                 | Docker Compose monitoring only     |
+    | **Prometheus**  | [http://localhost:9090/metrics](http://localhost:9090/metrics) | Docker Compose monitoring only     |
 
 ## Development Automation Guide
 
@@ -81,30 +92,26 @@ These commands help you manage the development environment using Docker:
 | `make docker-clean`      | Runs commands `docker-stop`, `docker-prune`, `docker-rm-volumes`                                   |
 | `make docker-reset`      | Runs commands `docker-clean`, `docker-build`, `docker-start`                                       |
 
-These commands help you manage the development environment with Kubernetes (Minikube):
+These commands help you manage the development environment with Kubernetes (kind):
 
-| Command                               | Description                                     |
-| ------------------------------------- | ----------------------------------------------- |
-| `make kube-start`                     | Start Minikube cluster with configurations      |
-| `make kube-stop`                      | Stop Minikube cluster                           |
-| `make kube-delete`                    | Delete Minikube cluster                         |
-| `make kube-uninstall`                 | Uninstall Minikube cluster                      |
-| `make kube-secrets`                   | Create/Update secrets for Minikube cluster      |
-| `make kube-docker`                    | Load all docker images into Minikube cluster    |
-| `make kube-deploy`                    | Install services to Minikube cluster            |
-| `make kube-upgrade`                   | Upgrade all services in Minikube cluster        |
-| `make kube-delete-pod pod=<pod_name>` | Delete a specific pod in Minikube cluster       |
-| `make kube-reset`                     | Reset services in Minikube cluster              |
-| `make kube-status`                    | Check status of deployed services in Minikube   |
-| `make kube-nodes`                     | List all nodes in Minikube cluster              |
-| `make kube-pods`                      | List all pods in Minikube cluster               |
-| `make kube-svc`                       | List all services in Minikube cluster           |
-| `make kube-deployments`               | List all deployments in Minikube cluster        |
-| `make kube-logs pod=<pod_name>`       | View logs of a specific pod in Minikube cluster |
-| `make kube-dashboard`                 | Open Minikube dashboard in browser              |
-| `make kube-ssh`                       | SSH into Minikube cluster                       |
-| `make kube-forward pod=<pod_name>`    | Port forward a service from Minikube cluster    |
-| `make kube-tunnel`                    | Create a tunnel to access Minikube services     |
+| Command                               | Description                                    |
+| ------------------------------------- | ---------------------------------------------- |
+| `make kube-start`                     | Start the kind cluster                         |
+| `make kube-stop`                      | Stop (Delete) the kind cluster                 |
+| `make kube-uninstall`                 | Uninstall the Fafnir Helm release              |
+| `make kube-secrets`                   | Create/Update secrets for the kind cluster     |
+| `make kube-docker`                    | Load all Docker images into kind               |
+| `make kube-deploy`                    | Install services, dependencies, and Traefik    |
+| `make kube-upgrade hooks=<hooks>`     | Upgrade with or without Helm hooks when needed |
+| `make kube-delete-pod pod=<pod_name>` | Delete a specific pod in kind                  |
+| `make kube-reset`                     | Reset services in kind                         |
+| `make kube-status`                    | Check status of deployed services in kind      |
+| `make kube-nodes`                     | List all nodes in kind                         |
+| `make kube-pods`                      | List all pods in kind                          |
+| `make kube-svc`                       | List all services in kind                      |
+| `make kube-deployments`               | List all deployments in kind                   |
+| `make kube-logs pod=<pod_name>`       | View logs of a specific pod in kind            |
+| `make kube-forward pod=<pod_name>`    | Port forward a specific pod                    |
 
 You can also use the following commands to migrate the database:
 

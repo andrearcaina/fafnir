@@ -13,7 +13,7 @@ data:
 
     set -e
 
-    nats stream add users \
+    nats --server "nats://${NATS_HOST}:${NATS_PORT}" stream add users \
         --subjects "users.>" \
         --storage file \
         --retention limits \
@@ -21,7 +21,7 @@ data:
         --max-bytes 100MB \
         --defaults
 
-    nats stream add orders \
+    nats --server "nats://${NATS_HOST}:${NATS_PORT}" stream add orders \
         --subjects "orders.>" \
         --storage file \
         --retention limits \

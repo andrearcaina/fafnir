@@ -40,8 +40,8 @@ In no particular order:
 - [x] Explore Kubernetes local implementation ([issue #5](https://github.com/andrearcaina/fafnir/issues/5)).
     - [x] Use Helm for Kubernetes package management and manifests ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
 - [x] Explore centralizing logging with Elasticsearch ([issue #6](https://github.com/andrearcaina/fafnir/issues/6)).
-    - [x] Migrate to utilizing [Loki](https://grafana.com/oss/loki/) for both Minikube and docker-compose ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
+    - [x] Migrate to utilizing [Loki](https://grafana.com/oss/loki/) for both kind and docker-compose ([issue #29](https://github.com/andrearcaina/fafnir/issues/29)).
     - [x] Migrate from `log` to `log/slog` for structured logging and better integration with [Loki](https://grafana.com/oss/loki/) ([issue #31](https://github.com/andrearcaina/fafnir/issues/31)).
 - [x] Implement a frontend for the stock trading simulator/platform (check [web/](web/)).
 - [ ] Implement a CI/CD pipeline for automated testing and Docker builds.
-- [ ] Production deployment via DigitalOcean and Traefik ([issue #22](https://github.com/andrearcaina/fafnir/issues/22)).
+- [ ] Production deployment via Homelab Server ([issue #22](https://github.com/andrearcaina/fafnir/issues/22)).

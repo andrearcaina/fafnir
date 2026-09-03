@@ -14,5 +14,8 @@ dependencies:
 - name: promtail
   repository: https://grafana.github.io/helm-charts
   version: 6.15.3
-digest: sha256:2234ab09828598f9ab1bf3c902230331a0743a507b697dd6c9ab214f271e2199
-generated: "2026-01-21T22:28:01.017425098-05:00"
+- name: traefik
+  repository: https://traefik.github.io/charts
+  version: 41.4.0
+digest: sha256:5cdde81c1b81d194a76092c6a1088486b5373ea3db8267d6208a579f7f2a3391
+generated: "2026-09-03T14:05:04.609063761-04:00"

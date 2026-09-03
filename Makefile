@@ -174,10 +174,7 @@ kube-start:
 	./tools/scripts/k8s.sh start
 
 kube-stop:
-	minikube stop -p fafnir-cluster
-
-kube-delete:
-	minikube delete -p fafnir-cluster
+	kind delete cluster --name fafnir-cluster
 
 kube-uninstall:
 	./tools/scripts/k8s.sh uninstall
@@ -191,8 +188,9 @@ kube-docker:
 kube-deploy:
 	./tools/scripts/k8s.sh deploy
 
+kube-upgrade: hooks ?= true
 kube-upgrade:
-	./tools/scripts/k8s.sh upgrade
+	./tools/scripts/k8s.sh upgrade $(hooks)
 
 kube-delete-pod:
 	./tools/scripts/k8s.sh delete $(pod)
@@ -218,17 +216,8 @@ kube-deployments:
 kube-logs:
 	./tools/scripts/k8s.sh logs $(pod) $(ns)
 
-kube-dashboard:
-	minikube dashboard -p fafnir-cluster
-
-kube-ssh:
-	minikube ssh -p fafnir-cluster
-
 kube-forward:
 	./tools/scripts/k8s.sh forward $(pod)
-
-kube-tunnel:
-	minikube tunnel -p fafnir-cluster
 
 # ------------------------------
 # Locust Operations
